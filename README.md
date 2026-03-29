@@ -6,7 +6,7 @@ Booky transforms solitary reading into a connected experience. Readers highlight
 
 ## Demo
 
-[![Booky Demo Video](https://img.youtube.com/vi/DfWic5WwqOg/maxresdefault.jpg)](https://www.youtube.com/watch?v=DfWic5WwqOg)
+[Watch the demo on YouTube](https://www.youtube.com/watch?v=DfWic5WwqOg)
 
 ## Screenshots
 
