@@ -30,10 +30,11 @@ function getStartAngle(index: number): number {
   return index * 137.5; // golden angle for even spread
 }
 
-// Convert API planetImage ("planet2.png") → asset path
-function toPlanetSrc(planetImage?: string): string {
+// Convert API planetImage ("planet2.png") → asset path; prefer generated image
+function toPlanetSrc(planetImage?: string, generatedImage?: string): string {
+  if (generatedImage) return generatedImage; // base64 data URI
   if (!planetImage) return "/assets/planet2.png";
-  if (planetImage.startsWith("/")) return planetImage;
+  if (planetImage.startsWith("/") || planetImage.startsWith("data:")) return planetImage;
   return `/assets/${planetImage}`;
 }
 
@@ -84,7 +85,7 @@ export default function PlanetPage() {
 
   if (!myPlanet) return null;
 
-  const myPlanetSrc = toPlanetSrc(myPlanet.planetImage);
+  const myPlanetSrc = toPlanetSrc(myPlanet.planetImage, myPlanet.generatedPlanetImage);
 
   return (
     <>
@@ -258,7 +259,7 @@ export default function PlanetPage() {
           const period = keplerPeriod(orbit.size / 2);
           const startDeg = getStartAngle(idx);
           const planetVmin = 16;
-          const imgSrc = toPlanetSrc(fp.planetImage);
+          const imgSrc = toPlanetSrc(fp.planetImage, fp.generatedPlanetImage);
 
           return (
             <button

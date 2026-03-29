@@ -63,9 +63,8 @@ export const getChoices = (bookId: string) =>
   fetcher<Choice[]>(`/choices/${bookId}`);
 export const getChoice = (bookId: string, choiceId: string) =>
   fetcher<Choice>(`/choices/${bookId}/${choiceId}`);
-/** @deprecated Use getMyPlanet() — profile is now merged into planet data */
-export const getReadingProfile = () =>
-  fetcher<ReadingProfile>("/planet/me");
+export const submitChoice = (bookId: string, choiceId: string, optionId: string, comment: string = "") =>
+  postJson<{ success: boolean; stats: Record<string, { percentage: number; count?: number; voters: { userId: string; userName: string; optionId?: string; comment: string }[] }>; totalVotes: number }>(`/choices/${bookId}/${choiceId}`, { optionId, comment });
 
 // Planet
 export const getMyPlanet = () => fetcher<PlanetData>("/planet/me");
@@ -127,17 +126,35 @@ export const aiVoiceAsk = (question: string, passage: string, bookTitle: string,
 export const aiSpoilerCheck = (text: string, bookTitle: string, readerChapter: number) =>
   postJson<{ is_spoiler: boolean; reason: string }>("/ai/spoiler-check", { text, book_title: bookTitle, reader_chapter: readerChapter });
 
+export interface ReadingLens {
+  Philosophical: number;
+  Emotional: number;
+  Critical: number;
+  Practical: number;
+  Creative: number;
+}
+
+export interface JourneyStep {
+  text: string;
+  type: "discovery" | "observation" | "comparison" | "contrast" | "insight" | "analysis" | "pattern" | "synthesis" | "thinking";
+}
+
 export interface ReadingNotes {
   shared_passages: {
     text: string;
     my_note: string;
     my_insight: string;
+    why?: string;
     friends: { name: string; note: string; insight: string }[];
     tension: string;
   }[];
-  only_me: { text: string; my_note: string; why_unique: string }[];
-  only_friends: { text: string; friend_name: string; note: string; what_you_missed: string }[];
+  only_me: { text: string; my_note: string; why_unique: string; why?: string }[];
+  only_friends: { text: string; friend_name: string; note: string; what_you_missed: string; why?: string }[];
   reader_styles: { me: string; friends: { name: string; style: string }[] };
+  reading_lens?: { me: ReadingLens; friends: { name: string; lens: ReadingLens }[] };
+  think_summary?: string;
+  my_summary?: string;
+  friends_summary?: string;
   synthesis: string;
 }
 
@@ -150,6 +167,8 @@ export interface SavedReadingNote {
   current: ReadingNotes;
   history: { notes: ReadingNotes; generatedAt: string }[];
   updatedAt: string;
+  think_summary?: string;
+  journey_steps?: JourneyStep[];
 }
 
 export const getMyReadingNotes = () =>
@@ -160,6 +179,53 @@ export const getBookReadingNotes = (bookId: string) =>
 
 export const generateBookReadingNotes = (bookId: string) =>
   postJson<SavedReadingNote>(`/reading-notes/${bookId}/generate`, {});
+
+export type StreamChunk =
+  | { type: "think"; content: string }
+  | { type: "think_done"; content: string }
+  | { type: "answer"; content: string }
+  | { type: "done"; data: SavedReadingNote }
+  | { type: "error"; message: string };
+
+export function streamGenerateReadingNotes(
+  bookId: string,
+  onChunk: (chunk: StreamChunk) => void,
+): AbortController {
+  const controller = new AbortController();
+  const url = `${API_BASE}/reading-notes/${bookId}/generate-stream`;
+
+  fetch(url, { method: "POST", signal: controller.signal })
+    .then(async (res) => {
+      if (!res.ok || !res.body) {
+        onChunk({ type: "error", message: `API ${res.status}` });
+        return;
+      }
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop() || "";
+        for (const line of lines) {
+          if (line.startsWith("data: ")) {
+            try {
+              onChunk(JSON.parse(line.slice(6)));
+            } catch { /* skip malformed */ }
+          }
+        }
+      }
+    })
+    .catch((e) => {
+      if (e.name !== "AbortError") {
+        onChunk({ type: "error", message: String(e) });
+      }
+    });
+
+  return controller;
+}
 
 // AI reading notes (direct, no persistence)
 export const aiGenerateReadingNotes = (
@@ -278,16 +344,11 @@ export interface Choice {
   question: string;
   context: string;
   options: { id: string; text: string; description: string }[];
-  stats: Record<string, { percentage: number; voters: { userId: string; userName: string; comment: string }[] }>;
+  stats: Record<string, { percentage: number; count?: number; voters: { userId: string; userName: string; optionId?: string; comment: string }[] }>;
   myChoice: string;
+  totalVotes?: number;
 }
 
-export interface ReadingProfile {
-  spectrum: { label: string; left: string; right: string; value: number }[];
-  radar: Record<string, number>;
-  tendencies: { text: string; percentage: number }[];
-  friendComparison: { friendId: string; friendName: string; matchPercentage: number }[];
-}
 
 export interface PlanetData {
   id: string;
@@ -312,6 +373,7 @@ export interface FriendPlanet {
   id: string;
   name: string;
   planetImage: string;
+  generatedPlanetImage?: string;
   similarity: number;
   position: { x: number; y: number; z: number };
   latestFeed?: string;

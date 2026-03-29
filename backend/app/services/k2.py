@@ -1,18 +1,73 @@
 """K2 Think V2 API client — OpenAI-compatible chat completions."""
+import re
+import json as _json
+from typing import AsyncIterator
 import httpx
 from app.config import settings
 
 
 def _extract_final_answer(text: str) -> str:
     """Strip K2 reasoning traces, return only the final answer."""
-    # K2 Think V2 uses <think>...</think> blocks for reasoning
     if "</think>" in text:
         return text.split("</think>", 1)[1].strip()
-    # Fallback: look for other markers
     for marker in ["\n\nAnswer:", "\n\nResponse:", "\n\n---\n"]:
         if marker in text:
             return text.split(marker, 1)[1].strip()
     return text.strip()
+
+
+def _extract_think_and_answer(text: str) -> dict:
+    """Return both the think block and the final answer."""
+    think = ""
+    answer = text.strip()
+    if "</think>" in text:
+        parts = text.split("</think>", 1)
+        think_raw = parts[0]
+        # Strip opening <think> tag
+        think = re.sub(r"^<think>\s*", "", think_raw).strip()
+        answer = parts[1].strip()
+    return {"think": think, "answer": answer}
+
+
+def _parse_journey_steps(think: str) -> list[dict]:
+    """Extract key reasoning steps from a think block as a journey timeline."""
+    if not think:
+        return []
+    steps = []
+    # Split into sentences/chunks and pick meaningful ones
+    sentences = re.split(r'(?<=[.!?])\s+', think)
+    keywords = {
+        "discover": "discovery",
+        "found": "discovery",
+        "notice": "observation",
+        "compar": "comparison",
+        "similar": "comparison",
+        "differ": "contrast",
+        "tension": "contrast",
+        "unique": "insight",
+        "interest": "insight",
+        "style": "analysis",
+        "lens": "analysis",
+        "pattern": "pattern",
+        "theme": "pattern",
+        "synthe": "synthesis",
+        "overall": "synthesis",
+        "conclu": "synthesis",
+    }
+    for s in sentences:
+        s = s.strip()
+        if len(s) < 20:
+            continue
+        step_type = "thinking"
+        lower = s.lower()
+        for kw, stype in keywords.items():
+            if kw in lower:
+                step_type = stype
+                break
+        steps.append({"text": s, "type": step_type})
+        if len(steps) >= 8:
+            break
+    return steps
 
 
 async def chat(messages: list[dict], stream: bool = False, temperature: float = 0.7) -> str:
@@ -35,6 +90,94 @@ async def chat(messages: list[dict], stream: bool = False, temperature: float = 
         data = resp.json()
         raw = data["choices"][0]["message"]["content"]
         return _extract_final_answer(raw)
+
+
+async def chat_with_think(messages: list[dict], temperature: float = 0.7) -> dict:
+    """Like chat(), but returns {think, answer, journey_steps}."""
+    async with httpx.AsyncClient(timeout=120.0) as client:
+        resp = await client.post(
+            settings.k2_api_url,
+            headers={
+                "Authorization": f"Bearer {settings.k2_api_key}",
+                "Content-Type": "application/json",
+            },
+            json={
+                "model": settings.k2_model,
+                "messages": messages,
+                "stream": False,
+                "temperature": temperature,
+            },
+        )
+        resp.raise_for_status()
+        data = resp.json()
+        raw = data["choices"][0]["message"]["content"]
+        result = _extract_think_and_answer(raw)
+        result["journey_steps"] = _parse_journey_steps(result["think"])
+        return result
+
+
+async def chat_stream(messages: list[dict], temperature: float = 0.7) -> AsyncIterator[dict]:
+    """Stream K2 response, yielding {type, content} dicts.
+
+    Yields:
+      {"type": "think", "content": "chunk"} during <think> block
+      {"type": "answer", "content": "chunk"} after </think>
+      {"type": "done", "think": "full", "answer": "full"} at end
+    """
+    async with httpx.AsyncClient(timeout=120.0) as client:
+        async with client.stream(
+            "POST",
+            settings.k2_api_url,
+            headers={
+                "Authorization": f"Bearer {settings.k2_api_key}",
+                "Content-Type": "application/json",
+            },
+            json={
+                "model": settings.k2_model,
+                "messages": messages,
+                "stream": True,
+                "temperature": temperature,
+            },
+        ) as resp:
+            resp.raise_for_status()
+            full_text = ""
+            in_think = False
+            think_done = False
+
+            async for line in resp.aiter_lines():
+                if not line.startswith("data: "):
+                    continue
+                payload = line[6:]
+                if payload.strip() == "[DONE]":
+                    break
+                chunk_data = _json.loads(payload)
+                delta = chunk_data.get("choices", [{}])[0].get("delta", {})
+                token = delta.get("content", "")
+                if not token:
+                    continue
+
+                full_text += token
+
+                # Detect <think> boundaries
+                if "<think>" in full_text and not in_think and not think_done:
+                    in_think = True
+                if "</think>" in full_text and in_think:
+                    in_think = False
+                    think_done = True
+                    yield {"type": "think_done", "content": ""}
+                    continue
+
+                if in_think:
+                    # Strip the <think> tag from first token
+                    clean = token.replace("<think>", "")
+                    if clean:
+                        yield {"type": "think", "content": clean}
+                elif think_done:
+                    yield {"type": "answer", "content": token}
+
+            result = _extract_think_and_answer(full_text)
+            result["journey_steps"] = _parse_journey_steps(result["think"])
+            yield {"type": "done", **result}
 
 
 async def generate_questions(book_title: str, author: str, chapter_title: str, passage: str) -> str:
@@ -113,13 +256,10 @@ async def generate_recap(book_title: str, author: str, chapters_summary: str) ->
     ])
 
 
-async def generate_reading_notes(
-    book_title: str,
-    author: str,
-    my_highlights: list[dict],
-    friend_highlights: list[dict],
-) -> str:
-    """Compare reader's highlights with friends' highlights and generate structured reading notes."""
+def _build_reading_notes_messages(
+    book_title: str, author: str, my_highlights: list[dict], friend_highlights: list[dict]
+) -> list[dict]:
+    """Build the messages for reading notes generation — 3-part structure."""
     my_hl_text = "\n".join(
         f'- "{h["text"]}" — my note: {h.get("comment") or "(no note)"}'
         for h in my_highlights
@@ -130,29 +270,63 @@ async def generate_reading_notes(
         for h in friend_highlights
     ) or "(no friend highlights)"
 
-    return await chat([
+    return [
         {"role": "system", "content": (
             "You are a literary analysis assistant for a social reading app. "
-            "Analyze a reader's highlights and their friends' highlights from the same book. "
-            "Identify: shared passages (semantically similar, not necessarily identical), "
-            "unique observations from the reader, unique observations from friends, "
-            "each person's reading style/lens, and an overall synthesis. "
-            "Respond with ONLY valid JSON in this exact format:\n"
-            '{"shared_passages": [{"text": "exact quote", "my_note": "...", "my_insight": "1 sentence", '
-            '"friends": [{"name": "...", "note": "...", "insight": "1 sentence"}], '
-            '"tension": "1-2 sentences comparing perspectives"}], '
-            '"only_me": [{"text": "exact quote", "my_note": "...", "why_unique": "1 sentence"}], '
-            '"only_friends": [{"text": "exact quote", "friend_name": "...", "note": "...", "what_you_missed": "1 sentence"}], '
-            '"reader_styles": {"me": "2-3 sentences", "friends": [{"name": "...", "style": "1-2 sentences"}]}, '
-            '"synthesis": "2-3 sentences overall comparison"}'
+            "Generate a clean, concise reading report with exactly 3 sections. "
+            "Respond with ONLY valid JSON:\n"
+            "{\n"
+            '  "my_summary": "A cohesive 3-5 sentence paragraph summarizing MY reading experience — '
+            'what themes I gravitated toward, what my highlights reveal about how I read this book, '
+            'my overall perspective and emotional response.",\n'
+            '  "friends_summary": "A cohesive 3-5 sentence paragraph summarizing FRIENDS\' collective reading — '
+            'what patterns emerge across all friends, how the group as a whole approached the book differently from me, '
+            'key contrasts and surprising agreements. Do NOT list individual friends — synthesize into one narrative.",\n'
+            '  "synthesis": "2-3 sentences tying it all together — the key tension or insight that emerges '
+            'when comparing my reading with my friends\'."'
+            "\n}"
         )},
         {"role": "user", "content": (
             f"Book: {book_title} by {author}\n\n"
             f"MY highlights and notes:\n{my_hl_text}\n\n"
             f"FRIENDS' highlights and notes:\n{friend_hl_text}\n\n"
-            "Generate the reading notes comparison JSON."
+            "Generate the 3-part reading report JSON."
         )},
-    ], temperature=0.5)
+    ]
+
+
+async def generate_reading_notes(
+    book_title: str,
+    author: str,
+    my_highlights: list[dict],
+    friend_highlights: list[dict],
+) -> str:
+    """Compare reader's highlights with friends' — returns answer only."""
+    messages = _build_reading_notes_messages(book_title, author, my_highlights, friend_highlights)
+    return await chat(messages, temperature=0.5)
+
+
+async def generate_reading_notes_with_think(
+    book_title: str,
+    author: str,
+    my_highlights: list[dict],
+    friend_highlights: list[dict],
+) -> dict:
+    """Compare reader's highlights — returns {think, answer, journey_steps}."""
+    messages = _build_reading_notes_messages(book_title, author, my_highlights, friend_highlights)
+    return await chat_with_think(messages, temperature=0.5)
+
+
+async def stream_reading_notes(
+    book_title: str,
+    author: str,
+    my_highlights: list[dict],
+    friend_highlights: list[dict],
+) -> AsyncIterator[dict]:
+    """Stream reading notes generation — yields think/answer/done chunks."""
+    messages = _build_reading_notes_messages(book_title, author, my_highlights, friend_highlights)
+    async for chunk in chat_stream(messages, temperature=0.5):
+        yield chunk
 
 
 async def check_spoiler(user_text: str, book_title: str, reader_chapter: int) -> str:

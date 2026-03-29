@@ -25,21 +25,29 @@ async def build_planet_prompt(user_data: dict, profile: dict | None = None) -> s
 
     result = await k2.chat([
         {"role": "system", "content": (
-            "You generate image prompts for unique fantasy planets. "
-            "Each planet should visually reflect the reader's personality and taste. "
-            "Genre preferences shape the planet's biome/terrain. "
-            "Personality traits shape the atmosphere, colors, and mood. "
-            "Return ONLY a single detailed image generation prompt (no JSON, no explanation). "
-            "The prompt should describe a single planet floating in space, seen from a slight distance. "
-            "Style: digital art, vibrant colors, ethereal glow, detailed surface textures. "
-            "Keep it under 120 words."
+            "You generate image prompts for seamless PLANET SURFACE TEXTURES. "
+            "Think satellite photography of alien planets — like NASA images of Mars, Jupiter, or Europa surfaces. "
+            "The texture must fill the ENTIRE image edge to edge with NO borders, NO horizon, NO sky, NO space, NO stars. "
+            "Just raw planetary surface material as if a satellite camera is pointing straight down. "
+            "Examples of good textures: swirling gas clouds like Jupiter, cracked ice like Europa, "
+            "red desert dunes like Mars, molten lava rivers, crystalline mineral deposits, "
+            "bioluminescent organic patterns, metallic city grids from above, dense canopy forests from space. "
+            "The reader's genre preferences determine the surface type:\n"
+            "- gothic/horror → dark obsidian with glowing magma veins\n"
+            "- romance → soft pink and coral organic swirls\n"
+            "- sci-fi → metallic circuitry patterns with neon traces\n"
+            "- literature → earthy layered sediment with golden veins\n"
+            "- dystopian → rusted industrial patchwork with smog haze\n"
+            "- philosophy → geometric crystal lattice structures\n"
+            "Mix genres = mix textures. Personality traits affect color palette and chaos level. "
+            "Return ONLY the prompt. Under 80 words."
         )},
         {"role": "user", "content": (
             f"Reader: {name}\n"
             f"Genre preferences: {json.dumps(genres)}\n"
             f"Planet style hint: {planet_style}\n"
             f"{profile_desc}\n"
-            "Generate a unique planet image prompt that reflects this reader's soul."
+            "Generate a seamless planet surface texture prompt."
         )},
     ], temperature=0.9)
 
@@ -53,7 +61,7 @@ async def generate_planet_image(user_id: str, profile: dict | None = None) -> st
         return None
 
     prompt = await build_planet_prompt(user, profile)
-    styled = f"Fantasy planet floating in space, digital art, vibrant ethereal glow, detailed: {prompt}"
+    styled = f"Seamless alien planet surface texture, satellite top-down view, fills entire image edge to edge, no sky no horizon no space, photorealistic: {prompt}"
 
     token = _get_access_token()
     image = await generate_image(styled, token)
@@ -76,7 +84,7 @@ async def generate_all_planet_images(profile: dict | None = None) -> list[dict]:
     for user in users:
         uid = user["_id"]
         prompt = await build_planet_prompt(user, profile)
-        styled = f"Fantasy planet floating in space, digital art, vibrant ethereal glow, detailed: {prompt}"
+        styled = f"Seamless alien planet surface texture, satellite top-down view, fills entire image edge to edge, no sky no horizon no space, photorealistic: {prompt}"
         image = await generate_image(styled, token)
         if image:
             db.users.update_one({"_id": uid}, {"$set": {"generatedPlanetImage": image}})

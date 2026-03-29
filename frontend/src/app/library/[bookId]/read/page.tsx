@@ -13,6 +13,7 @@ import {
   getFriendHighlights,
   getCharacters,
   getChoices,
+  submitChoice,
   aiAuthorChat,
   aiGenerateQuestions,
   createHighlight,
@@ -247,9 +248,15 @@ export default function ReadPage() {
   const [viewingHighlight, setViewingHighlight] = useState<(UserHighlight | Highlight) | null>(null);
   const [replyInput, setReplyInput] = useState("");
   const [voiceAsk, setVoiceAsk] = useState<{ passage: string; listening: boolean; question: string; answer: string; loading: boolean } | null>(null);
+  const [showChapterChoice, setShowChapterChoice] = useState<Choice | null>(null);
+  const [chapterChoiceDismissed, setChapterChoiceDismissed] = useState(false);
+  const [submittingChoice, setSubmittingChoice] = useState(false);
 
   // Store selected text in a ref so it survives the re-render caused by setSelectionToolbar
   const selectedTextRef = useRef<string>("");
+
+  // Swipe gesture — defined below after hasPageNext/hasPagePrev
+  const touchStartX = useRef<number>(0);
 
   const contentRef = useRef<HTMLDivElement>(null);
   const topRef = useRef<HTMLDivElement>(null);
@@ -257,6 +264,8 @@ export default function ReadPage() {
   useEffect(() => {
     setLoading(true);
     setAIMCDismissed(false);
+    setChapterChoiceDismissed(false);
+    setShowChapterChoice(null);
     setSelectionToolbar(null);
 
     // Fast path: load chapter content without waiting for K2 character generation
@@ -405,8 +414,8 @@ export default function ReadPage() {
     ? chapter.text.split(/\n\n+/).filter((p) => p.trim().length > 0)
     : [];
 
-  // Pagination: group paragraphs into pages of ~2000 chars
-  const CHARS_PER_PAGE = 2000;
+  // Pagination: group paragraphs into pages sized for one screen (no scroll)
+  const CHARS_PER_PAGE = 900;
   const pages: string[][] = [];
   let currentPage: string[] = [];
   let currentLen = 0;
@@ -435,6 +444,20 @@ export default function ReadPage() {
 
   const hasPrev = chapterNum > 1;
   const hasNext = totalChapters === 0 || chapterNum < totalChapters;
+
+  // Swipe gesture for page turning
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+  }, []);
+  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+    const dx = e.changedTouches[0].clientX - touchStartX.current;
+    if (Math.abs(dx) < 50) return;
+    if (dx < 0 && hasPageNext) {
+      setPageIndex((p) => p + 1);
+    } else if (dx > 0 && hasPagePrev) {
+      setPageIndex((p) => p - 1);
+    }
+  }, [hasPageNext, hasPagePrev]);
 
   if (loading) {
     return (
@@ -498,11 +521,13 @@ export default function ReadPage() {
         </div>
       )}
 
-      {/* Chapter text — scrollable */}
+      {/* Chapter text — paginated, no scroll */}
       <div
         ref={contentRef}
-        className="flex-1 overflow-y-auto px-5 pt-4 max-w-prose mx-auto w-full flex flex-col select-text"
+        className="flex-1 overflow-hidden px-5 pt-4 max-w-prose mx-auto w-full flex flex-col select-text"
         onPointerUp={handleMouseUp}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
       >
         {pageIndex === 0 && (
           <>
@@ -601,12 +626,27 @@ export default function ReadPage() {
               Next →
             </button>
           ) : hasNext ? (
-            <Link
-              href={`/library/${bookId}/read?chapter=${chapterNum + 1}`}
-              className="px-4 py-2 rounded-xl text-sm font-medium bg-amber-600 text-white hover:bg-amber-500 shadow-sm transition-all"
-            >
-              Next Chapter →
-            </Link>
+            (() => {
+              const chapterChoice = choices.find((c) => c.chapterNum === chapterNum);
+              if (chapterChoice && !chapterChoice.myChoice && !chapterChoiceDismissed) {
+                return (
+                  <button
+                    onClick={() => setShowChapterChoice(chapterChoice)}
+                    className="px-4 py-2 rounded-xl text-sm font-medium bg-indigo-600 text-white hover:bg-indigo-500 shadow-sm transition-all animate-pulse"
+                  >
+                    ⚡ Choice Point
+                  </button>
+                );
+              }
+              return (
+                <Link
+                  href={`/library/${bookId}/read?chapter=${chapterNum + 1}`}
+                  className="px-4 py-2 rounded-xl text-sm font-medium bg-amber-600 text-white hover:bg-amber-500 shadow-sm transition-all"
+                >
+                  Next Chapter →
+                </Link>
+              );
+            })()
           ) : (
             <span className="px-4 py-2 text-sm text-gray-300">End</span>
           )}
@@ -811,6 +851,149 @@ export default function ReadPage() {
                     className="mt-4 w-full py-2.5 bg-indigo-500 text-white text-sm font-medium rounded-xl hover:bg-indigo-400 transition-colors"
                   >
                     🎤 Ask another question
+                  </button>
+                )}
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* Detroit-style Chapter Choice Modal */}
+      <AnimatePresence>
+        {showChapterChoice && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[70] bg-black/60"
+              onClick={() => { setShowChapterChoice(null); setChapterChoiceDismissed(true); }}
+            />
+            <motion.div
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 40 }}
+              className="fixed bottom-0 left-0 right-0 z-[70] bg-white rounded-t-3xl shadow-2xl max-h-[80vh] overflow-y-auto"
+            >
+              <div className="px-5 pt-5 pb-8">
+                <div className="w-10 h-1 bg-gray-200 rounded-full mx-auto mb-4" />
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-xs font-bold text-indigo-500 uppercase tracking-wider">⚡ Choice Point</span>
+                  <span className="text-[10px] text-gray-400">Ch.{showChapterChoice.chapterNum}</span>
+                </div>
+                <h2 className="text-lg font-bold text-gray-900 mb-2 leading-snug">{showChapterChoice.question}</h2>
+                {showChapterChoice.context && (
+                  <p className="text-xs text-gray-500 leading-relaxed mb-5 italic">{showChapterChoice.context}</p>
+                )}
+
+                {/* Options */}
+                <div className="flex flex-col gap-3 mb-5">
+                  {showChapterChoice.options.map((opt) => {
+                    const stats = showChapterChoice.stats?.[opt.id];
+                    const isMyChoice = showChapterChoice.myChoice === opt.id;
+                    const hasVoted = !!showChapterChoice.myChoice;
+                    return (
+                      <button
+                        key={opt.id}
+                        disabled={submittingChoice || hasVoted}
+                        onClick={() => {
+                          setSubmittingChoice(true);
+                          submitChoice(bookId, showChapterChoice.id, opt.id).then((res) => {
+                            if (res) {
+                              setShowChapterChoice((prev) => prev ? { ...prev, myChoice: opt.id, stats: res.stats as typeof prev.stats, totalVotes: res.totalVotes } : prev);
+                              setChoices((prev) => prev.map((c) => c.id === showChapterChoice.id ? { ...c, myChoice: opt.id } : c));
+                            }
+                            setSubmittingChoice(false);
+                          });
+                        }}
+                        className={`relative text-left rounded-2xl border-2 px-4 py-3.5 transition-all ${
+                          isMyChoice
+                            ? "border-indigo-500 bg-indigo-50"
+                            : hasVoted
+                            ? "border-gray-100 bg-gray-50 opacity-70"
+                            : "border-gray-200 bg-white hover:border-indigo-300 hover:bg-indigo-50/30"
+                        }`}
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex-1">
+                            <div className="text-sm font-bold text-gray-900 flex items-center gap-1.5">
+                              {isMyChoice && <span className="text-indigo-500">✦</span>}
+                              {opt.text}
+                            </div>
+                            <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">{opt.description}</p>
+                          </div>
+                          {hasVoted && stats && (
+                            <span className="text-sm font-bold text-indigo-600 flex-shrink-0">{stats.percentage}%</span>
+                          )}
+                        </div>
+                        {/* Progress bar after voting */}
+                        {hasVoted && stats && (
+                          <motion.div
+                            initial={{ width: 0 }}
+                            animate={{ width: `${stats.percentage}%` }}
+                            transition={{ duration: 0.6, ease: "easeOut" }}
+                            className={`absolute bottom-0 left-0 h-1 rounded-b-2xl ${isMyChoice ? "bg-indigo-400" : "bg-gray-200"}`}
+                          />
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Stats after voting */}
+                {showChapterChoice.myChoice && (
+                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mb-4">
+                    <div className="text-xs font-semibold text-gray-500 mb-2">
+                      {showChapterChoice.totalVotes || Object.values(showChapterChoice.stats || {}).reduce((s, v) => s + (v.count || v.voters?.length || 0), 0)} readers voted
+                    </div>
+                    {/* Friends' choices */}
+                    {(() => {
+                      const allVoters = Object.entries(showChapterChoice.stats || {}).flatMap(([optId, s]) =>
+                        (s.voters || []).filter((v) => v.userId !== "me").map((v) => ({ ...v, optId }))
+                      );
+                      if (allVoters.length === 0) return null;
+                      return (
+                        <div>
+                          <div className="text-xs font-semibold text-gray-500 mb-1.5">Friends</div>
+                          <div className="flex flex-wrap gap-2">
+                            {allVoters.map((v) => {
+                              const optLabel = showChapterChoice.options.find((o) => o.id === v.optId)?.text || v.optId;
+                              return (
+                                <div key={v.userId} className="flex items-center gap-1.5 bg-gray-50 border border-gray-100 rounded-full px-2.5 py-1">
+                                  <div className="w-4 h-4 rounded-full bg-indigo-200 flex items-center justify-center text-[8px] font-bold text-indigo-700">
+                                    {v.userName?.[0] || "?"}
+                                  </div>
+                                  <span className="text-[11px] text-gray-700">{v.userName?.split(" ")[0]}</span>
+                                  <span className={`text-[10px] font-bold ${v.optId === showChapterChoice.myChoice ? "text-indigo-500" : "text-gray-400"}`}>{optLabel}</span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      );
+                    })()}
+                  </motion.div>
+                )}
+
+                {/* Continue button after voting */}
+                {showChapterChoice.myChoice && (
+                  <Link
+                    href={`/library/${bookId}/read?chapter=${chapterNum + 1}`}
+                    className="block w-full text-center py-3 bg-amber-600 text-white text-sm font-semibold rounded-xl hover:bg-amber-500 transition-colors"
+                    onClick={() => setShowChapterChoice(null)}
+                  >
+                    Continue to Chapter {chapterNum + 1} →
+                  </Link>
+                )}
+
+                {/* Skip */}
+                {!showChapterChoice.myChoice && (
+                  <button
+                    onClick={() => { setShowChapterChoice(null); setChapterChoiceDismissed(true); }}
+                    className="w-full text-center py-2 text-xs text-gray-400 hover:text-gray-600"
+                  >
+                    Skip for now
                   </button>
                 )}
               </div>
