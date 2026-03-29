@@ -72,7 +72,7 @@ export default function MyPlanetDetailPage() {
       {/* Planet image */}
       <div className="flex justify-center pt-16 pb-6">
         <motion.img
-          src="/assets/planet2.png"
+          src={`/assets/${planet.planetImage?.replace('.png', '-3d.jpg') || 'planet2-3d.jpg'}`}
           alt="My Planet"
           initial={{ scale: 0, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}

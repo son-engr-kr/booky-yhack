@@ -19,7 +19,7 @@ const ORBIT_RINGS = [
 // r=250 → T = 18 * (250/160)^(3/2) ≈ 18 * 2.44 ≈ 44s  (actually (250/160)^1.5 = 1.5625^1.5 ≈ 1.953 → 35s)
 // r=340 → T = 18 * (340/160)^1.5 = 18 * 2.125^1.5 ≈ 18 * 3.096 ≈ 56s
 function keplerPeriod(r: number): number {
-  const base = 18;
+  const base = 60; // much slower: 60s base period
   const rBase = 160;
   return base * Math.pow(r / rBase, 1.5);
 }
@@ -38,14 +38,14 @@ function getAngleOffset(indexInOrbit: number, totalInOrbit: number): number {
   return (360 / totalInOrbit) * indexInOrbit + 45;
 }
 
-// Planet image cycling for friends who have an index-based image
-const PLANET_IMAGES = [
-  "/assets/planet3-3d.jpg",
-  "/assets/planet1-3d.jpg",
-  "/assets/planet4-3d.jpg",
-  "/assets/planet5-3d.jpg",
-  "/assets/planet6-3d.jpg",
-];
+// Convert API planetImage ("planet4.png") → 3d version ("/assets/planet4-3d.jpg")
+function toPlanetSrc(planetImage?: string): string {
+  if (!planetImage) return "/assets/planet2-3d.jpg";
+  if (planetImage.startsWith("/")) return planetImage;
+  // "planet4.png" → "planet4-3d.jpg"
+  const base = planetImage.replace(/\.png$/, "");
+  return `/assets/${base}-3d.jpg`;
+}
 
 // 30 static twinkling stars with varied positions and timings
 const STARS = Array.from({ length: 32 }, (_, i) => ({
@@ -91,9 +91,7 @@ export default function PlanetPage() {
 
   if (!myPlanet) return null;
 
-  const myPlanetSrc = myPlanet.planetImage?.startsWith("/")
-    ? myPlanet.planetImage
-    : "/assets/planet2-3d.jpg";
+  const myPlanetSrc = toPlanetSrc(myPlanet.planetImage);
 
   return (
     <>
@@ -318,9 +316,7 @@ export default function PlanetPage() {
             const total = friends.length;
             const startDeg = getAngleOffset(idx, total);
             const planetSize = ring.id === 1 ? 40 : ring.id === 2 ? 34 : 28;
-            const imgSrc = fp.planetImage?.startsWith("/")
-              ? fp.planetImage
-              : PLANET_IMAGES[friendPlanets.indexOf(fp) % PLANET_IMAGES.length];
+            const imgSrc = toPlanetSrc(fp.planetImage);
 
             return (
               <button
@@ -352,75 +348,28 @@ export default function PlanetPage() {
                     filter: `drop-shadow(0 0 6px rgba(150,150,200,0.3))`,
                   }}
                 />
+                {/* Name label */}
+                <span className="absolute -bottom-4 left-1/2 -translate-x-1/2 text-[8px] text-gray-400 whitespace-nowrap font-medium">
+                  {fp.name}
+                </span>
+                {/* Speech bubble attached to planet */}
+                {fp.latestFeed && speakingFriends.includes(fp) && (
+                  <div
+                    className="absolute -top-12 left-1/2 -translate-x-1/2 speech-ambient bg-black/70 backdrop-blur-md border border-amber-500/20 rounded-lg px-2 py-1 max-w-[90px] pointer-events-none"
+                    style={{ "--duration": "6s", "--delay": `${idx * 1.5}s` } as React.CSSProperties}
+                  >
+                    <div className="text-[7px] text-amber-400 font-semibold">{fp.name}</div>
+                    <div className="text-[7px] text-gray-300 leading-tight">
+                      {fp.latestFeed.length > 40 ? fp.latestFeed.slice(0, 40) + "..." : fp.latestFeed}
+                    </div>
+                  </div>
+                )}
               </button>
             );
           });
         })}
 
-        {/* === SPEECH BUBBLES (ambient float) === */}
-        {speakingFriends.map((fp, i) => {
-          // Scatter bubbles around the scene
-          const positions = [
-            { top: "14%", right: "18%", left: undefined },
-            { top: undefined, bottom: "30%", left: "12%", right: undefined },
-            { top: "22%", left: "14%", right: undefined, bottom: undefined },
-          ];
-          const pos = positions[i] ?? positions[0];
-          const delays = [0, 1.8, 3.2];
-          const durations = [5, 6, 5.5];
-
-          return (
-            <motion.div
-              key={fp.id}
-              className="absolute z-[5] cursor-pointer"
-              style={{
-                top: pos.top,
-                bottom: (pos as { bottom?: string }).bottom,
-                left: pos.left,
-                right: pos.right,
-                maxWidth: 110,
-                background: "rgba(22,22,40,0.88)",
-                border: "1px solid rgba(255,215,0,0.2)",
-                borderRadius: "8px 8px 8px 2px",
-                padding: "5px 8px",
-                backdropFilter: "blur(4px)",
-              }}
-              initial={{ opacity: 0, y: 4, scale: 0.92 }}
-              animate={{
-                opacity: [0, 0.9, 0.9, 0],
-                y: [4, 0, 0, -3],
-                scale: [0.92, 1, 1, 0.95],
-              }}
-              transition={{
-                duration: durations[i],
-                delay: delays[i],
-                repeat: Infinity,
-                ease: "easeInOut",
-                times: [0, 0.15, 0.7, 1],
-              }}
-              onClick={() => handlePlanetTap("friend", fp.id)}
-            >
-              {/* Tail */}
-              <div
-                className="absolute"
-                style={{
-                  bottom: -4,
-                  left: 4,
-                  width: 0,
-                  height: 0,
-                  borderLeft: "5px solid rgba(22,22,40,0.88)",
-                  borderBottom: "4px solid transparent",
-                }}
-              />
-              <div className="text-[#FFD700] font-semibold leading-none mb-[2px]" style={{ fontSize: 9 }}>
-                {fp.name}
-              </div>
-              <div className="text-[#ccc] leading-snug" style={{ fontSize: 9 }}>
-                {fp.latestFeed}
-              </div>
-            </motion.div>
-          );
-        })}
+        {/* Speech bubbles now attached to orbiting planets above */}
 
         {/* === BOTTOM NAV === */}
         <BottomNav />
