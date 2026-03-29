@@ -1,7 +1,7 @@
 "use client";
 
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { OrbitControls, Stars, Html } from "@react-three/drei";
+import { OrbitControls, Stars, Html, useTexture } from "@react-three/drei";
 import { Suspense, useRef, useState, useEffect } from "react";
 import * as THREE from "three";
 import { motion, AnimatePresence } from "framer-motion";
@@ -36,6 +36,40 @@ interface PlanetSceneProps {
   onPlanetTap?: (type: "me" | "friend", id?: string) => void;
 }
 
+function PlanetSphere({
+  imagePath,
+  radius,
+  onClick,
+  rotationSpeed = 0.15,
+}: {
+  imagePath: string;
+  radius: number;
+  onClick?: () => void;
+  rotationSpeed?: number;
+}) {
+  const meshRef = useRef<THREE.Mesh>(null);
+  const texture = useTexture(imagePath);
+
+  useFrame((_, delta) => {
+    if (meshRef.current) {
+      meshRef.current.rotation.y += delta * rotationSpeed;
+    }
+  });
+
+  return (
+    <mesh ref={meshRef} onClick={onClick}>
+      <sphereGeometry args={[radius, 64, 64]} />
+      <meshStandardMaterial
+        map={texture}
+        roughness={0.65}
+        metalness={0.2}
+        emissiveMap={texture}
+        emissiveIntensity={0.08}
+      />
+    </mesh>
+  );
+}
+
 function MyPlanet({
   planetImage,
   satellites,
@@ -45,13 +79,9 @@ function MyPlanet({
   satellites: SatelliteData[];
   onTap: () => void;
 }) {
-  const meshRef = useRef<THREE.Mesh>(null);
   const glowRef = useRef<THREE.Mesh>(null);
 
   useFrame((_, delta) => {
-    if (meshRef.current) {
-      meshRef.current.rotation.y += delta * 0.15;
-    }
     if (glowRef.current) {
       glowRef.current.rotation.y -= delta * 0.05;
     }
@@ -65,25 +95,21 @@ function MyPlanet({
         <meshBasicMaterial color="#FFD700" transparent opacity={0.15} />
       </mesh>
 
-      {/* Planet sphere */}
-      <mesh ref={meshRef} onClick={onTap}>
-        <sphereGeometry args={[0.8, 64, 64]} />
-        <meshStandardMaterial
-          color="#386641"
-          roughness={0.7}
-          metalness={0.3}
-          emissive="#1a472a"
-          emissiveIntensity={0.2}
-        />
-      </mesh>
+      {/* Planet with texture */}
+      <PlanetSphere
+        imagePath={`/assets/${planetImage}`}
+        radius={0.8}
+        onClick={onTap}
+        rotationSpeed={0.15}
+      />
 
-      {/* Atmosphere */}
-      <mesh scale={[1.05, 1.05, 1.05]}>
+      {/* Atmosphere glow */}
+      <mesh scale={[1.08, 1.08, 1.08]}>
         <sphereGeometry args={[0.8, 32, 32]} />
         <meshBasicMaterial
-          color="#6a994e"
+          color="#88cc88"
           transparent
-          opacity={0.08}
+          opacity={0.06}
           side={THREE.BackSide}
         />
       </mesh>
@@ -159,40 +185,35 @@ function FriendPlanetMesh({
   data: FriendPlanetData;
   onTap: () => void;
 }) {
-  const ref = useRef<THREE.Mesh>(null);
   const [hovered, setHovered] = useState(false);
-  const scale = 0.3 + (data.similarity / 100) * 0.3;
-
-  useFrame((_, delta) => {
-    if (ref.current) {
-      ref.current.rotation.y += delta * 0.2;
-    }
-  });
-
-  const planetColors: Record<string, string> = {
-    "planet1.png": "#2a2040",
-    "planet2.png": "#386641",
-    "planet3.png": "#9b6a3a",
-  };
+  const baseScale = 0.3 + (data.similarity / 100) * 0.3;
+  const scale = hovered ? baseScale * 1.2 : baseScale;
 
   return (
-    <group position={[data.position.x, data.position.y, data.position.z]}>
-      <mesh
-        ref={ref}
-        onClick={onTap}
-        onPointerOver={() => setHovered(true)}
-        onPointerOut={() => setHovered(false)}
-        scale={hovered ? scale * 1.2 : scale}
-      >
-        <sphereGeometry args={[1, 32, 32]} />
-        <meshStandardMaterial
-          color={planetColors[data.planetImage] || "#555"}
-          roughness={0.6}
-          metalness={0.4}
-          emissive={planetColors[data.planetImage] || "#333"}
-          emissiveIntensity={hovered ? 0.4 : 0.15}
-        />
-      </mesh>
+    <group
+      position={[data.position.x, data.position.y, data.position.z]}
+      scale={[scale, scale, scale]}
+      onClick={onTap}
+      onPointerOver={() => setHovered(true)}
+      onPointerOut={() => setHovered(false)}
+    >
+      <PlanetSphere
+        imagePath={`/assets/${data.planetImage}`}
+        radius={1}
+        rotationSpeed={0.2 + Math.random() * 0.1}
+      />
+      {/* Atmosphere on hover */}
+      {hovered && (
+        <mesh scale={[1.1, 1.1, 1.1]}>
+          <sphereGeometry args={[1, 16, 16]} />
+          <meshBasicMaterial
+            color="#FFD700"
+            transparent
+            opacity={0.08}
+            side={THREE.BackSide}
+          />
+        </mesh>
+      )}
       {/* Name label */}
       <Html distanceFactor={6} style={{ pointerEvents: "none" }}>
         <div className="text-[9px] text-white/80 whitespace-nowrap font-semibold">
@@ -319,9 +340,12 @@ function Scene({
 
   return (
     <>
-      <ambientLight intensity={0.3} />
-      <pointLight position={[5, 3, 5]} intensity={1} color="#FFD700" />
-      <pointLight position={[-3, -2, -3]} intensity={0.3} color="#4466ff" />
+      {/* Key light — strong directional from one side for shadow contrast */}
+      <directionalLight position={[5, 3, 4]} intensity={1.8} color="#fff5e0" />
+      {/* Fill light — dim opposite side so shadows aren't pitch black */}
+      <pointLight position={[-4, -1, -3]} intensity={0.15} color="#4466ff" />
+      {/* Ambient — very low to keep dark side visible but dark */}
+      <ambientLight intensity={0.08} />
 
       <Stars
         radius={50}
