@@ -44,8 +44,12 @@ function HighlightCard({ post }: { post: FeedPost }) {
 function StoryCard({ post }: { post: FeedPost }) {
   return (
     <div className="flex items-start gap-3">
-      <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
-        {post.userName[0]}
+      <div className="w-9 h-9 rounded-full overflow-hidden flex-shrink-0">
+        <img
+          src={`/assets/${post.planetImage || "planet2.png"}`}
+          alt={post.userName}
+          className="w-full h-full object-cover"
+        />
       </div>
       <div className="flex-1">
         <p className="text-[13px] text-gray-800 leading-relaxed">{post.text}</p>
@@ -105,8 +109,12 @@ export default function FeedCard({ post }: FeedCardProps) {
     >
       {/* Header */}
       <div className="flex items-center gap-3 px-4 pt-4 pb-3">
-        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
-          {post.userName[0]}
+        <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
+          <img
+            src={`/assets/${post.planetImage || "planet2.png"}`}
+            alt={post.userName}
+            className="w-full h-full object-cover"
+          />
         </div>
         <div className="flex-1 min-w-0">
           <span className="text-[13px] font-semibold text-gray-900">{post.userName}</span>

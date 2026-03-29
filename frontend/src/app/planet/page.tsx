@@ -52,7 +52,6 @@ export default function PlanetPage() {
   const router = useRouter();
   const [myPlanet, setMyPlanet] = useState<PlanetData | null>(null);
   const [friendPlanets, setFriendPlanets] = useState<FriendPlanet[]>([]);
-  const [filter, setFilter] = useState("all");
 
   useEffect(() => {
     getMyPlanet().then((d) => d && setMyPlanet(d));
@@ -68,8 +67,6 @@ export default function PlanetPage() {
     const route = type === "me" ? "/planet/detail" : `/planet/friend/${id}`;
     router.push(route);
   }, [router]);
-
-  const filters = ["All", "Close friends", "Gatsby readers"];
 
   // One orbit per friend
   const friendOrbits = generateOrbits(friendPlanets.length);
@@ -209,25 +206,6 @@ export default function PlanetPage() {
         </div>
 
 
-        {/* === FILTER PILLS (zoom 1.5 to match other pages) === */}
-        <div className="absolute top-0 left-0 right-0 z-10 pt-8 px-4" style={{ zoom: 1.5 }}>
-          <div className="flex gap-2">
-            {filters.map((f) => (
-              <button
-                key={f}
-                onClick={() => setFilter(f.toLowerCase())}
-                className={`text-[10px] px-3 py-1 rounded-full border transition-all ${
-                  filter === f.toLowerCase()
-                    ? "border-[#FFD700] text-[#FFD700] bg-[rgba(255,215,0,0.08)]"
-                    : "border-[#2a2a3e] text-[#666]"
-                }`}
-                style={{ zIndex: 10 }}
-              >
-                {f}
-              </button>
-            ))}
-          </div>
-        </div>
 
         {/* === ORBIT RINGS === */}
         {friendOrbits.map((orbit) => (

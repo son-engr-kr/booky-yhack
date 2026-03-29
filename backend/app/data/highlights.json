@@ -193,5 +193,136 @@
     "likes": 0,
     "replies": [],
     "createdAt": "2026-03-16T20:54:59.091177"
+  },
+  {
+    "id": "3d4d106c-d34f-46e2-a320-1fed85a2c314",
+    "bookId": "great-gatsby",
+    "chapterNum": 3,
+    "userId": "me",
+    "userName": "Hunjun",
+    "text": "rings and the champagne and the stars. Every Friday five crates of oranges and lemons arrived from a fruiterer in New York — every Monday t",
+    "comment": "",
+    "color": "#f59e0b",
+    "likes": 0,
+    "replies": [],
+    "createdAt": "2026-03-29T04:53:23.837911+00:00"
+  },
+  {
+    "id": "47865291-4f06-488a-8a7c-0c37745fda4c",
+    "bookId": "great-gatsby",
+    "chapterNum": 3,
+    "userId": "me",
+    "userName": "Hunjun",
+    "text": "ns men and girls came and went like moths among the whisperings and the champagne and the stars. Every Friday five crates of oranges and lemons arrived from a fruiterer in New York — every Monda",
+    "comment": "",
+    "color": "#f59e0b",
+    "likes": 0,
+    "replies": [],
+    "createdAt": "2026-03-29T04:54:16.927567+00:00"
+  },
+  {
+    "id": "e84722ee-19b2-4052-a301-15d5f8ea0cb9",
+    "bookId": "great-gatsby",
+    "chapterNum": 3,
+    "userId": "me",
+    "userName": "Hunjun",
+    "text": "who had actually been invited. Most people came to Gatsby's parties without invitation. They conducted themselves according to",
+    "comment": "Test chap 3 12:56AM\nhi",
+    "color": "#f59e0b",
+    "likes": 0,
+    "replies": [],
+    "createdAt": "2026-03-29T04:57:00.877839+00:00"
+  },
+  {
+    "id": "d2099453-26ca-4588-ab30-ba8b711b0c50",
+    "bookId": "great-gatsby",
+    "chapterNum": 3,
+    "userId": "me",
+    "userName": "Hunjun",
+    "text": "ough the gardens, looking for our host. The bar was in full swing, and flo",
+    "comment": "",
+    "color": "#f59e0b",
+    "likes": 0,
+    "replies": [],
+    "createdAt": "2026-03-29T05:02:40.165891+00:00"
+  },
+  {
+    "id": "5d49a930-45a4-4b8c-97a0-98ef35e1f7c1",
+    "bookId": "great-gatsby",
+    "chapterNum": 3,
+    "userId": "me",
+    "userName": "Hunjun",
+    "text": "ound an owl-eyed man in Gatsby's library, amazed that the books w",
+    "comment": "",
+    "color": "#f59e0b",
+    "likes": 0,
+    "replies": [],
+    "createdAt": "2026-03-29T05:03:12.998888+00:00"
+  },
+  {
+    "id": "35ae3c72-5a74-4473-a420-ee104dab1f8e",
+    "bookId": "great-gatsby",
+    "chapterNum": 3,
+    "userId": "me",
+    "userName": "Hunjun",
+    "text": "usic from my ne",
+    "comment": "01:12AM highlight\n",
+    "color": "#f59e0b",
+    "likes": 0,
+    "replies": [
+      {
+        "id": "a389aa90-93c7-48fd-8c40-a03e9fdebd13",
+        "userId": "me",
+        "userName": "Hunjun",
+        "text": "01:12 - comment",
+        "createdAt": "2026-03-29T05:12:29.606154+00:00"
+      },
+      {
+        "id": "89e8de0e-8410-418f-96ec-f4a2caa4b4f0",
+        "userId": "me",
+        "userName": "Hunjun",
+        "text": "01:12 comment22",
+        "createdAt": "2026-03-29T05:12:51.556437+00:00"
+      }
+    ],
+    "createdAt": "2026-03-29T05:12:23.759991+00:00",
+    "likers": []
+  },
+  {
+    "id": "21091ed9-f472-4bbf-8183-61b5058436d1",
+    "bookId": "great-gatsby",
+    "chapterNum": 5,
+    "userId": "me",
+    "userName": "Hunjun",
+    "text": "mow my lawn and had flowers delivered — my small house looked like a gree",
+    "comment": "ergser",
+    "color": "#f59e0b",
+    "likes": 0,
+    "replies": [
+      {
+        "id": "7aef0520-07f7-461d-955b-b2b2535454ad",
+        "userId": "me",
+        "userName": "Hunjun",
+        "text": "sergesgesrg",
+        "createdAt": "2026-03-29T05:16:35.031142+00:00"
+      }
+    ],
+    "createdAt": "2026-03-29T05:16:32.209847+00:00"
+  },
+  {
+    "id": "f1555e0c-b843-4ba0-8226-9015ae68e2d6",
+    "bookId": "great-gatsby",
+    "chapterNum": 6,
+    "userId": "me",
+    "userName": "Hunjun",
+    "text": "th Dakota. He had changed it at the age of seventeen — at the specific mo",
+    "comment": "",
+    "color": "#f59e0b",
+    "likes": 1,
+    "replies": [],
+    "createdAt": "2026-03-29T05:21:31.585472+00:00",
+    "likers": [
+      "me"
+    ]
   }
 ]

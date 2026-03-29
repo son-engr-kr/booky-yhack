@@ -37,9 +37,15 @@ export const getMyHighlights = (bookId: string) =>
 export const getFriendHighlights = (bookId: string, chapter: number) =>
   fetcher<Highlight[]>(`/highlights/${bookId}/friends?chapter=${chapter}`);
 
-// Highlights - create
+// Highlights - create & reply
 export const createHighlight = (bookId: string, chapter: number, text: string, note?: string) =>
   postJson<Highlight>(`/highlights/${bookId}`, { chapter, text, note });
+export const addHighlightReply = (bookId: string, highlightId: string, text: string) =>
+  postJson<{ id: string; userId: string; userName: string; text: string; createdAt: string }>(`/highlights/${bookId}/${highlightId}/reply`, { text });
+export const deleteHighlight = (bookId: string, highlightId: string) =>
+  fetch(`${API_BASE}/highlights/${bookId}/${highlightId}`, { method: "DELETE" }).then((r) => r.ok);
+export const toggleHighlightLike = (bookId: string, highlightId: string) =>
+  postJson<{ likes: number; liked: boolean }>(`/highlights/${bookId}/${highlightId}/like`, {});
 
 // Feed
 export const getFeed = () => fetcher<FeedPost[]>("/feed/");
@@ -160,7 +166,7 @@ export interface Highlight {
   comment: string;
   color: string;
   likes: number;
-  replies: { userId: string; userName: string; text: string }[];
+  replies: { id?: string; userId: string; userName: string; text: string; createdAt?: string }[];
   createdAt: string;
 }
 

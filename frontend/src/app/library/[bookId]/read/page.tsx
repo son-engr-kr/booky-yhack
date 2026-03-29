@@ -16,6 +16,10 @@ import {
   aiAuthorChat,
   aiGenerateQuestions,
   createHighlight,
+  getMyHighlights,
+  addHighlightReply,
+  deleteHighlight,
+  toggleHighlightLike,
   type Chapter,
   type Character,
   type Highlight,
@@ -45,6 +49,11 @@ interface UserHighlight {
   id: string;
   text: string;
   color: string;
+  bookId?: string;
+  comment?: string;
+  replies?: { id?: string; userId: string; userName: string; text: string; createdAt?: string }[];
+  likes?: number;
+  liked?: boolean;
 }
 
 type TextSegment =
@@ -133,7 +142,8 @@ function renderParagraph(
   userHighlights: UserHighlight[],
   hoveredHighlight: Highlight | null,
   setHoveredHighlight: (h: Highlight | null) => void,
-  handleCharacterTap: (name: string) => void
+  handleCharacterTap: (name: string) => void,
+  onHighlightClick?: (hl: UserHighlight | Highlight) => void,
 ) {
   const segments = segmentText(paragraphText, characterNames, friendHighlights, userHighlights);
   return (
@@ -162,6 +172,7 @@ function renderParagraph(
               onMouseEnter={() => setHoveredHighlight(hl)}
               onMouseLeave={() => setHoveredHighlight(null)}
               onTouchStart={() => setHoveredHighlight(hl)}
+              onClick={() => onHighlightClick?.(hl)}
             >
               <span
                 style={{ borderBottom: `2px solid ${hl.color || "#60a5fa"}` }}
@@ -171,7 +182,7 @@ function renderParagraph(
               </span>
               <AnimatePresence>
                 {hoveredHighlight?.id === hl.id && (
-                  <motion.div
+                  <motion.span
                     initial={{ opacity: 0, y: -4 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -4 }}
@@ -179,7 +190,7 @@ function renderParagraph(
                   >
                     <span className="block font-semibold text-amber-400 mb-1">{hl.userName}</span>
                     <span className="block leading-relaxed">{hl.comment}</span>
-                  </motion.div>
+                  </motion.span>
                 )}
               </AnimatePresence>
             </span>
@@ -190,7 +201,8 @@ function renderParagraph(
             <span
               key={i}
               style={{ borderBottom: "2px solid #f59e0b" }}
-              className="bg-amber-50/70"
+              className="bg-amber-50/70 cursor-pointer hover:bg-amber-100/80 transition-colors"
+              onClick={() => onHighlightClick?.(seg.highlight)}
             >
               {seg.content}
             </span>
@@ -232,10 +244,14 @@ export default function ReadPage() {
   const [aiMCQuestion, setAIMCQuestion] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [selectionToolbar, setSelectionToolbar] = useState<SelectionToolbar | null>(null);
+  const [highlightComment, setHighlightComment] = useState<{ text: string; x: number; y: number } | null>(null);
+  const [commentInput, setCommentInput] = useState("");
   const [activePanel, setActivePanel] = useState<"notes" | "characters" | "chat" | null>(initialPanel);
   const [chatMessages, setChatMessages] = useState<{ role: string; content: string }[]>([]);
   const [chatInput, setChatInput] = useState("");
   const [chatLoading, setChatLoading] = useState(false);
+  const [viewingHighlight, setViewingHighlight] = useState<(UserHighlight | Highlight) | null>(null);
+  const [replyInput, setReplyInput] = useState("");
 
   // Store selected text in a ref so it survives the re-render caused by setSelectionToolbar
   const selectedTextRef = useRef<string>("");
@@ -248,28 +264,44 @@ export default function ReadPage() {
     setAIMCDismissed(false);
     setSelectionToolbar(null);
 
+    // Fast path: load chapter content without waiting for K2 character generation
     Promise.all([
       getChapter(bookId, chapterNum),
-      getCharacters(bookId, chapterNum),
       getFriendHighlights(bookId, chapterNum),
       getChoices(bookId),
       getBook(bookId),
-    ]).then(([ch, charResp, fh, ch2, bookData]) => {
+      getMyHighlights(bookId),
+    ]).then(([ch, fh, ch2, bookData, myHl]) => {
       setChapter(ch);
       setBook(bookData);
+      setFriendHighlights(Array.isArray(fh) ? fh : []);
+      setChoices(Array.isArray(ch2) ? ch2 : []);
+      setTotalChapters(bookData.totalChapters ?? 0);
 
-      // Bug 1 fix: API may return {bookId, characters:[...]} or a plain array
+      const savedHighlights: UserHighlight[] = (Array.isArray(myHl) ? myHl : [])
+        .filter((h: Highlight) => h.chapterNum === chapterNum)
+        .map((h: Highlight) => ({
+          id: h.id,
+          text: h.text,
+          color: h.color || "#f59e0b",
+          bookId: h.bookId,
+          comment: h.comment,
+          replies: h.replies ?? [],
+          likes: h.likes ?? 0,
+          liked: (h as Highlight & { likers?: string[] }).likers?.includes("me") ?? false,
+        }));
+      setUserHighlights(savedHighlights);
+      setLoading(false);
+    }).catch(() => {
+      setLoading(false);
+    });
+
+    // Slow path: K2 character generation loads in background
+    getCharacters(bookId, chapterNum).then((charResp) => {
       const charList = Array.isArray(charResp)
         ? charResp
         : (charResp as { bookId?: string; characters?: Character[] }).characters ?? [];
       setCharacters(charList);
-
-      setFriendHighlights(Array.isArray(fh) ? fh : []);
-      setChoices(Array.isArray(ch2) ? ch2 : []);
-      setTotalChapters(bookData.totalChapters ?? 0);
-      setLoading(false);
-    }).catch(() => {
-      setLoading(false);
     });
   }, [bookId, chapterNum]);
 
@@ -335,19 +367,35 @@ export default function ReadPage() {
 
   const handleAddHighlight = useCallback(() => {
     const text = selectedTextRef.current || selectionToolbar?.text;
-    if (!text) return;
-    const newHighlight: UserHighlight = {
-      id: `user-${Date.now()}`,
-      text,
-      color: "#f59e0b",
-    };
-    setUserHighlights((prev) => [...prev, newHighlight]);
+    if (!text || !selectionToolbar) return;
+    // Show comment input instead of saving immediately
+    setHighlightComment({ text, x: selectionToolbar.x, y: selectionToolbar.y });
+    setCommentInput("");
     setSelectionToolbar(null);
-    selectedTextRef.current = "";
     window.getSelection()?.removeAllRanges();
-    // Persist to backend
-    createHighlight(bookId, chapterNum, text);
-  }, [selectionToolbar, bookId, chapterNum]);
+  }, [selectionToolbar]);
+
+  const handleSaveHighlight = useCallback((withComment: boolean) => {
+    if (!highlightComment) return;
+    const note = withComment ? commentInput : undefined;
+    setHighlightComment(null);
+    setCommentInput("");
+    selectedTextRef.current = "";
+    const capturedText = highlightComment.text;
+    createHighlight(bookId, chapterNum, capturedText, note).then((saved) => {
+      const newHighlight: UserHighlight = {
+        id: saved?.id ?? `user-${Date.now()}`,
+        text: capturedText,
+        color: saved?.color ?? "#f59e0b",
+        bookId,
+        comment: note || saved?.comment || "",
+        replies: saved?.replies ?? [],
+        likes: saved?.likes ?? 0,
+        liked: false,
+      };
+      setUserHighlights((prev) => [...prev, newHighlight]);
+    });
+  }, [highlightComment, commentInput, bookId, chapterNum]);
 
   const handleAnswer = (_answer: string) => {
     // answer is shown inline in AIMCCard
@@ -481,7 +529,8 @@ export default function ReadPage() {
                   userHighlights,
                   hoveredHighlight,
                   setHoveredHighlight,
-                  handleCharacterTap
+                  handleCharacterTap,
+                  setViewingHighlight,
                 )
               )
             : (
@@ -582,6 +631,204 @@ export default function ReadPage() {
               ✕
             </button>
           </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Highlight detail popup with comments */}
+      <AnimatePresence>
+        {viewingHighlight && (() => {
+          // UserHighlight has optional bookId/comment/replies
+          // Highlight (friend) has userId/userName/bookId/comment/replies
+          const isFriendHl = "userName" in viewingHighlight;
+          const hlBookId = viewingHighlight.bookId ?? bookId;
+          const hlComment = viewingHighlight.comment ?? (isFriendHl ? (viewingHighlight as Highlight).comment : undefined);
+          const hlReplies = viewingHighlight.replies ?? [];
+          const hlUserName = isFriendHl ? (viewingHighlight as Highlight).userName : "Me";
+          const hlUserId = isFriendHl ? (viewingHighlight as Highlight).userId : "me";
+
+          const sendReply = () => {
+            if (!replyInput.trim()) return;
+            const text = replyInput.trim();
+            setReplyInput("");
+            addHighlightReply(hlBookId, viewingHighlight.id, text).then((reply) => {
+              if (reply) {
+                setViewingHighlight((prev) => {
+                  if (!prev) return prev;
+                  const updated = { ...prev, replies: [...(prev.replies ?? []), reply] };
+                  // Keep userHighlights in sync so data persists after popup close/reopen
+                  if (!("userName" in prev) || (prev as Highlight).userId === "me") {
+                    setUserHighlights((hs) => hs.map((h) => h.id === prev.id ? { ...h, replies: updated.replies } : h));
+                  }
+                  return updated;
+                });
+              }
+            });
+          };
+
+          const handleLike = () => {
+            const hl = viewingHighlight as UserHighlight;
+            const newLiked = !hl.liked;
+            const newLikes = (hl.likes ?? 0) + (newLiked ? 1 : -1);
+            setViewingHighlight((prev) => prev ? { ...prev, liked: newLiked, likes: newLikes } : prev);
+            if (!isFriendHl) {
+              setUserHighlights((prev) => prev.map((h) => h.id === viewingHighlight.id ? { ...h, liked: newLiked, likes: newLikes } : h));
+            }
+            toggleHighlightLike(hlBookId, viewingHighlight.id);
+          };
+
+          const handleDelete = () => {
+            deleteHighlight(hlBookId, viewingHighlight.id).then((ok) => {
+              if (ok) {
+                setUserHighlights((prev) => prev.filter((h) => h.id !== viewingHighlight.id));
+                setViewingHighlight(null);
+                setReplyInput("");
+              }
+            });
+          };
+
+          return (
+            <>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 z-[60] bg-black/30"
+                onClick={() => { setViewingHighlight(null); setReplyInput(""); }}
+              />
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 20 }}
+                className="fixed bottom-0 left-0 right-0 z-[70] bg-white rounded-t-2xl shadow-2xl px-4 pt-4 pb-6 max-w-prose mx-auto max-h-[70vh] flex flex-col"
+              >
+                {/* Header */}
+                <div className="flex items-center justify-between mb-3 flex-shrink-0">
+                  <span className="text-xs font-semibold text-gray-500">
+                    {hlUserId === "me" ? "My Highlight" : hlUserName}
+                  </span>
+                  <div className="flex items-center gap-2">
+                    {/* Like button */}
+                    <button
+                      onClick={handleLike}
+                      className={`flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-full border transition-colors ${
+                        (viewingHighlight as UserHighlight).liked
+                          ? "bg-rose-50 border-rose-300 text-rose-500"
+                          : "bg-gray-50 border-gray-200 text-gray-400 hover:border-rose-300 hover:text-rose-400"
+                      }`}
+                    >
+                      <span>{(viewingHighlight as UserHighlight).liked ? "♥" : "♡"}</span>
+                      <span>{(viewingHighlight as UserHighlight).likes ?? 0}</span>
+                    </button>
+                    {/* Delete — only for own highlights */}
+                    {hlUserId === "me" && (
+                      <button
+                        onClick={handleDelete}
+                        className="text-xs text-gray-300 hover:text-red-400 transition-colors px-1.5 py-1"
+                      >
+                        🗑
+                      </button>
+                    )}
+                    <button onClick={() => { setViewingHighlight(null); setReplyInput(""); }} className="text-gray-400 text-lg">✕</button>
+                  </div>
+                </div>
+
+                {/* Highlighted text */}
+                <div className="bg-amber-50 border-l-4 border-amber-400 rounded-r-lg px-3 py-2 mb-3 flex-shrink-0">
+                  <p className="text-sm text-gray-700 italic">"{viewingHighlight.text}"</p>
+                </div>
+
+                {/* Note */}
+                {hlComment && (
+                  <div className="bg-gray-50 rounded-xl px-3 py-2 mb-3 flex-shrink-0">
+                    <p className="text-xs text-gray-400 mb-1 font-semibold">Note</p>
+                    <p className="text-sm text-gray-600">{hlComment}</p>
+                  </div>
+                )}
+
+                {/* Replies */}
+                <div className="flex-1 overflow-y-auto mb-3">
+                  {hlReplies.length > 0 ? (
+                    <div className="flex flex-col gap-2">
+                      <p className="text-xs text-gray-400 font-semibold">Comments ({hlReplies.length})</p>
+                      {hlReplies.map((r, ri) => (
+                        <div key={r.id || ri} className="flex gap-2">
+                          <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center text-[10px] font-bold text-gray-500 flex-shrink-0">
+                            {r.userName[0]}
+                          </div>
+                          <div>
+                            <span className="text-xs font-semibold text-gray-700">{r.userName}</span>
+                            <p className="text-sm text-gray-600">{r.text}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-xs text-gray-400 italic text-center py-2">No comments yet</p>
+                  )}
+                </div>
+
+                {/* Comment input */}
+                <div className="flex gap-2 flex-shrink-0">
+                  <input
+                    value={replyInput}
+                    onChange={(e) => setReplyInput(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === "Enter") sendReply(); }}
+                    placeholder="Add a comment..."
+                    className="flex-1 text-sm bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-amber-400"
+                  />
+                  <button onClick={sendReply} className="bg-amber-500 text-white text-sm font-medium px-4 py-2 rounded-xl hover:bg-amber-400 transition-colors">
+                    Send
+                  </button>
+                </div>
+              </motion.div>
+            </>
+          );
+        })()}
+      </AnimatePresence>
+
+      {/* Highlight comment input */}
+      <AnimatePresence>
+        {highlightComment && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[60] bg-black/30"
+              onClick={() => { handleSaveHighlight(false); }}
+            />
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 20 }}
+              className="fixed bottom-0 left-0 right-0 z-[70] bg-white rounded-t-2xl shadow-2xl px-4 pt-4 pb-6 max-w-prose mx-auto"
+            >
+              <div className="bg-amber-50 border-l-4 border-amber-400 rounded-r-lg px-3 py-2 mb-3">
+                <p className="text-sm text-gray-700 italic line-clamp-2">"{highlightComment.text}"</p>
+              </div>
+              <textarea
+                autoFocus
+                value={commentInput}
+                onChange={(e) => setCommentInput(e.target.value)}
+                placeholder="Add a note (optional)..."
+                className="w-full text-sm bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-amber-400 resize-none h-20 mb-3"
+              />
+              <div className="flex gap-2">
+                <button
+                  onClick={() => handleSaveHighlight(false)}
+                  className="flex-1 text-sm font-medium text-gray-500 py-2.5 rounded-xl border border-gray-200 hover:bg-gray-50 transition-colors"
+                >
+                  Save without note
+                </button>
+                <button
+                  onClick={() => handleSaveHighlight(true)}
+                  className="flex-1 text-sm font-semibold text-white py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 transition-colors"
+                >
+                  Save with note
+                </button>
+              </div>
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
 

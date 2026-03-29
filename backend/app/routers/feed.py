@@ -29,8 +29,24 @@ class HighlightPost(BaseModel):
 
 @router.get("/")
 def get_feed() -> list:
-    """Return all feed posts sorted by createdAt descending."""
+    """Return all feed posts sorted by createdAt descending, with dynamic spoiler detection."""
     posts = load_json("feed.json")
+    users = {u["id"]: u for u in load_json("users.json")}
+    progress = load_json("reading-progress.json")
+    my_progress = {p["bookId"]: p for p in progress if p["userId"] == "me"}
+
+    for post in posts:
+        user = users.get(post.get("userId"), {})
+        post["planetImage"] = user.get("planetImage", "planet2.png")
+        # Dynamic spoiler detection based on user's reading progress
+        book_prog = my_progress.get(post.get("bookId"))
+        post_chapter = post.get("chapterNum", 0)
+        if book_prog is None:
+            post["isSpoiler"] = True if post_chapter > 0 else False
+        elif post_chapter > book_prog.get("currentChapter", 0):
+            post["isSpoiler"] = True
+        # Keep existing isSpoiler=True if already set by content analysis
+
     return sorted(posts, key=lambda p: p["createdAt"], reverse=True)
 
 

@@ -13,6 +13,11 @@ def _load(filename: str) -> Any:
         return json.load(f)
 
 
+def _save(filename: str, data: Any) -> None:
+    with open(DATA_DIR / filename, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+
+
 class ChoiceSubmit(BaseModel):
     optionId: str
 
@@ -32,10 +37,10 @@ def get_reading_profile() -> dict:
             {"text": "You prefer observing before acting.", "percentage": 65},
         ],
         "friendComparison": [
-            {"friendId": "alex", "friendName": "Alex", "matchPercentage": 91},
-            {"friendId": "mina", "friendName": "Mina", "matchPercentage": 45},
-            {"friendId": "jake", "friendName": "Jake", "matchPercentage": 78},
-            {"friendId": "sofia", "friendName": "Sofia", "matchPercentage": 62},
+            {"friendId": "friend-alex", "friendName": "Alex Kim", "matchPercentage": 91},
+            {"friendId": "friend-mina", "friendName": "Mina Park", "matchPercentage": 45},
+            {"friendId": "friend-jake", "friendName": "Jake Lee", "matchPercentage": 78},
+            {"friendId": "friend-sofia", "friendName": "Sofia Chen", "matchPercentage": 62},
         ],
     }
 
@@ -73,6 +78,9 @@ def submit_choice(book_id: str, choice_id: str, body: ChoiceSubmit) -> dict:
     option = next((o for o in choice["options"] if o["id"] == body.optionId), None)
     if option is None:
         raise HTTPException(status_code=400, detail=f"Option '{body.optionId}' is not valid")
+    # Persist the choice
+    choice["myChoice"] = body.optionId
+    _save("choices.json", choices)
     return {
         "success": True,
         "bookId": book_id,
