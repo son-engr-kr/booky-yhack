@@ -1,6 +1,8 @@
 """6-panel comic recap using K2 for scene descriptions + Vertex AI Imagen for images."""
 import asyncio
 import json
+import os
+import google.auth
 from google.oauth2 import service_account
 from google.auth.transport.requests import Request as AuthRequest
 import httpx
@@ -18,10 +20,13 @@ IMAGEN_URL = (
 
 
 def _get_access_token() -> str:
-    """Get OAuth2 access token from service account."""
-    creds = service_account.Credentials.from_service_account_file(
-        settings.gcp_credentials_path, scopes=SCOPES
-    )
+    """Get OAuth2 access token — uses service account file locally, default credentials on Cloud Run."""
+    if os.path.exists(settings.gcp_credentials_path):
+        creds = service_account.Credentials.from_service_account_file(
+            settings.gcp_credentials_path, scopes=SCOPES
+        )
+    else:
+        creds, _ = google.auth.default(scopes=SCOPES)
     creds.refresh(AuthRequest())
     return creds.token
 

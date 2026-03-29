@@ -1,5 +1,7 @@
 """Gemini API via Vertex AI for book Q&A."""
+import os
 import httpx
+import google.auth
 from google.oauth2 import service_account
 from google.auth.transport.requests import Request as AuthRequest
 from app.config import settings
@@ -15,9 +17,12 @@ URL = (
 
 
 def _get_token() -> str:
-    creds = service_account.Credentials.from_service_account_file(
-        settings.gcp_credentials_path, scopes=SCOPES
-    )
+    if os.path.exists(settings.gcp_credentials_path):
+        creds = service_account.Credentials.from_service_account_file(
+            settings.gcp_credentials_path, scopes=SCOPES
+        )
+    else:
+        creds, _ = google.auth.default(scopes=SCOPES)
     creds.refresh(AuthRequest())
     return creds.token
 
