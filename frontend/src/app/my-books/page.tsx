@@ -59,7 +59,7 @@ function BookItem({
 
         <div className="flex items-center gap-3 text-[11px] text-gray-400 mb-2">
           <span>📝 {progress.notesCount} notes</span>
-          <span>🤖 {progress.questionsAnswered} AI q's</span>
+          <span>💬 {progress.questionsAnswered} Booky q's</span>
         </div>
 
         {progress.status !== "completed" && (

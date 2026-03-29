@@ -1,90 +1,947 @@
 [
   {
-    "id": "h1",
-    "userId": "me",
-    "userName": "You",
+    "id": "hl-1",
     "bookId": "great-gatsby",
     "chapterNum": 1,
-    "text": "So we beat on, boats against the current, borne back ceaselessly into the past.",
-    "comment": "Powerful ending. The futility of fighting time.",
-    "createdAt": "2024-01-20T14:35:00Z",
-    "color": "yellow"
-  },
-  {
-    "id": "h2",
     "userId": "me",
     "userName": "You",
+    "text": "reserve judgment, he was told, because not everyone has had your advantages",
+    "comment": "The whole novel is about what happens when Nick fails to follow this advice. He judges everyone by the end.",
+    "color": "#8B6914",
+    "likes": 14,
+    "replies": [
+      {"userId": "alex", "userName": "Alex", "text": "And yet he's the most judgmental narrator in American literature. The irony is the point."}
+    ],
+    "createdAt": "2026-03-20T10:15:00Z"
+  },
+  {
+    "id": "hl-2",
     "bookId": "great-gatsby",
-    "chapterNum": 3,
-    "text": "There was music from my neighbor's house through the summer nights.",
-    "comment": "Sets the mood perfectly.",
-    "createdAt": "2024-01-19T10:20:00Z",
-    "color": "blue"
-  },
-  {
-    "id": "h3",
-    "userId": "me",
-    "userName": "You",
-    "bookId": "1984",
     "chapterNum": 1,
-    "text": "It was a bright cold day in April, and the clocks were striking thirteen.",
-    "comment": "Iconic opening. Immediately unsettling.",
-    "createdAt": "2024-01-17T20:10:00Z",
-    "color": "red"
-  },
-  {
-    "id": "h4",
     "userId": "alex",
     "userName": "Alex",
-    "bookId": "great-gatsby",
-    "chapterNum": 5,
-    "text": "Can't repeat the past? Why of course you can!",
-    "comment": "Gatsby's delusion laid bare.",
-    "createdAt": "2024-01-21T08:45:00Z",
-    "color": "yellow"
+    "text": "a man about his own age with a slightly formal manner, a careful smile, and eyes that rest on Nick with complete and peculiar attention",
+    "comment": "Gatsby's first real appearance and already Fitzgerald is telling us everything — the performance, the watchfulness, the attention as a form of power.",
+    "color": "#FFD700",
+    "likes": 22,
+    "replies": [],
+    "createdAt": "2026-03-21T14:30:00Z"
   },
   {
-    "id": "h5",
-    "userId": "alex",
-    "userName": "Alex",
+    "id": "hl-3",
     "bookId": "great-gatsby",
-    "chapterNum": 7,
-    "text": "They were careless people, Tom and Daisy — they smashed up things and creatures.",
-    "comment": "Nick's moral judgment finally surfaces.",
-    "createdAt": "2024-01-21T09:30:00Z",
-    "color": "green"
-  },
-  {
-    "id": "h6",
+    "chapterNum": 1,
     "userId": "mina",
     "userName": "Mina",
-    "bookId": "pride-prejudice",
-    "chapterNum": 3,
-    "text": "She is tolerable, but not handsome enough to tempt me.",
-    "comment": "First impression of Darcy — arrogance at peak.",
-    "createdAt": "2024-01-19T21:15:00Z",
-    "color": "pink"
+    "text": "she hopes her daughter will be a beautiful little fool, because that is the best a girl can be in this world",
+    "comment": "Daisy saying the quiet part loud. She knows exactly what the world is and has decided to play along. That's sadder than ignorance.",
+    "color": "#FF6B9D",
+    "likes": 31,
+    "replies": [
+      {"userId": "sofia", "userName": "Sofia", "text": "This line never fails to hit me. She's so self-aware and so trapped at the same time."},
+      {"userId": "me", "userName": "You", "text": "It's one of the most devastating things in the book precisely because it's so casual."}
+    ],
+    "createdAt": "2026-03-19T18:00:00Z"
   },
   {
-    "id": "h7",
+    "id": "hl-4",
+    "bookId": "great-gatsby",
+    "chapterNum": 2,
     "userId": "jake",
     "userName": "Jake",
-    "bookId": "1984",
-    "chapterNum": 5,
-    "text": "Freedom is the freedom to say that two plus two make four.",
-    "comment": "The core thesis of the whole book.",
-    "createdAt": "2024-01-20T19:40:00Z",
-    "color": "yellow"
+    "text": "the enormous eyes of Doctor T.J. Eckleburg, painted on a faded billboard, their blue and yellow gaze watching from behind spectacles the size of a man's face",
+    "comment": "The god that watches but doesn't intervene. Fitzgerald's take on moral vacancy in modern America. Everything passes under those eyes and nothing changes.",
+    "color": "#4ECDC4",
+    "likes": 18,
+    "replies": [
+      {"userId": "alex", "userName": "Alex", "text": "And Wilson literally confuses them with God's eyes later. The symbol becomes character."}
+    ],
+    "createdAt": "2026-03-22T09:45:00Z"
   },
   {
-    "id": "h8",
+    "id": "hl-5",
+    "bookId": "great-gatsby",
+    "chapterNum": 2,
     "userId": "sofia",
     "userName": "Sofia",
+    "text": "Myrtle is a fleshy, vital woman in her thirties, radiating a kind of desperate physical energy that seems designed to escape her circumstances",
+    "comment": "The contrast between Myrtle and Daisy is so deliberate — Myrtle wants everything Daisy takes for granted. Both are destroyed by Tom.",
+    "color": "#B5838D",
+    "likes": 25,
+    "replies": [],
+    "createdAt": "2026-03-21T20:10:00Z"
+  },
+  {
+    "id": "hl-6",
+    "bookId": "great-gatsby",
+    "chapterNum": 3,
+    "userId": "me",
+    "userName": "You",
+    "text": "Guests arrive who have not been invited and could not name their host",
+    "comment": "Gatsby as pure projection surface. People consume his parties without needing him to exist as a person. He's an idea before he's a man.",
+    "color": "#8B6914",
+    "likes": 17,
+    "replies": [],
+    "createdAt": "2026-03-20T22:00:00Z"
+  },
+  {
+    "id": "hl-7",
+    "bookId": "great-gatsby",
+    "chapterNum": 3,
+    "userId": "alex",
+    "userName": "Alex",
+    "text": "one of those rare smiles with a quality of eternal reassurance, as if the whole world had formed itself into the precise shape Gatsby had hoped for",
+    "comment": "Nick's description of Gatsby's smile is the best thing in this chapter. It's both beautiful and slightly terrifying — too much reassurance is its own kind of manipulation.",
+    "color": "#FFD700",
+    "likes": 29,
+    "replies": [
+      {"userId": "mina", "userName": "Mina", "text": "The smile as performance. Gatsby has rehearsed himself so completely he's become the role."}
+    ],
+    "createdAt": "2026-03-23T11:20:00Z"
+  },
+  {
+    "id": "hl-8",
+    "bookId": "great-gatsby",
+    "chapterNum": 4,
+    "userId": "mina",
+    "userName": "Mina",
+    "text": "Wolfsheim fixed the 1919 World Series, Gatsby mentions afterward, as casually as one might mention that a man has an unusual hobby",
+    "comment": "The casualness is everything here. Nick's narration doing so much work — the throwaway delivery tells us more about Gatsby's world than pages of description could.",
+    "color": "#FF6B9D",
+    "likes": 20,
+    "replies": [],
+    "createdAt": "2026-03-24T15:30:00Z"
+  },
+  {
+    "id": "hl-9",
+    "bookId": "great-gatsby",
+    "chapterNum": 4,
+    "userId": "sofia",
+    "userName": "Sofia",
+    "text": "Daisy had nearly refused to marry Tom but relented at the last moment, receiving a letter from Gatsby and then drinking herself senseless in a bathtub the night before the wedding",
+    "comment": "This detail from Jordan's story — Daisy in a bathtub with a bottle of wine and a letter she won't keep — is the most heartbreaking backstory in the novel.",
+    "color": "#B5838D",
+    "likes": 38,
+    "replies": [
+      {"userId": "me", "userName": "You", "text": "And she goes through with it anyway. The cruelty of a world where you can feel everything and still do nothing."},
+      {"userId": "jake", "userName": "Jake", "text": "Fitzgerald gives us this in one sentence and it carries more weight than whole chapters."}
+    ],
+    "createdAt": "2026-03-22T16:45:00Z"
+  },
+  {
+    "id": "hl-10",
+    "bookId": "great-gatsby",
+    "chapterNum": 5,
+    "userId": "jake",
+    "userName": "Jake",
+    "text": "shirts from England, dozens of them, in every shade of ivory and coral and apple-green and lavender — and suddenly hurls them in great cascades over the bed",
+    "comment": "The shirts scene. Possibly the strangest and most moving thing in any American novel. Material wealth performing emotional truth.",
+    "color": "#4ECDC4",
+    "likes": 44,
+    "replies": [
+      {"userId": "alex", "userName": "Alex", "text": "And Daisy cries. The shirts are five years of longing made physical. Of course she cries."},
+      {"userId": "mina", "userName": "Mina", "text": "I've read this passage probably ten times and I still don't fully understand why it works so well."}
+    ],
+    "createdAt": "2026-03-21T08:30:00Z"
+  },
+  {
+    "id": "hl-11",
+    "bookId": "great-gatsby",
+    "chapterNum": 5,
+    "userId": "me",
+    "userName": "You",
+    "text": "the green light had been an idea, an aspiration, the concentrated symbol of everything Gatsby wanted. Now Daisy is here, in person, and the enchanted quality of the object is slightly diminished",
+    "comment": "The tragedy of getting what you want. The dream is always better than the reality it points toward. Gatsby spent five years building toward a moment that cannot survive contact with the actual.",
+    "color": "#8B6914",
+    "likes": 33,
+    "replies": [
+      {"userId": "sofia", "userName": "Sofia", "text": "This is the core of the whole novel compressed into one observation."}
+    ],
+    "createdAt": "2026-03-25T12:00:00Z"
+  },
+  {
+    "id": "hl-12",
+    "bookId": "great-gatsby",
+    "chapterNum": 6,
+    "userId": "alex",
+    "userName": "Alex",
+    "text": "born James Gatz in North Dakota, the son of shiftless farm people, he reinvented himself at seventeen",
+    "comment": "America's foundational myth: the self-made man. But Fitzgerald shows the cost. You can build yourself from scratch, but you can't build yourself a past.",
+    "color": "#FFD700",
+    "likes": 27,
+    "replies": [],
+    "createdAt": "2026-03-23T19:00:00Z"
+  },
+  {
+    "id": "hl-13",
+    "bookId": "great-gatsby",
+    "chapterNum": 6,
+    "userId": "mina",
+    "userName": "Mina",
+    "text": "Can't repeat the past? Of course you can. He speaks with absolute certainty, as if Nick has said something childish and obvious",
+    "comment": "Gatsby's delusion stated plainly. What makes it tragic rather than foolish is that he's spent everything — his whole reinvented life — on this one wrong belief.",
+    "color": "#FF6B9D",
+    "likes": 36,
+    "replies": [
+      {"userId": "jake", "userName": "Jake", "text": "He's not delusional about the world. He's delusional about time. That's a very specific kind of grief."}
+    ],
+    "createdAt": "2026-03-24T10:15:00Z"
+  },
+  {
+    "id": "hl-14",
+    "bookId": "great-gatsby",
+    "chapterNum": 7,
+    "userId": "sofia",
+    "userName": "Sofia",
+    "text": "Tom strikes her across the face with an open hand, breaking her nose cleanly. Blood on the cream-colored dress",
+    "comment": "Wait — that's chapter 2, but the violence in chapter 7 is worse because it's invisible. Tom destroys Myrtle by sending Wilson after Gatsby. The physical brutality earlier is almost a preview.",
+    "color": "#B5838D",
+    "likes": 15,
+    "replies": [],
+    "createdAt": "2026-03-20T14:00:00Z"
+  },
+  {
+    "id": "hl-15",
+    "bookId": "great-gatsby",
+    "chapterNum": 7,
+    "userId": "jake",
+    "userName": "Jake",
+    "text": "He is waiting. Nothing is coming.",
+    "comment": "Four words for the whole last act of Gatsby's life. Nick knows. The reader knows. Only Gatsby doesn't.",
+    "color": "#4ECDC4",
+    "likes": 51,
+    "replies": [
+      {"userId": "me", "userName": "You", "text": "This might be the saddest line in the novel. It's so quiet and so final."},
+      {"userId": "alex", "userName": "Alex", "text": "The vigil outside Daisy's house — still protecting her even after everything. That's who Gatsby is."}
+    ],
+    "createdAt": "2026-03-25T17:20:00Z"
+  },
+  {
+    "id": "hl-16",
+    "bookId": "great-gatsby",
+    "chapterNum": 8,
+    "userId": "me",
+    "userName": "You",
+    "text": "he had kissed her for the first time standing in the moonlight, how at the moment of the kiss he had understood that he was choosing her over everything else, over the whole universe of possible futures",
+    "comment": "Gatsby's first kiss with Daisy told to Nick the morning before he dies. There's something unbearable about that timing. He's describing the beginning while standing at the end.",
+    "color": "#8B6914",
+    "likes": 42,
+    "replies": [
+      {"userId": "mina", "userName": "Mina", "text": "He married her to his visions. That phrase is so exact — she was always more symbol than person to him."}
+    ],
+    "createdAt": "2026-03-26T09:00:00Z"
+  },
+  {
+    "id": "hl-17",
+    "bookId": "great-gatsby",
+    "chapterNum": 8,
+    "userId": "sofia",
+    "userName": "Sofia",
+    "text": "they smash things and people and then retreat into their money and their vast carelessness and let other people clean up the mess",
+    "comment": "Nick's final verdict on Tom and Daisy. The word 'carelessness' is doing all the work — not evil, not stupid, just utterly indifferent to the wreckage they leave.",
+    "color": "#B5838D",
+    "likes": 48,
+    "replies": [
+      {"userId": "alex", "userName": "Alex", "text": "The most damning moral judgment in the book, and Fitzgerald delivers it so quietly."},
+      {"userId": "jake", "userName": "Jake", "text": "Privilege as armor. Nothing sticks to them because nothing has to."}
+    ],
+    "createdAt": "2026-03-24T21:30:00Z"
+  },
+  {
+    "id": "hl-18",
+    "bookId": "great-gatsby",
+    "chapterNum": 9,
+    "userId": "alex",
+    "userName": "Alex",
+    "text": "In the end, only Nick and Gatsby's father, Henry C. Gatz, and Owl Eyes from the library stand at the grave in the rain",
+    "comment": "Five hundred guests at his parties and three people at his funeral. The math of Gatsby's whole life is right there.",
+    "color": "#FFD700",
+    "likes": 55,
+    "replies": [
+      {"userId": "sofia", "userName": "Sofia", "text": "And Owl Eyes — the one person who saw through the facade, at the library that first night. That's not an accident."},
+      {"userId": "me", "userName": "You", "text": "Henry Gatz with his worn schedule that James made as a boy. That detail breaks me every time."}
+    ],
+    "createdAt": "2026-03-27T13:00:00Z"
+  },
+  {
+    "id": "hl-19",
+    "bookId": "great-gatsby",
+    "chapterNum": 9,
+    "userId": "mina",
+    "userName": "Mina",
+    "text": "So we beat on, boats against the current — and the current is time, and the current always wins, and we are always being carried back into what we cannot change",
+    "comment": "The closing image of the novel. The green light, the boats, the current. Every time I read this I feel it differently. This time it felt like grief for the future as much as the past.",
+    "color": "#FF6B9D",
+    "likes": 67,
+    "replies": [
+      {"userId": "jake", "userName": "Jake", "text": "The most quoted ending in American literature for a reason. It contains the whole book."},
+      {"userId": "alex", "userName": "Alex", "text": "Note that Nick says 'we' — he's not standing outside Gatsby's tragedy, he's inside it too."}
+    ],
+    "createdAt": "2026-03-27T20:00:00Z"
+  },
+  {
+    "id": "hl-20",
+    "bookId": "1984",
+    "chapterNum": 1,
+    "userId": "jake",
+    "userName": "Jake",
+    "text": "the clocks strike thirteen",
+    "comment": "Three words and you're in. Not 'twelve' — thirteen. The world is off by one in a way that can never be corrected.",
+    "color": "#4ECDC4",
+    "likes": 39,
+    "replies": [
+      {"userId": "me", "userName": "You", "text": "Such a precise signal. Not grotesquely wrong, just wrong enough to make you feel the wrongness of everything else."}
+    ],
+    "createdAt": "2026-03-18T08:00:00Z"
+  },
+  {
+    "id": "hl-21",
+    "bookId": "1984",
+    "chapterNum": 1,
+    "userId": "me",
+    "userName": "You",
+    "text": "WAR IS PEACE. FREEDOM IS SLAVERY. IGNORANCE IS STRENGTH.",
+    "comment": "The slogans work because each one contains a truth — just distorted enough to become a weapon. That's what makes them so durable as a cultural reference.",
+    "color": "#8B6914",
+    "likes": 44,
+    "replies": [
+      {"userId": "mina", "userName": "Mina", "text": "They're not nonsense. They're inversions. And inversions are scarier than nonsense because they use the same logic."}
+    ],
+    "createdAt": "2026-03-19T11:30:00Z"
+  },
+  {
+    "id": "hl-22",
+    "bookId": "1984",
+    "chapterNum": 1,
+    "userId": "sofia",
+    "userName": "Sofia",
+    "text": "Winston had caught O'Brien's eye and felt, for a fraction of a second, that they were allies",
+    "comment": "The whole trap is set right here in chapter one. Winston's desperate need for connection makes him see what he wants to see. Orwell plants this so quietly.",
+    "color": "#B5838D",
+    "likes": 28,
+    "replies": [
+      {"userId": "jake", "userName": "Jake", "text": "Seven years of surveillance and it begins with a glance during the Two Minutes Hate. The cruelty is exquisite."}
+    ],
+    "createdAt": "2026-03-20T17:45:00Z"
+  },
+  {
+    "id": "hl-23",
+    "bookId": "1984",
+    "chapterNum": 2,
+    "userId": "alex",
+    "userName": "Alex",
+    "text": "The Parsons children are terrifying. Their highest ambition is to attend a hanging",
+    "comment": "The children as the most successful product of the system. Innocence weaponized. They will inform on their parents and feel only pride.",
+    "color": "#FFD700",
+    "likes": 33,
+    "replies": [
+      {"userId": "sofia", "userName": "Sofia", "text": "Parsons being turned in by his daughter and still defending the Party is one of the most disturbing moments in the book."}
+    ],
+    "createdAt": "2026-03-21T13:00:00Z"
+  },
+  {
+    "id": "hl-24",
+    "bookId": "1984",
+    "chapterNum": 2,
+    "userId": "mina",
+    "userName": "Mina",
+    "text": "Freedom is the freedom to say that two plus two make four. If that is granted, all else follows.",
+    "comment": "Winston's philosophical core, written in a diary no one may ever read. The simplest possible articulation of what totalitarianism takes from you: the right to a verifiable fact.",
+    "color": "#FF6B9D",
+    "likes": 57,
+    "replies": [
+      {"userId": "me", "userName": "You", "text": "And O'Brien later makes him say two plus two equals five. That's where the novel goes. From this hope to that defeat."},
+      {"userId": "alex", "userName": "Alex", "text": "The progression from this to Room 101 is the whole arc of Winston's story."}
+    ],
+    "createdAt": "2026-03-22T10:00:00Z"
+  },
+  {
+    "id": "hl-25",
+    "bookId": "1984",
+    "chapterNum": 3,
+    "userId": "jake",
+    "userName": "Jake",
+    "text": "By 2050, he says, the whole range of human thought will be contained in about five hundred words, and thoughtcrime will be literally impossible because there will be no words in which to think it",
+    "comment": "Syme explaining Newspeak with genuine excitement. The horror is that he's right and he knows it and he finds it beautiful. Orwell understood that ideologues often see clearly.",
+    "color": "#4ECDC4",
+    "likes": 41,
+    "replies": [
+      {"userId": "mina", "userName": "Mina", "text": "The destruction of words as the destruction of thought. Language as the last line of defense."},
+      {"userId": "sofia", "userName": "Sofia", "text": "And Syme gets vaporized anyway. Intelligence is dangerous even when it's loyal."}
+    ],
+    "createdAt": "2026-03-23T16:30:00Z"
+  },
+  {
+    "id": "hl-26",
+    "bookId": "1984",
+    "chapterNum": 3,
+    "userId": "sofia",
+    "userName": "Sofia",
+    "text": "Winston thinks, but does not say, that Syme will be vaporized within two years — he is too intelligent, too articulate, too obviously aware of what he is doing",
+    "comment": "Winston seeing Syme's fate clearly while not being able to save him or warn him. The loneliness of that knowledge.",
+    "color": "#B5838D",
+    "likes": 22,
+    "replies": [],
+    "createdAt": "2026-03-24T14:00:00Z"
+  },
+  {
+    "id": "hl-27",
+    "bookId": "1984",
+    "chapterNum": 4,
+    "userId": "me",
+    "userName": "You",
+    "text": "The Ministry's incinerators, called memory holes, swallow the originals. The rewritten records are filed and become, officially, the truth.",
+    "comment": "The mechanics of how history is erased. What chills me is how practical and bureaucratic it all is. No one is dramatically evil — they're just doing their jobs.",
+    "color": "#8B6914",
+    "likes": 35,
+    "replies": [
+      {"userId": "jake", "userName": "Jake", "text": "The banality of falsification. Hannah Arendt would recognize this immediately."}
+    ],
+    "createdAt": "2026-03-21T09:00:00Z"
+  },
+  {
+    "id": "hl-28",
+    "bookId": "1984",
+    "chapterNum": 4,
+    "userId": "alex",
+    "userName": "Alex",
+    "text": "I understand HOW; I do not understand WHY.",
+    "comment": "Winston's real question. He can describe the system perfectly. He can't understand why it needs to be this way. O'Brien will answer this in Part Three and the answer is worse than anything Winston imagined.",
+    "color": "#FFD700",
+    "likes": 46,
+    "replies": [
+      {"userId": "me", "userName": "You", "text": "The answer is power for its own sake, with no pretense of utility. That's what O'Brien tells him. Pure domination as the final end."}
+    ],
+    "createdAt": "2026-03-25T11:45:00Z"
+  },
+  {
+    "id": "hl-29",
+    "bookId": "1984",
+    "chapterNum": 5,
+    "userId": "mina",
+    "userName": "Mina",
+    "text": "the message inside says: I love you",
+    "comment": "Three words on a scrap of paper and it changes everything. After pages of surveillance and fear and gray bureaucracy, these words hit like a defibrillator. Orwell earns this moment perfectly.",
+    "color": "#FF6B9D",
+    "likes": 49,
+    "replies": [
+      {"userId": "sofia", "userName": "Sofia", "text": "And he carries it all morning, terrified to read it, terrified not to. The suspense is almost unbearable."},
+      {"userId": "alex", "userName": "Alex", "text": "Julia reaching out first is so important. Winston would never have moved on his own."}
+    ],
+    "createdAt": "2026-03-22T19:30:00Z"
+  },
+  {
+    "id": "hl-30",
+    "bookId": "1984",
+    "chapterNum": 5,
+    "userId": "jake",
+    "userName": "Jake",
+    "text": "She knows how the system works, and she has learned to move within it like water through a cracked wall",
+    "comment": "Julia's intelligence is entirely practical and I love her for it. She doesn't theorize about the Party — she just finds the cracks and moves through them.",
+    "color": "#4ECDC4",
+    "likes": 37,
+    "replies": [
+      {"userId": "me", "userName": "You", "text": "She and Winston are two different kinds of rebel. His is philosophical, hers is instinctive. Together they almost work."}
+    ],
+    "createdAt": "2026-03-23T08:15:00Z"
+  },
+  {
+    "id": "hl-31",
+    "bookId": "1984",
+    "chapterNum": 6,
+    "userId": "sofia",
+    "userName": "Sofia",
+    "text": "To want something simply because you want it — to feel pleasure in a body, to love without the Party's permission — is an act of insurrection",
+    "comment": "The political dimension of desire in 1984. Sex as rebellion. The body as the last territory the Party hasn't fully colonized. Julia understood this before Winston.",
+    "color": "#B5838D",
+    "likes": 40,
+    "replies": [
+      {"userId": "mina", "userName": "Mina", "text": "The Party's control of sexuality is so pointed — directing desire into rage and loyalty. Orwell saw something real about authoritarian systems here."}
+    ],
+    "createdAt": "2026-03-24T16:00:00Z"
+  },
+  {
+    "id": "hl-32",
+    "bookId": "1984",
+    "chapterNum": 6,
+    "userId": "me",
+    "userName": "You",
+    "text": "a bird that sings for no reason, for no audience, without being commanded. It sings a range of variations over and over, a performance of spontaneous beauty in a world that has banned the spontaneous",
+    "comment": "The thrush in the meadow. One of the most beautiful passages in the novel — and the most politically precise. The Party cannot regulate birds.",
+    "color": "#8B6914",
+    "likes": 31,
+    "replies": [
+      {"userId": "jake", "userName": "Jake", "text": "The proles are like this bird — existing below the level of ideology. That's why Winston keeps going back to them."}
+    ],
+    "createdAt": "2026-03-25T14:20:00Z"
+  },
+  {
+    "id": "hl-33",
+    "bookId": "1984",
+    "chapterNum": 7,
+    "userId": "alex",
+    "userName": "Alex",
+    "text": "a glass paperweight with a coral fragment at its center",
+    "comment": "The paperweight as symbol is almost too perfect — a beautiful, fragile, useless thing from the old world that gets smashed at the end. Orwell is not subtle but he is precise.",
+    "color": "#FFD700",
+    "likes": 24,
+    "replies": [
+      {"userId": "sofia", "userName": "Sofia", "text": "The room above Charrington's shop is the paperweight. A small enclosed world, pink and glass, that shatters."}
+    ],
+    "createdAt": "2026-03-23T12:00:00Z"
+  },
+  {
+    "id": "hl-34",
+    "bookId": "1984",
+    "chapterNum": 7,
+    "userId": "mina",
+    "userName": "Mina",
+    "text": "O'Brien turns off the telescreen with a casual gesture that Winston will remember forever",
+    "comment": "This single gesture. The Inner Party can turn off the telescreens. They live differently. The surveillance is only for those below. Winston sees this and it reads to him as freedom — but it's just another layer of hierarchy.",
+    "color": "#FF6B9D",
+    "likes": 43,
+    "replies": [
+      {"userId": "me", "userName": "You", "text": "And it's this gesture that finally convinces Winston O'Brien is trustworthy. The trap closes on a switched-off screen."}
+    ],
+    "createdAt": "2026-03-26T11:00:00Z"
+  },
+  {
+    "id": "hl-35",
+    "bookId": "1984",
+    "chapterNum": 8,
+    "userId": "jake",
+    "userName": "Jake",
+    "text": "Tom Parsons arrives — cheerful, sweating, proud — and tells Winston that his daughter heard him talking in his sleep: Down with Big Brother. He says it without bitterness, with a kind of awe",
+    "comment": "Parsons proud that his daughter reported him. The system working exactly as designed. He believes so completely that he's grateful to be caught. That's the most terrifying thing in the book.",
+    "color": "#4ECDC4",
+    "likes": 52,
+    "replies": [
+      {"userId": "alex", "userName": "Alex", "text": "He says it with awe. Not horror, not grief. Awe. The total capture of a human being."},
+      {"userId": "sofia", "userName": "Sofia", "text": "And his daughter is nine or ten. The same age as Winston's dream memory of his mother. Orwell is threading this through the whole novel."}
+    ],
+    "createdAt": "2026-03-27T10:30:00Z"
+  },
+  {
+    "id": "hl-36",
+    "bookId": "1984",
+    "chapterNum": 8,
+    "userId": "sofia",
+    "userName": "Sofia",
+    "text": "O'Brien does not seem cruel. He speaks to Winston with something almost like affection, the attention of a craftsman who takes pride in difficult work",
+    "comment": "O'Brien's affection for Winston is real — that's what makes it so devastating. He genuinely cares about doing this correctly. The torturer as artist.",
+    "color": "#B5838D",
+    "likes": 45,
+    "replies": [
+      {"userId": "mina", "userName": "Mina", "text": "He's been waiting seven years for this. Winston is his masterpiece."},
+      {"userId": "me", "userName": "You", "text": "The Party doesn't want to destroy Winston. It wants to own him completely. That's a different and much worse thing."}
+    ],
+    "createdAt": "2026-03-27T18:45:00Z"
+  },
+  {
+    "id": "hl-37",
     "bookId": "pride-prejudice",
     "chapterNum": 1,
+    "userId": "sofia",
+    "userName": "Sofia",
     "text": "It is a truth universally acknowledged, that a single man in possession of a good fortune, must be in want of a wife.",
-    "comment": "Satire disguised as declaration.",
-    "createdAt": "2024-01-22T12:30:00Z",
-    "color": "blue"
+    "comment": "The irony works on multiple levels. Austen is mocking the assumption while also capturing it perfectly. The 'universally acknowledged' is the tell — whose universe?",
+    "color": "#B5838D",
+    "likes": 61,
+    "replies": [
+      {"userId": "mina", "userName": "Mina", "text": "It's Mrs. Bennet's truth, not Bingley's. Austen lets us know whose perspective is shaping the sentence from the very first word."},
+      {"userId": "jake", "userName": "Jake", "text": "Two hundred years later and this sentence still works. That's an absurd level of craft."}
+    ],
+    "createdAt": "2026-03-18T12:00:00Z"
+  },
+  {
+    "id": "hl-38",
+    "bookId": "pride-prejudice",
+    "chapterNum": 1,
+    "userId": "me",
+    "userName": "You",
+    "text": "Mr. Bennet is one of the great comic figures of English fiction: a man of dry wit and genuine intelligence who has made his peace with a foolish wife by retreating behind irony",
+    "comment": "Mr. Bennet is so funny and so culpable. His irony is a defense mechanism that becomes a moral failure. He could have done better by his daughters and chose not to.",
+    "color": "#8B6914",
+    "likes": 29,
+    "replies": [
+      {"userId": "alex", "userName": "Alex", "text": "He's witty at the expense of everyone around him. Austen admires the wit and condemns the abdication simultaneously."}
+    ],
+    "createdAt": "2026-03-19T14:30:00Z"
+  },
+  {
+    "id": "hl-39",
+    "bookId": "pride-prejudice",
+    "chapterNum": 2,
+    "userId": "mina",
+    "userName": "Mina",
+    "text": "she is tolerable, but not handsome enough to tempt me",
+    "comment": "The famous line. What I love is that Darcy is clearly already looking at her closely enough to have an opinion. 'Tolerable' is not dismissal — it's suppressed interest.",
+    "color": "#FF6B9D",
+    "likes": 48,
+    "replies": [
+      {"userId": "sofia", "userName": "Sofia", "text": "And Elizabeth laughs. She doesn't brood or plot revenge, she just finds it funny. That's what makes her Austen's heroine."},
+      {"userId": "me", "userName": "You", "text": "Darcy probably regrets this sentence for the rest of the novel. She certainly doesn't let him forget it."}
+    ],
+    "createdAt": "2026-03-20T09:00:00Z"
+  },
+  {
+    "id": "hl-40",
+    "bookId": "pride-prejudice",
+    "chapterNum": 2,
+    "userId": "jake",
+    "userName": "Jake",
+    "text": "Darcy does not yet know this about her. He will spend several hundred pages learning it.",
+    "comment": "I love when a narrator steps back like this. Austen knowing the whole arc before we do, letting us in on the joke. The whole novel is already contained in this chapter.",
+    "color": "#4ECDC4",
+    "likes": 34,
+    "replies": [],
+    "createdAt": "2026-03-21T16:00:00Z"
+  },
+  {
+    "id": "hl-41",
+    "bookId": "pride-prejudice",
+    "chapterNum": 3,
+    "userId": "alex",
+    "userName": "Alex",
+    "text": "She has fine eyes — he notices them at Lucas Lodge, during an evening of cards and conversation, and finds himself thinking about them afterward with a persistence that surprises him",
+    "comment": "Darcy noticing Elizabeth's eyes and being troubled by his own noticing. This is the exact moment the pride starts cracking. He can't control his attention.",
+    "color": "#FFD700",
+    "likes": 37,
+    "replies": [
+      {"userId": "mina", "userName": "Mina", "text": "Fine eyes is such a specific compliment. It's not beauty broadly — it's intelligence he's responding to. He just doesn't know how to say that yet."}
+    ],
+    "createdAt": "2026-03-22T11:30:00Z"
+  },
+  {
+    "id": "hl-42",
+    "bookId": "pride-prejudice",
+    "chapterNum": 3,
+    "userId": "sofia",
+    "userName": "Sofia",
+    "text": "Charlotte is twenty-seven, plain, and acutely conscious of the limited time a woman without beauty or great fortune has to secure a comfortable situation",
+    "comment": "Austen doesn't mock Charlotte for this calculus — she renders it with complete clarity. Charlotte is right by the rules of the world she lives in. Elizabeth is arguing for a different world.",
+    "color": "#B5838D",
+    "likes": 43,
+    "replies": [
+      {"userId": "me", "userName": "You", "text": "Charlotte accepts reality. Elizabeth refuses it. Both positions have costs. Austen respects both even as she prefers one."},
+      {"userId": "jake", "userName": "Jake", "text": "The Charlotte subplot is doing as much work as the main romance. Maybe more."}
+    ],
+    "createdAt": "2026-03-23T14:00:00Z"
+  },
+  {
+    "id": "hl-43",
+    "bookId": "pride-prejudice",
+    "chapterNum": 3,
+    "userId": "me",
+    "userName": "You",
+    "text": "Mr. Wickham arrives with the militia regiment that has quartered itself in Meryton, and the younger Bennet girls are immediately and collectively enchanted",
+    "comment": "Wickham arrives as pure surface — handsome, easy, apparently wronged — and Austen lets us enjoy him for a while before she shows us the trap. Elizabeth isn't stupid; she's just human.",
+    "color": "#8B6914",
+    "likes": 19,
+    "replies": [],
+    "createdAt": "2026-03-20T19:00:00Z"
+  },
+  {
+    "id": "hl-44",
+    "bookId": "pride-prejudice",
+    "chapterNum": 4,
+    "userId": "mina",
+    "userName": "Mina",
+    "text": "He interprets her refusals as the elegant play of an elegant woman, the expected ritual of initial coyness before consent. He has read, apparently, that a woman often refuses the first time as a matter of form.",
+    "comment": "Mr. Collins as the perfect satirical object — so self-enclosed that he can turn 'no' into 'yes' just by filtering it through his own certainty. Austen's contempt here is barely disguised.",
+    "color": "#FF6B9D",
+    "likes": 38,
+    "replies": [
+      {"userId": "alex", "userName": "Alex", "text": "He read it in a book somewhere. Of course he did. Collins relates to women through a manual."},
+      {"userId": "sofia", "userName": "Sofia", "text": "And yet he gets Charlotte. The system rewards people like Collins. That's the uncomfortable truth under the satire."}
+    ],
+    "createdAt": "2026-03-24T09:30:00Z"
+  },
+  {
+    "id": "hl-45",
+    "bookId": "pride-prejudice",
+    "chapterNum": 4,
+    "userId": "jake",
+    "userName": "Jake",
+    "text": "Elizabeth believes him entirely. She has seen Darcy's arrogance, has experienced his dismissiveness firsthand; Wickham's story fits perfectly into the image she has already formed",
+    "comment": "This is Austen naming the mechanism of prejudice directly. Elizabeth's intelligence doesn't protect her — it makes her better at building convincing wrong pictures.",
+    "color": "#4ECDC4",
+    "likes": 41,
+    "replies": [
+      {"userId": "me", "userName": "You", "text": "Confirmation bias with a Regency setting. Human nature doesn't change that much."}
+    ],
+    "createdAt": "2026-03-25T16:00:00Z"
+  },
+  {
+    "id": "hl-46",
+    "bookId": "pride-prejudice",
+    "chapterNum": 5,
+    "userId": "alex",
+    "userName": "Alex",
+    "text": "Mr. Bennet sides with Elizabeth with the dry satisfaction of a man who has been waiting for exactly this kind of conflict",
+    "comment": "Mr. Bennet's defense of Elizabeth is real love expressed through wit. But he enjoyed the drama too. Everything with him is slightly ruined by his own amusement.",
+    "color": "#FFD700",
+    "likes": 26,
+    "replies": [],
+    "createdAt": "2026-03-22T15:30:00Z"
+  },
+  {
+    "id": "hl-47",
+    "bookId": "pride-prejudice",
+    "chapterNum": 5,
+    "userId": "sofia",
+    "userName": "Sofia",
+    "text": "Charlotte is right by her own lights; Elizabeth cannot argue. But something between them closes, and the easy intimacy of their friendship becomes slightly more careful, slightly more formal",
+    "comment": "The real loss in this chapter isn't Collins. It's the friendship. Austen handles this so gently — a hairline crack in fine china, as the summary puts it perfectly.",
+    "color": "#B5838D",
+    "likes": 32,
+    "replies": [
+      {"userId": "mina", "userName": "Mina", "text": "Two women who care for each other, diverging over the question of whether to accept the world as it is. I find this more affecting than the romance."}
+    ],
+    "createdAt": "2026-03-26T13:00:00Z"
+  },
+  {
+    "id": "hl-48",
+    "bookId": "pride-prejudice",
+    "chapterNum": 6,
+    "userId": "me",
+    "userName": "You",
+    "text": "They begin a conversation that neither of them expected, quick and exact and slightly combative, Elizabeth testing him with every question, Darcy rising to each test",
+    "comment": "The Netherfield conversation. This is where it really starts — not the dancing, not the fine eyes, but the moment they argue and both find it interesting.",
+    "color": "#8B6914",
+    "likes": 36,
+    "replies": [
+      {"userId": "jake", "userName": "Jake", "text": "She asks whether her object is to throw people off balance. He engages with it seriously. That's Darcy falling in love in real time."},
+      {"userId": "alex", "userName": "Alex", "text": "Two people who have each met their intellectual equal and don't quite know what to do with that yet."}
+    ],
+    "createdAt": "2026-03-25T10:00:00Z"
+  },
+  {
+    "id": "hl-49",
+    "bookId": "pride-prejudice",
+    "chapterNum": 6,
+    "userId": "mina",
+    "userName": "Mina",
+    "text": "He allows himself to believe that Bingley's feeling for Jane is less serious than it appears. He is preparing the arguments that will allow him to act against it.",
+    "comment": "Darcy at his worst — rationalizing interference in his friend's happiness because of class anxiety. Austen is precise about how good people do harmful things.",
+    "color": "#FF6B9D",
+    "likes": 28,
+    "replies": [
+      {"userId": "sofia", "userName": "Sofia", "text": "He'll confess this to Elizabeth in the letter and it's one of the most honest moments in the book. He knows what he did."}
+    ],
+    "createdAt": "2026-03-24T18:30:00Z"
+  },
+  {
+    "id": "hl-50",
+    "bookId": "pride-prejudice",
+    "chapterNum": 7,
+    "userId": "jake",
+    "userName": "Jake",
+    "text": "Elizabeth tells her father that Lydia is in real danger of becoming a source of permanent embarrassment to the family — that she is unguarded, vain, and easily flattered, and that Brighton will make her worse. Mr. Bennet listens, agrees she is right in general, and lets Lydia go anyway.",
+    "comment": "Mr. Bennet's failure is right here. He agrees she's right. He lets her go anyway. Everything that follows — Wickham, the elopement, Darcy's intervention — traces back to this moment of comfortable negligence.",
+    "color": "#4ECDC4",
+    "likes": 45,
+    "replies": [
+      {"userId": "me", "userName": "You", "text": "He's not malicious. He's just profoundly checked out. Which is almost worse."},
+      {"userId": "sofia", "userName": "Sofia", "text": "Elizabeth sees this clearly and forgives him anyway. That's a kind of moral generosity Austen doesn't always get credit for."}
+    ],
+    "createdAt": "2026-03-26T16:00:00Z"
+  },
+  {
+    "id": "hl-51",
+    "bookId": "pride-prejudice",
+    "chapterNum": 7,
+    "userId": "alex",
+    "userName": "Alex",
+    "text": "He is not a wronged innocent; he is a charming, calculating man with debts and no conscience. Elizabeth had the information for weeks and did not properly receive it.",
+    "comment": "Austen holding Elizabeth accountable without cruelty. She had the letter. She filtered it through her prejudice. The novel's title is about her as much as Darcy.",
+    "color": "#FFD700",
+    "likes": 39,
+    "replies": [
+      {"userId": "mina", "userName": "Mina", "text": "The humiliation of recognizing that your intelligence failed you is what drives Elizabeth's character arc in the second half."}
+    ],
+    "createdAt": "2026-03-27T09:00:00Z"
+  },
+  {
+    "id": "hl-52",
+    "bookId": "pride-prejudice",
+    "chapterNum": 8,
+    "userId": "sofia",
+    "userName": "Sofia",
+    "text": "Darcy tracked Wickham and Lydia to London, found them in their lodgings, and negotiated with Wickham: his debts paid, a commission purchased, an annual settlement in exchange for marrying Lydia",
+    "comment": "Darcy spending his own money to save the family of the woman who refused him, in secret, asking for nothing. That's the redeemed Darcy in one action.",
+    "color": "#B5838D",
+    "likes": 53,
+    "replies": [
+      {"userId": "jake", "userName": "Jake", "text": "And he asks them to tell no one. He's not doing it for credit. The change in him is complete."},
+      {"userId": "me", "userName": "You", "text": "Elizabeth figures it out anyway. That moment when she writes to Mrs. Gardiner and confirms it — you can feel everything shift for her."}
+    ],
+    "createdAt": "2026-03-27T14:30:00Z"
+  },
+  {
+    "id": "hl-53",
+    "bookId": "pride-prejudice",
+    "chapterNum": 8,
+    "userId": "mina",
+    "userName": "Mina",
+    "text": "he says he did it only for her",
+    "comment": "Six words and the whole novel resolves. Everything Darcy did — the secrecy, the money, the negotiating with a man he despises — done only for her. That's a love declaration.",
+    "color": "#FF6B9D",
+    "likes": 64,
+    "replies": [
+      {"userId": "alex", "userName": "Alex", "text": "It lands so hard because we've watched him struggle against his feelings for six chapters. The restraint and then this."},
+      {"userId": "sofia", "userName": "Sofia", "text": "And he doesn't demand anything in return. He's not bartering. He just did it."}
+    ],
+    "createdAt": "2026-03-28T08:00:00Z"
+  },
+  {
+    "id": "hl-54",
+    "bookId": "pride-prejudice",
+    "chapterNum": 8,
+    "userId": "jake",
+    "userName": "Jake",
+    "text": "Do you like him? he asks Elizabeth, because if you do not, it makes no difference what he has.",
+    "comment": "Mr. Bennet finally asking the right question. All his ironic detachment falls away for one moment and he's just a father who wants his daughter to be happy. It's brief but it's real.",
+    "color": "#4ECDC4",
+    "likes": 47,
+    "replies": [
+      {"userId": "me", "userName": "You", "text": "This is the most emotionally direct thing Mr. Bennet says in the entire novel. It costs him something to say it."}
+    ],
+    "createdAt": "2026-03-28T11:30:00Z"
+  },
+  {
+    "id": "hl-55",
+    "bookId": "great-gatsby",
+    "chapterNum": 2,
+    "userId": "me",
+    "userName": "You",
+    "text": "a god who has gone blind, or perhaps only indifferent",
+    "comment": "The Eckleburg description lands differently every time. Blind god, indifferent god — either reading is devastating. A cosmos that watches suffering and cannot or will not act.",
+    "color": "#8B6914",
+    "likes": 30,
+    "replies": [
+      {"userId": "jake", "userName": "Jake", "text": "The god that faded with the old world. Whatever moral order once existed has become an advertisement now."}
+    ],
+    "createdAt": "2026-03-19T16:00:00Z"
+  },
+  {
+    "id": "hl-56",
+    "bookId": "1984",
+    "chapterNum": 3,
+    "userId": "me",
+    "userName": "You",
+    "text": "Winston carries his mother's memory as something sacred and almost unbearable: she loved him in a private, individual way that the Party would now call obsolete",
+    "comment": "Individual love as a political category. The Party didn't just take Winston's mother — it declared the kind of love she had for him an outdated concept. That's a specific kind of totalitarianism.",
+    "color": "#8B6914",
+    "likes": 35,
+    "replies": [
+      {"userId": "sofia", "userName": "Sofia", "text": "The private, particular love of one person for another specific person. That's what the Party most needs to eliminate."}
+    ],
+    "createdAt": "2026-03-22T08:30:00Z"
+  },
+  {
+    "id": "hl-57",
+    "bookId": "great-gatsby",
+    "chapterNum": 4,
+    "userId": "jake",
+    "userName": "Jake",
+    "text": "cufflinks made from human molars",
+    "comment": "Wolfsheim established in one detail. Not metaphorically monstrous — literally wearing human teeth. Fitzgerald's way of saying: here is where Gatsby's money comes from.",
+    "color": "#4ECDC4",
+    "likes": 27,
+    "replies": [
+      {"userId": "alex", "userName": "Alex", "text": "And Nick just notes it and moves on. That's perfect. The horror is in the casualness."}
+    ],
+    "createdAt": "2026-03-21T11:00:00Z"
+  },
+  {
+    "id": "hl-58",
+    "bookId": "1984",
+    "chapterNum": 6,
+    "userId": "alex",
+    "userName": "Alex",
+    "text": "the room has no telescreen",
+    "comment": "The absence of a telescreen as the most significant architectural detail in the novel. A room without surveillance is a room where you can be a person. Winston knows this and it becomes the thing he protects.",
+    "color": "#FFD700",
+    "likes": 38,
+    "replies": [
+      {"userId": "mina", "userName": "Mina", "text": "And of course there is a telescreen — behind the picture. The one place he felt safe was the one place he was most watched."}
+    ],
+    "createdAt": "2026-03-25T19:00:00Z"
+  },
+  {
+    "id": "hl-59",
+    "bookId": "pride-prejudice",
+    "chapterNum": 5,
+    "userId": "jake",
+    "userName": "Jake",
+    "text": "pompous, obsequious, self-satisfied, utterly without irony or humor, the kind of man who compliments a room's dimensions with the same solemnity he uses for everything else",
+    "comment": "Collins captured in one sentence. The solemnity about the room dimensions is such a specific and perfect detail. Austen's satirical precision at its best.",
+    "color": "#4ECDC4",
+    "likes": 33,
+    "replies": [
+      {"userId": "alex", "userName": "Alex", "text": "He's not a villain. He's something Austen finds almost worse: a man of perfectly arranged self-importance."}
+    ],
+    "createdAt": "2026-03-23T10:00:00Z"
+  },
+  {
+    "id": "hl-60",
+    "bookId": "great-gatsby",
+    "chapterNum": 9,
+    "userId": "sofia",
+    "userName": "Sofia",
+    "text": "the last time in human history, perhaps, that something so vast and so beautiful could be apprehended as a singular and unrepeatable gift",
+    "comment": "The Dutch sailors and the green breast of the new world. Fitzgerald reaching back to the original American dream — before it became Gatsby's version, before it became a hustle.",
+    "color": "#B5838D",
+    "likes": 44,
+    "replies": [
+      {"userId": "me", "userName": "You", "text": "And then he sets it against the green light. The continent and the dock light, the same dream in different scales."},
+      {"userId": "mina", "userName": "Mina", "text": "The whole of American history compressed into that transition. From virgin land to a light at the end of someone's pier."}
+    ],
+    "createdAt": "2026-03-28T10:00:00Z"
+  },
+  {
+    "id": "hl-61",
+    "bookId": "1984",
+    "chapterNum": 7,
+    "userId": "sofia",
+    "userName": "Sofia",
+    "text": "Walking home, Winston feels the weight of the book under his arm like the weight of a verdict",
+    "comment": "Goldstein's book as the beginning of the end. He wanted the answer to WHY — and now he'll have it. But the answer arrives inside a trap. The verdict metaphor is exactly right.",
+    "color": "#B5838D",
+    "likes": 29,
+    "replies": [],
+    "createdAt": "2026-03-26T15:00:00Z"
+  },
+  {
+    "id": "hl-62",
+    "bookId": "pride-prejudice",
+    "chapterNum": 6,
+    "userId": "alex",
+    "userName": "Alex",
+    "text": "Caroline Bingley attempts to engage Darcy's attention by walking with him, by sitting near him, by finding opportunities to speak to him about Elizabeth unfavorably — and Darcy's responses are so deliberately unhelpful that they constitute their own form of information",
+    "comment": "Darcy's non-responses to Caroline about Elizabeth are the funniest moments in the Netherfield section. He's not trying to hide it well at all.",
+    "color": "#FFD700",
+    "likes": 31,
+    "replies": [
+      {"userId": "sofia", "userName": "Sofia", "text": "Caroline sees everything and can do nothing. Her frustration is both comic and a little pitiable."}
+    ],
+    "createdAt": "2026-03-24T12:00:00Z"
+  },
+  {
+    "id": "hl-63",
+    "bookId": "great-gatsby",
+    "chapterNum": 6,
+    "userId": "sofia",
+    "userName": "Sofia",
+    "text": "he had married her to his unutterable visions, Nick writes, and his mind would never romp again like the mind of God",
+    "comment": "The most Fitzgerald sentence in the novel. 'Romp again like the mind of God' — that freedom, that boundlessness before he committed everything to one dream. It's a loss of infinity.",
+    "color": "#B5838D",
+    "likes": 58,
+    "replies": [
+      {"userId": "me", "userName": "You", "text": "I read this sentence five times the first time through. 'The mind of God' — Fitzgerald reaching for something almost theological to describe what Gatsby gave up."},
+      {"userId": "mina", "userName": "Mina", "text": "He didn't just fall in love. He closed off every other possibility. That's what makes it beautiful and doomed simultaneously."}
+    ],
+    "createdAt": "2026-03-26T19:00:00Z"
   }
 ]

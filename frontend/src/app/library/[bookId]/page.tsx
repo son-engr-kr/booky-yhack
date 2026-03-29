@@ -162,7 +162,7 @@ export default function BookDetailPage() {
           {[
             { icon: "📝", label: "Notes", href: `/library/${bookId}/read` },
             { icon: "👥", label: "Characters", href: `/library/${bookId}/read` },
-            { icon: "🤖", label: "AI Author", href: `/library/${bookId}/read` },
+            { icon: "💬", label: "Booky Chat", href: `/library/${bookId}/read` },
           ].map((action) => (
             <Link
               key={action.label}

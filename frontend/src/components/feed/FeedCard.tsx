@@ -157,9 +157,9 @@ export default function FeedCard({ post }: FeedCardProps) {
         <button className="flex items-center gap-1.5 text-[12px] text-gray-400 font-medium">
           💬 <span>{post.comments.length}</span>
         </button>
-        <button className="ml-auto text-[12px] text-indigo-500 font-medium">
+        <a href={`/library/${post.bookId}`} className="ml-auto text-[12px] text-indigo-500 font-medium hover:text-indigo-700 transition-colors">
           Start reading →
-        </button>
+        </a>
       </div>
     </motion.div>
   );

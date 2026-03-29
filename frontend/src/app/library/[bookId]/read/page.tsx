@@ -231,6 +231,7 @@ export default function ReadPage() {
   const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(null);
   const [hoveredHighlight, setHoveredHighlight] = useState<Highlight | null>(null);
   const [aiMCDismissed, setAIMCDismissed] = useState(false);
+  const [showAIMCPopup, setShowAIMCPopup] = useState(false);
   const [loading, setLoading] = useState(true);
   const [selectionToolbar, setSelectionToolbar] = useState<SelectionToolbar | null>(null);
 
@@ -321,9 +322,37 @@ export default function ReadPage() {
   };
 
   // Split chapter text into paragraphs
-  const paragraphs = chapter?.text
+  const allParagraphs = chapter?.text
     ? chapter.text.split(/\n\n+/).filter((p) => p.trim().length > 0)
     : [];
+
+  // Pagination: group paragraphs into pages of ~2000 chars
+  const CHARS_PER_PAGE = 2000;
+  const pages: string[][] = [];
+  let currentPage: string[] = [];
+  let currentLen = 0;
+  for (const para of allParagraphs) {
+    if (currentLen + para.length > CHARS_PER_PAGE && currentPage.length > 0) {
+      pages.push(currentPage);
+      currentPage = [];
+      currentLen = 0;
+    }
+    currentPage.push(para);
+    currentLen += para.length;
+  }
+  if (currentPage.length > 0) pages.push(currentPage);
+
+  const [pageIndex, setPageIndex] = useState(0);
+
+  // Reset page when chapter changes
+  useEffect(() => {
+    setPageIndex(0);
+  }, [chapterNum]);
+
+  const totalPages = pages.length;
+  const paragraphs = pages[pageIndex] || [];
+  const hasPagePrev = pageIndex > 0;
+  const hasPageNext = pageIndex < totalPages - 1;
 
   const hasPrev = chapterNum > 1;
   const hasNext = totalChapters === 0 || chapterNum < totalChapters;
@@ -339,9 +368,9 @@ export default function ReadPage() {
   if (!chapter) return null;
 
   return (
-    <div className="min-h-screen bg-[#f0f2f8]" ref={topRef}>
+    <div className="h-screen bg-[#f0f2f8] flex flex-col overflow-hidden" ref={topRef}>
       {/* Header */}
-      <div className="sticky top-0 z-30 bg-[#f0f2f8]/95 backdrop-blur-sm border-b border-gray-200/60 px-4 py-3 flex items-center justify-between">
+      <div className="flex-shrink-0 z-30 bg-[#f0f2f8]/95 backdrop-blur-sm border-b border-gray-200/60 px-4 py-3 flex items-center justify-between">
         <Link
           href={`/library/${bookId}`}
           className="flex items-center gap-1.5 text-gray-600 hover:text-gray-900 transition-colors"
@@ -355,6 +384,7 @@ export default function ReadPage() {
           </div>
           <div className="text-[10px] text-gray-500">
             Chapter {chapterNum}{totalChapters > 0 ? ` of ${totalChapters}` : ""}
+            {totalPages > 1 && <span className="ml-1">· p.{pageIndex + 1}/{totalPages}</span>}
           </div>
         </div>
         <button
@@ -379,18 +409,22 @@ export default function ReadPage() {
         </div>
       )}
 
-      {/* Chapter text */}
+      {/* Chapter text — fixed height, no scroll */}
       <div
         ref={contentRef}
-        className="px-5 pt-6 pb-4 max-w-prose mx-auto"
+        className="flex-1 overflow-hidden px-5 pt-4 max-w-prose mx-auto w-full flex flex-col"
         onMouseUp={handleMouseUp}
       >
-        <h1 className="text-2xl font-bold text-gray-900 font-serif mb-2">{chapter.title}</h1>
-        <div className="text-xs text-gray-400 mb-6 font-sans">
-          Chapter {chapterNum}{totalChapters > 0 ? ` of ${totalChapters}` : ""}
-        </div>
+        {pageIndex === 0 && (
+          <>
+            <h1 className="text-2xl font-bold text-gray-900 font-serif mb-1 flex-shrink-0">{chapter.title}</h1>
+            <div className="text-xs text-gray-400 mb-4 font-sans flex-shrink-0">
+              Chapter {chapterNum}{totalChapters > 0 ? ` of ${totalChapters}` : ""}
+            </div>
+          </>
+        )}
 
-        <div className="relative">
+        <div className="flex-1 overflow-hidden relative">
           {paragraphs.length > 0
             ? paragraphs.map((para, idx) =>
                 renderParagraph(
@@ -409,6 +443,51 @@ export default function ReadPage() {
                 No text available for this chapter.
               </p>
             )}
+        </div>
+      </div>
+
+      {/* Page navigation — fixed at bottom */}
+      <div className="flex-shrink-0 px-5 py-3 max-w-prose mx-auto w-full border-t border-gray-200 bg-[#f0f2f8]">
+        <div className="flex items-center justify-between">
+          <button
+            onClick={() => setPageIndex((p) => p - 1)}
+            disabled={!hasPagePrev}
+            className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
+              hasPagePrev
+                ? "bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 shadow-sm"
+                : "text-gray-300 cursor-not-allowed"
+            }`}
+          >
+            ← Prev
+          </button>
+          <div className="text-xs text-gray-400">
+            {totalPages > 1 ? `${pageIndex + 1} / ${totalPages}` : ""}
+          </div>
+          {hasPageNext ? (
+            <button
+              onClick={() => {
+                if (!aiMCDismissed && !showAIMCPopup) {
+                  setShowAIMCPopup(true);
+                } else {
+                  setPageIndex((p) => p + 1);
+                  setShowAIMCPopup(false);
+                  setAIMCDismissed(false);
+                }
+              }}
+              className="px-4 py-2 rounded-xl text-sm font-medium bg-amber-600 text-white hover:bg-amber-500 shadow-sm transition-all"
+            >
+              Next →
+            </button>
+          ) : hasNext ? (
+            <Link
+              href={`/library/${bookId}/read?chapter=${chapterNum + 1}`}
+              className="px-4 py-2 rounded-xl text-sm font-medium bg-amber-600 text-white hover:bg-amber-500 shadow-sm transition-all"
+            >
+              Next Chapter →
+            </Link>
+          ) : (
+            <span className="px-4 py-2 text-sm text-gray-300">End</span>
+          )}
         </div>
       </div>
 
@@ -449,55 +528,48 @@ export default function ReadPage() {
         )}
       </AnimatePresence>
 
-      {/* AI MC Card */}
+      {/* Booky AI MC Popup — triggered on Next tap */}
       <AnimatePresence>
-        {!aiMCDismissed && (
-          <motion.div
-            initial={{ y: 60, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: 60, opacity: 0 }}
-            transition={{ type: "spring", damping: 24, stiffness: 280 }}
-            className="px-4 pb-4 max-w-prose mx-auto"
-          >
-            <AIMCCard
-              question={getQuestion(bookId, chapterNum)}
-              onAnswer={handleAnswer}
-              onSkip={handleSkipAIMC}
+        {showAIMCPopup && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm"
+              onClick={() => {
+                setShowAIMCPopup(false);
+                setAIMCDismissed(true);
+                setPageIndex((p) => Math.min(p + 1, totalPages - 1));
+              }}
             />
-          </motion.div>
+            <motion.div
+              initial={{ y: "100%", opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: "100%", opacity: 0 }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              className="fixed bottom-0 left-0 right-0 z-50 px-4 pb-6 pt-2 max-w-prose mx-auto"
+            >
+              <AIMCCard
+                question={getQuestion(bookId, chapterNum)}
+                onAnswer={(answer) => {
+                  handleAnswer(answer);
+                  setTimeout(() => {
+                    setShowAIMCPopup(false);
+                    setAIMCDismissed(true);
+                    setPageIndex((p) => Math.min(p + 1, totalPages - 1));
+                  }, 1500);
+                }}
+                onSkip={() => {
+                  setShowAIMCPopup(false);
+                  setAIMCDismissed(true);
+                  setPageIndex((p) => Math.min(p + 1, totalPages - 1));
+                }}
+              />
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
-
-      {/* Chapter navigation */}
-      <div className="px-4 pb-8 pt-2 max-w-prose mx-auto flex gap-3">
-        {hasPrev ? (
-          <Link
-            href={`/library/${bookId}/read?chapter=${chapterNum - 1}`}
-            className="flex-1 flex items-center justify-between bg-white hover:bg-gray-50 border border-gray-200 text-gray-700 rounded-2xl px-5 py-4 shadow-sm transition-colors"
-          >
-            <span className="text-gray-400 text-lg">←</span>
-            <div className="text-right">
-              <div className="text-xs text-gray-400 mb-0.5">Previous</div>
-              <div className="text-sm font-semibold">Chapter {chapterNum - 1}</div>
-            </div>
-          </Link>
-        ) : (
-          <div className="flex-1" />
-        )}
-
-        {hasNext && (
-          <Link
-            href={`/library/${bookId}/read?chapter=${chapterNum + 1}`}
-            className="flex-1 flex items-center justify-between bg-gray-900 hover:bg-gray-800 text-white rounded-2xl px-5 py-4 shadow-sm transition-colors"
-          >
-            <div>
-              <div className="text-xs text-gray-400 mb-0.5">Next</div>
-              <div className="text-sm font-semibold">Chapter {chapterNum + 1}</div>
-            </div>
-            <span className="text-gray-400 text-lg">→</span>
-          </Link>
-        )}
-      </div>
 
       {/* Character popup */}
       <AnimatePresence>

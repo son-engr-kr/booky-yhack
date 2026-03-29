@@ -30,9 +30,9 @@ export default function AIMCCard({ question, onAnswer, onSkip }: AIMCCardProps) 
     >
       {/* Header */}
       <div className="flex items-center gap-2 mb-3">
-        <span className="text-base">🤖</span>
+        <img src="/assets/booky-chracter.png" alt="Booky" className="w-6 h-6 object-contain" />
         <span className="text-xs font-bold uppercase tracking-widest text-amber-700">
-          AI MC
+          Booky
         </span>
       </div>
 

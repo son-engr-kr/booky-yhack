@@ -10,14 +10,14 @@
     "year": 1925
   },
   {
-    "id": "1984",
-    "title": "1984",
-    "author": "George Orwell",
-    "genre": "Dystopia",
-    "cover": "https://covers.openlibrary.org/b/id/12645114-L.jpg",
-    "totalChapters": 8,
-    "description": "A dystopian novel about totalitarianism, surveillance, and the destruction of truth.",
-    "year": 1949
+    "id": "frankenstein",
+    "title": "Frankenstein",
+    "author": "Mary Shelley",
+    "genre": "Gothic",
+    "cover": "https://covers.openlibrary.org/b/id/12648289-L.jpg",
+    "totalChapters": 28,
+    "description": "A scientist creates a sentient creature in an unorthodox experiment, exploring themes of ambition, isolation, and humanity.",
+    "year": 1818
   },
   {
     "id": "pride-prejudice",
@@ -25,7 +25,7 @@
     "author": "Jane Austen",
     "genre": "Romance",
     "cover": "https://covers.openlibrary.org/b/id/12648289-L.jpg",
-    "totalChapters": 8,
+    "totalChapters": 61,
     "description": "Elizabeth Bennet navigates love, reputation, and misunderstanding in Regency England.",
     "year": 1813
   }
