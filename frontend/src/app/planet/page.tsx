@@ -8,34 +8,32 @@ import BottomNav from "@/components/nav/BottomNav";
 import { getMyPlanet, getFriendPlanets, type PlanetData, type FriendPlanet } from "@/lib/api";
 
 // Kepler orbit config: T ∝ r^(3/2)
-// Three orbit rings with radii (px). Duration in seconds ∝ r^(3/2) / base
+// Three orbit rings with sizes in vmin units
 const ORBIT_RINGS = [
-  { id: 1, size: 260 },  // closest — fastest
-  { id: 2, size: 400 },  // medium
-  { id: 3, size: 540 },  // farthest — slowest
+  { id: 1, size: 65 },   // closest — fastest
+  { id: 2, size: 100 },  // medium
+  { id: 3, size: 135 },  // farthest — slowest
 ];
 
 // Base period at r=160 → T_base = 18s
 // r=250 → T = 18 * (250/160)^(3/2) ≈ 18 * 2.44 ≈ 44s  (actually (250/160)^1.5 = 1.5625^1.5 ≈ 1.953 → 35s)
 // r=340 → T = 18 * (340/160)^1.5 = 18 * 2.125^1.5 ≈ 18 * 3.096 ≈ 56s
 function keplerPeriod(r: number): number {
-  const base = 60; // much slower: 60s base period
+  const base = 360; // very slow: 360s base period
   const rBase = 160;
   return base * Math.pow(r / rBase, 1.5);
 }
 
-// Assign friend planets to orbits based on similarity
-// similarity >= 80 → orbit 1 (close), 60–79 → orbit 2, <60 → orbit 3
-function getOrbitForSimilarity(similarity: number): number {
-  if (similarity >= 80) return 1;
-  if (similarity >= 60) return 2;
-  return 3;
+// Assign each friend to a unique orbit ring (round-robin across rings)
+function getOrbitForIndex(index: number): number {
+  return (index % ORBIT_RINGS.length) + 1;
 }
 
-// Spread friends around their orbit using an angle offset per index within the orbit
-function getAngleOffset(indexInOrbit: number, totalInOrbit: number): number {
-  if (totalInOrbit === 1) return 45;
-  return (360 / totalInOrbit) * indexInOrbit + 45;
+// Spread friends around orbit — different start angles per orbit ring for variety
+function getAngleOffset(indexInOrbit: number, totalInOrbit: number, ringId: number): number {
+  const ringOffset = ringId * 120; // each ring starts at a different angle
+  if (totalInOrbit === 1) return ringOffset + 30;
+  return (360 / totalInOrbit) * indexInOrbit + ringOffset;
 }
 
 // Convert API planetImage ("planet2.png") → asset path
@@ -67,6 +65,11 @@ export default function PlanetPage() {
     getFriendPlanets().then(setFriendPlanets);
   }, []);
 
+  useEffect(() => {
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = ""; };
+  }, []);
+
   const handlePlanetTap = (type: "me" | "friend", id?: string) => {
     if (type === "me") {
       router.push("/planet/detail");
@@ -79,8 +82,8 @@ export default function PlanetPage() {
 
   // Group friends by orbit ring
   const orbitGroups: Record<number, FriendPlanet[]> = { 1: [], 2: [], 3: [] };
-  friendPlanets.forEach((fp) => {
-    const orbit = getOrbitForSimilarity(fp.similarity);
+  friendPlanets.forEach((fp, idx) => {
+    const orbit = getOrbitForIndex(idx);
     orbitGroups[orbit].push(fp);
   });
 
@@ -117,8 +120,8 @@ export default function PlanetPage() {
         }
         .orbit-planet:hover { filter: brightness(1.25) drop-shadow(0 0 8px rgba(255,215,0,0.5)); }
         @keyframes planet-pulse {
-          0%, 100% { box-shadow: 0 0 24px rgba(100,180,100,0.35), 0 0 48px rgba(100,180,100,0.15); }
-          50%       { box-shadow: 0 0 32px rgba(100,180,100,0.55), 0 0 64px rgba(100,180,100,0.25); }
+          0%, 100% { filter: drop-shadow(0 0 40px rgba(100,180,100,0.2)) drop-shadow(0 0 80px rgba(100,180,100,0.1)); }
+          50%       { filter: drop-shadow(0 0 60px rgba(100,180,100,0.3)) drop-shadow(0 0 100px rgba(100,180,100,0.15)); }
         }
         @keyframes glow-ring {
           0%, 100% { opacity: 0.12; transform: translate(-50%, -50%) scale(1); }
@@ -126,7 +129,7 @@ export default function PlanetPage() {
         }
       `}</style>
 
-      <div className="h-screen w-full relative overflow-hidden bg-[#050507]">
+      <div className="h-screen w-full relative overflow-hidden bg-[#050507]" style={{ maxHeight: "100dvh" }}>
 
         {/* === MILKY WAY — subtle diagonal gradient band === */}
         <div
@@ -212,30 +215,6 @@ export default function PlanetPage() {
           />
         </div>
 
-        {/* === PORTHOLE FRAME — giant circular window with ship-wall shadow === */}
-        <div
-          className="absolute porthole-frame pointer-events-none"
-          style={{
-            width: "165%",
-            aspectRatio: "1",
-            top: "45%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            borderRadius: "50%",
-            zIndex: 8,
-          }}
-        />
-
-        {/* Bottom bezel gradient */}
-        <div
-          className="absolute bottom-0 left-0 right-0 pointer-events-none"
-          style={{
-            height: 48,
-            background: "linear-gradient(0deg, #eceef4 0%, #eceef4 40%, transparent 100%)",
-            zIndex: 9,
-            borderRadius: "0 0 24px 24px",
-          }}
-        />
 
         {/* === FILTER PILLS === */}
         <div className="absolute top-0 left-0 right-0 z-10 pt-8 px-4">
@@ -263,8 +242,8 @@ export default function PlanetPage() {
             key={ring.id}
             className="absolute rounded-full pointer-events-none"
             style={{
-              width: ring.size,
-              height: ring.size,
+              width: `${ring.size}vmin`,
+              height: `${ring.size}vmin`,
               top: "50%",
               left: "50%",
               transform: "translate(-50%, -50%)",
@@ -275,25 +254,12 @@ export default function PlanetPage() {
         ))}
 
         {/* === MY PLANET (center) === */}
-        {/* Pulsing glow ring */}
-        <div
-          className="absolute rounded-full pointer-events-none"
-          style={{
-            width: 96,
-            height: 96,
-            top: "50%",
-            left: "50%",
-            border: "1px solid rgba(255,215,0,0.10)",
-            animation: "glow-ring 3s ease-in-out infinite",
-            zIndex: 2,
-          }}
-        />
         <button
           onClick={() => handlePlanetTap("me")}
-          className="absolute rounded-full overflow-hidden"
+          className="absolute rounded-full flex items-center justify-center"
           style={{
-            width: 72,
-            height: 72,
+            width: "33vmin",
+            height: "33vmin",
             top: "50%",
             left: "50%",
             transform: "translate(-50%, -50%)",
@@ -307,9 +273,9 @@ export default function PlanetPage() {
           <Image
             src={myPlanetSrc}
             alt="My planet"
-            width={90}
-            height={90}
-            className="rounded-full object-cover"
+            width={200}
+            height={200}
+            className="rounded-full object-cover w-full h-full"
             style={{ filter: "drop-shadow(0 0 16px rgba(100,180,100,0.4))" }}
           />
         </button>
@@ -320,8 +286,8 @@ export default function PlanetPage() {
           const period = keplerPeriod(ring.size / 2);
           return friends.map((fp, idx) => {
             const total = friends.length;
-            const startDeg = getAngleOffset(idx, total);
-            const planetSize = ring.id === 1 ? 56 : ring.id === 2 ? 48 : 40;
+            const startDeg = getAngleOffset(idx, total, ring.id);
+            const planetVmin = ring.id === 1 ? 19 : ring.id === 2 ? 19 : 15;
             const imgSrc = toPlanetSrc(fp.planetImage);
 
             return (
@@ -330,13 +296,13 @@ export default function PlanetPage() {
                 className="orbit-planet"
                 onClick={() => handlePlanetTap("friend", fp.id)}
                 style={{
-                  width: planetSize,
-                  height: planetSize,
+                  width: `${planetVmin}vmin`,
+                  height: `${planetVmin}vmin`,
                   zIndex: 4,
                   padding: 0,
                   border: "none",
                   background: "none",
-                  "--orbit-r": `${ring.size / 2}px`,
+                  "--orbit-r": `${ring.size / 2}vmin`,
                   "--orbit-duration": `${period}s`,
                   "--start-angle": `${startDeg}deg`,
                   animationDelay: `${-(period * startDeg) / 360}s`,
@@ -346,27 +312,28 @@ export default function PlanetPage() {
                 <Image
                   src={imgSrc}
                   alt={fp.name}
-                  width={planetSize}
-                  height={planetSize}
+                  width={112}
+                  height={112}
                   className="rounded-full object-cover w-full h-full"
                   style={{
                     filter: `drop-shadow(0 0 8px rgba(150,150,200,0.3))`,
                   }}
                 />
                 {/* Name label */}
-                <span className="absolute -bottom-4 left-1/2 -translate-x-1/2 text-[8px] text-gray-400 whitespace-nowrap font-medium">
+                <span className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-[12px] text-gray-400 whitespace-nowrap font-medium">
                   {fp.name}
                 </span>
                 {/* Speech bubble — only shown when this friend is active */}
                 {fp.latestFeed && speakingFriends[activeBubble]?.id === fp.id && (
                   <div
-                    className="absolute -top-14 left-1/2 -translate-x-1/2 bg-black/80 backdrop-blur-md border border-amber-500/20 rounded-lg px-3 py-1.5 whitespace-nowrap pointer-events-none animate-[fadeInOut_4s_ease-in-out]"
+                    className="absolute bg-black/80 backdrop-blur-md border border-amber-500/20 rounded-lg px-3 py-2 pointer-events-none animate-[fadeInOut_4s_ease-in-out]"
+                    style={{ bottom: `calc(${planetVmin}vmin + 12px)`, right: -10, maxWidth: "45vmin", minWidth: "25vmin" }}
                   >
-                    <div className="text-[8px] text-amber-400 font-semibold">{fp.name}</div>
-                    <div className="text-[8px] text-gray-300 leading-tight">
-                      {fp.latestFeed.length > 50 ? fp.latestFeed.slice(0, 50) + "..." : fp.latestFeed}
+                    <div className="text-[13px] text-amber-400 font-semibold">{fp.name}</div>
+                    <div className="text-[12px] text-gray-300 leading-snug">
+                      {fp.latestFeed.length > 30 ? fp.latestFeed.slice(0, 30) + "..." : fp.latestFeed}
                     </div>
-                    <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-black/80 border-r border-b border-amber-500/20 rotate-45" />
+                    <div className="absolute -bottom-1 right-4 w-2.5 h-2.5 bg-black/80 border-r border-b border-amber-500/20 rotate-45" />
                   </div>
                 )}
               </button>

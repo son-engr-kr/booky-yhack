@@ -62,12 +62,12 @@ body {
 /* Porthole window for space views */
 .porthole-frame {
   box-shadow:
-    0 0 0 2px #555,
-    0 0 0 5px #a0a5b0,
-    0 0 0 6px #888e9a,
-    0 0 0 60px #eceef4,
-    0 0 0 61px #dde0ea,
-    0 0 0 64px #f0f2f8;
+    0 0 0 3px #555,
+    0 0 0 8px #a0a5b0,
+    0 0 0 10px #888e9a,
+    0 0 0 200px #eceef4,
+    0 0 0 202px #dde0ea,
+    0 0 0 206px #f0f2f8;
 }
 
 /* Frosted glass card */
