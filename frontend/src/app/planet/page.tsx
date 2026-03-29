@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import { motion, AnimatePresence } from "framer-motion";
 import BottomNav from "@/components/nav/BottomNav";
@@ -18,6 +19,7 @@ const PlanetScene = dynamic(() => import("@/components/planet/PlanetScene"), {
 type DetailView = null | { type: "me" } | { type: "friend"; id: string };
 
 export default function PlanetPage() {
+  const router = useRouter();
   const [myPlanet, setMyPlanet] = useState<PlanetData | null>(null);
   const [friendPlanets, setFriendPlanets] = useState<FriendPlanet[]>([]);
   const [detail, setDetail] = useState<DetailView>(null);
@@ -30,9 +32,9 @@ export default function PlanetPage() {
 
   const handlePlanetTap = (type: "me" | "friend", id?: string) => {
     if (type === "me") {
-      setDetail({ type: "me" });
+      router.push("/planet/detail");
     } else if (id) {
-      setDetail({ type: "friend", id });
+      router.push(`/planet/friend/${id}`);
     }
   };
 

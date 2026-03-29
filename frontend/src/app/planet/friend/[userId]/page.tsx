@@ -1,149 +1,142 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import { motion } from "framer-motion";
+import Link from "next/link";
 import BottomNav from "@/components/nav/BottomNav";
-import { getFriend, getFriendProgress, type Friend, type ReadingProgress } from "@/lib/api";
+import {
+  getFriend,
+  getFriendProgress,
+  listBooks,
+  type Friend,
+  type ReadingProgress,
+  type Book,
+} from "@/lib/api";
 
-const coverColors: Record<string, string> = {
-  "great-gatsby": "from-emerald-900 to-emerald-700",
-  "1984": "from-red-950 to-red-800",
-  "pride-prejudice": "from-cyan-900 to-teal-700",
-};
-
-export default function FriendPlanetPage() {
-  const { userId } = useParams<{ userId: string }>();
+export default function FriendPlanetDetailPage() {
   const router = useRouter();
+  const params = useParams();
+  const userId = params.userId as string;
+
   const [friend, setFriend] = useState<Friend | null>(null);
   const [progress, setProgress] = useState<ReadingProgress[]>([]);
+  const [allBooks, setAllBooks] = useState<Book[]>([]);
 
   useEffect(() => {
-    if (!userId) return;
     getFriend(userId).then(setFriend);
-    getFriendProgress(userId).then((p) => setProgress(p || []));
+    getFriendProgress(userId).then(setProgress);
+    listBooks().then(setAllBooks);
   }, [userId]);
 
   if (!friend) {
     return (
-      <div className="h-screen bg-[#050507] flex items-center justify-center">
+      <div className="min-h-screen bg-[#050507] flex items-center justify-center">
         <div className="text-amber-500/50 text-sm animate-pulse">Loading planet...</div>
       </div>
     );
   }
 
-  const reading = progress.filter((p) => p.status === "reading" || p.status === "completed");
+  const booksInCommon = progress.filter((p) => p.percentage > 0);
+  const topGenre = Object.keys(friend.genres)[0] ?? "Literature";
 
   return (
-    <div className="min-h-screen bg-[#050507] relative">
-      {/* Twinkling stars */}
-      {Array.from({ length: 30 }).map((_, i) => (
-        <div
-          key={i}
-          className="absolute rounded-full bg-white star-twinkle"
-          style={{
-            width: `${0.5 + (i % 3) * 0.5}px`,
-            height: `${0.5 + (i % 3) * 0.5}px`,
-            top: `${(i * 37) % 100}%`,
-            left: `${(i * 53) % 100}%`,
-            "--duration": `${3 + (i % 4)}s`,
-            "--delay": `${(i % 5) * 0.8}s`,
-          } as React.CSSProperties}
-        />
-      ))}
+    <div className="min-h-screen bg-[#050507] pb-24 overflow-y-auto">
+      {/* Back button */}
+      <button
+        onClick={() => router.push("/planet")}
+        className="absolute top-4 left-4 z-20 text-gray-400 text-sm flex items-center gap-1 hover:text-white transition-colors"
+      >
+        ← Back
+      </button>
 
-      {/* Header */}
-      <div className="relative z-10 flex items-center gap-3 p-4 pt-10">
-        <button
-          onClick={() => router.back()}
-          className="w-8 h-8 rounded-full bg-white/10 border border-white/10 flex items-center justify-center text-white/70 text-sm"
-        >
-          ←
-        </button>
-        <h1 className="text-white font-bold">{friend.name}&apos;s Planet</h1>
-      </div>
-
-      {/* Planet zoom-in */}
-      <div className="relative z-10 flex justify-center mt-4">
+      {/* Planet image */}
+      <div className="flex justify-center pt-16 pb-6">
         <motion.img
-          src={`/assets/${friend.planetImage.replace(".png", "-3d.jpg")}`}
-          className="w-28 h-28 rounded-full object-cover"
-          style={{ boxShadow: "0 0 30px rgba(255,215,0,0.15)" }}
-          initial={{ scale: 0.3, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ type: "spring", damping: 15, stiffness: 200 }}
+          src={`/assets/${friend.planetImage}`}
           alt={friend.name}
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ type: "spring", stiffness: 200, damping: 20, duration: 0.6 }}
+          className="w-40 h-40 rounded-full object-cover shadow-[0_0_60px_rgba(99,102,241,0.35)]"
         />
       </div>
 
-      {/* Name */}
-      <div className="relative z-10 text-center mt-4">
-        <div className="text-white font-bold text-xl">{friend.name}</div>
-        <div className="text-gray-500 text-xs">Level {friend.level} · {friend.similarity}% match</div>
+      {/* Title */}
+      <div className="text-center mb-6 px-4">
+        <h1 className="text-2xl font-bold text-white">{friend.name}</h1>
+        <p className="text-sm text-gray-400 mt-1">
+          {topGenre} reader · Lv.{friend.level}
+        </p>
       </div>
 
-      {/* Stats */}
-      <div className="relative z-10 flex justify-center gap-8 mt-6">
-        {[
-          { n: friend.booksRead, l: "Books" },
-          { n: friend.totalNotes, l: "Notes" },
-          { n: `${friend.similarity}%`, l: "Match" },
-        ].map((s) => (
-          <div key={s.l} className="text-center">
-            <div className="text-amber-500 font-bold text-lg">{s.n}</div>
-            <div className="text-gray-500 text-[10px]">{s.l}</div>
-          </div>
-        ))}
-      </div>
-
-      {/* Books in common */}
-      {reading.length > 0 && (
-        <div className="relative z-10 px-6 mt-6">
-          <div className="text-amber-500 text-xs font-semibold mb-2">
-            Books in common
-          </div>
-          <div className="flex gap-2">
-            {reading.map((p) => (
-              <div
-                key={p.bookId}
-                className={`w-12 h-16 rounded-md bg-gradient-to-br ${
-                  coverColors[p.bookId] || "from-gray-600 to-gray-400"
-                } flex items-center justify-center`}
-              >
-                <span className="text-white text-[8px] font-semibold text-center px-0.5">
-                  {p.bookId.split("-").map((w) => w[0]?.toUpperCase()).join("")}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Genres */}
-      <div className="relative z-10 px-6 mt-4">
-        <div className="flex gap-2 flex-wrap">
-          {Object.entries(friend.genres).map(([genre, pct]) => (
-            <span
-              key={genre}
-              className="text-[10px] px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-gray-400"
-            >
-              {genre} {pct}%
-            </span>
+      <div className="px-4 flex flex-col gap-4">
+        {/* Stats */}
+        <div className="grid grid-cols-3 gap-3 bg-white/5 rounded-2xl p-4 border border-white/10">
+          {[
+            { value: friend.booksRead, label: "Books" },
+            { value: friend.totalNotes, label: "Notes" },
+            { value: `${friend.similarity}%`, label: "Match%" },
+          ].map((s) => (
+            <div key={s.label} className="text-center">
+              <div className="text-indigo-400 font-bold text-xl">{s.value}</div>
+              <div className="text-gray-500 text-[10px] mt-0.5">{s.label}</div>
+            </div>
           ))}
         </div>
-      </div>
 
-      {/* View Constellation */}
-      <div className="relative z-10 px-6 mt-6">
-        <button
-          onClick={() => router.push("/constellation/great-gatsby")}
-          className="w-full text-center bg-amber-500/10 border border-amber-500/20 rounded-xl py-3 text-amber-500 text-sm font-semibold"
+        {/* Books in common */}
+        {booksInCommon.length > 0 && (
+          <div className="bg-white/5 rounded-2xl p-4 border border-white/10">
+            <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
+              Books in Common
+            </h2>
+            <div className="flex gap-3 overflow-x-auto pb-1">
+              {booksInCommon.map((p) => {
+                const book = allBooks.find((b) => b.id === p.bookId);
+                return (
+                  <motion.div
+                    key={p.bookId}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="flex-shrink-0 flex flex-col items-center gap-1.5"
+                  >
+                    <div className="w-14 h-20 rounded-lg bg-white/10 border border-white/10 overflow-hidden">
+                      {book?.cover ? (
+                        <img
+                          src={book.cover}
+                          alt={book.title}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-gray-600 text-xs text-center px-1">
+                          {book?.title ?? p.bookId}
+                        </div>
+                      )}
+                    </div>
+                    <span className="text-[9px] text-gray-500 w-14 text-center truncate">
+                      {book?.title ?? p.bookId}
+                    </span>
+                  </motion.div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* View Constellation */}
+        <Link
+          href="/constellation/great-gatsby"
+          className="flex items-center justify-between bg-indigo-500/10 rounded-2xl p-4 border border-indigo-500/20 hover:border-indigo-400/40 transition-colors"
         >
-          View Constellation →
-        </button>
+          <div>
+            <div className="text-sm font-semibold text-indigo-300">View Constellation</div>
+            <div className="text-xs text-gray-500 mt-0.5">See how your reading paths connect</div>
+          </div>
+          <span className="text-indigo-400 text-lg">→</span>
+        </Link>
       </div>
 
-      <div className="pb-20" />
       <BottomNav />
     </div>
   );
