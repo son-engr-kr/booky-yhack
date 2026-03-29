@@ -211,6 +211,46 @@ function FriendPlanetMesh({
   );
 }
 
+function OrbitingFriend({
+  data,
+  index,
+  total,
+  onTap,
+  showBubble,
+}: {
+  data: FriendPlanetData;
+  index: number;
+  total: number;
+  onTap: () => void;
+  showBubble: boolean;
+}) {
+  const groupRef = useRef<THREE.Group>(null);
+  const startAngle = (index / total) * Math.PI * 2;
+  const orbitRadius = 2.0 + (1 - data.similarity / 100) * 2.5;
+  // Each friend has a unique orbital speed based on index
+  const orbitalSpeed = 0.08 + index * 0.035;
+  const yOffset = ((index % 3) - 1) * 0.15;
+
+  useFrame((state) => {
+    if (groupRef.current) {
+      const t = state.clock.elapsedTime * orbitalSpeed + startAngle;
+      groupRef.current.position.x = Math.cos(t) * orbitRadius;
+      groupRef.current.position.z = Math.sin(t) * orbitRadius;
+      groupRef.current.position.y = yOffset + Math.sin(t * 0.5) * 0.1;
+    }
+  });
+
+  // Override position to 0,0,0 since the group handles positioning
+  const localData = { ...data, position: { x: 0, y: 0, z: 0 } };
+
+  return (
+    <group ref={groupRef}>
+      <FriendPlanetMesh data={localData} onTap={onTap} />
+      <SpeechBubble data={localData} visible={showBubble} />
+    </group>
+  );
+}
+
 function SpeechBubble({
   data,
   visible,
@@ -378,15 +418,16 @@ function Scene({
         </mesh>
       ))}
 
-      {/* Friend planets on orbital plane — positions computed once via useMemo */}
+      {/* Friend planets orbiting — each with unique orbital speed */}
       {friendPositions.map((fp, i) => (
-        <group key={fp.id}>
-          <FriendPlanetMesh
-            data={fp}
-            onTap={() => onPlanetTap?.("friend", fp.id)}
-          />
-          <SpeechBubble data={fp} visible={i === bubbleIndex} />
-        </group>
+        <OrbitingFriend
+          key={fp.id}
+          data={fp}
+          index={i}
+          total={friendPositions.length}
+          onTap={() => onPlanetTap?.("friend", fp.id)}
+          showBubble={i === bubbleIndex}
+        />
       ))}
 
       {/* Connection lines to friends */}

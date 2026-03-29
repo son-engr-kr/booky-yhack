@@ -4,7 +4,7 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import { useParams, useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import BottomNav from "@/components/nav/BottomNav";
+// BottomNav hidden during reading
 import CharacterPopup from "@/components/reading/CharacterPopup";
 import AIMCCard from "@/components/reading/AIMCCard";
 import {
@@ -276,41 +276,65 @@ export default function ReadPage() {
   const activeHighlights = friendHighlightsOn ? friendHighlights : [];
 
   const handleCharacterTap = useCallback((name: string) => {
-    const char = characters.find((c) => c.name === name);
-    if (char) setSelectedCharacter(char);
-  }, [characters]);
+    // Match by first name or full name (API has "Nick Carraway", text detects "Nick")
+    const char = characters.find((c) =>
+      c.name === name ||
+      c.name.startsWith(name) ||
+      c.name.split(" ")[0] === name ||
+      c.name.toLowerCase().includes(name.toLowerCase())
+    );
+    if (char) {
+      setSelectedCharacter(char);
+    } else {
+      // Create a basic character entry for display
+      setSelectedCharacter({
+        id: name.toLowerCase().replace(/\s/g, "-"),
+        name,
+        role: "character",
+        description: `A character appearing in this chapter.`,
+        chapters: [chapterNum],
+      });
+    }
+  }, [characters, chapterNum]);
 
   // Text selection handler for highlight toolbar
-  const handleMouseUp = useCallback(() => {
-    const selection = window.getSelection();
-    if (!selection || selection.isCollapsed) {
-      setSelectionToolbar(null);
-      return;
-    }
-    const text = selection.toString().trim();
-    if (!text || text.length < 3) {
-      setSelectionToolbar(null);
-      return;
-    }
-    const range = selection.getRangeAt(0);
-    const rect = range.getBoundingClientRect();
-    setSelectionToolbar({
-      x: rect.left + rect.width / 2,
-      y: rect.top + window.scrollY - 10,
-      text,
-    });
+  const toolbarRef = useRef<HTMLDivElement>(null);
+  const handleMouseUp = useCallback((e: React.PointerEvent) => {
+    // Ignore if clicking on the toolbar itself
+    if (toolbarRef.current?.contains(e.target as Node)) return;
+
+    setTimeout(() => {
+      const selection = window.getSelection();
+      if (!selection || selection.isCollapsed) {
+        setSelectionToolbar(null);
+        return;
+      }
+      const text = selection.toString().trim();
+      if (!text || text.length < 3) {
+        setSelectionToolbar(null);
+        return;
+      }
+      const range = selection.getRangeAt(0);
+      const rect = range.getBoundingClientRect();
+      setSelectionToolbar({
+        x: rect.left + rect.width / 2,
+        y: rect.top,
+        text,
+      });
+    }, 10);
   }, []);
 
   const handleAddHighlight = useCallback(() => {
     if (!selectionToolbar) return;
+    const text = selectionToolbar.text;
     const newHighlight: UserHighlight = {
       id: `user-${Date.now()}`,
-      text: selectionToolbar.text,
+      text,
       color: "#f59e0b",
     };
     setUserHighlights((prev) => [...prev, newHighlight]);
-    window.getSelection()?.removeAllRanges();
     setSelectionToolbar(null);
+    window.getSelection()?.removeAllRanges();
   }, [selectionToolbar]);
 
   const handleAnswer = (_answer: string) => {
@@ -368,7 +392,7 @@ export default function ReadPage() {
   if (!chapter) return null;
 
   return (
-    <div className="h-screen bg-[#f0f2f8] flex flex-col overflow-hidden" ref={topRef}>
+    <div className="fixed inset-0 bg-[#f0f2f8] flex flex-col overflow-hidden z-40" ref={topRef}>
       {/* Header */}
       <div className="flex-shrink-0 z-30 bg-[#f0f2f8]/95 backdrop-blur-sm border-b border-gray-200/60 px-4 py-3 flex items-center justify-between">
         <Link
@@ -412,8 +436,8 @@ export default function ReadPage() {
       {/* Chapter text — fixed height, no scroll */}
       <div
         ref={contentRef}
-        className="flex-1 overflow-hidden px-5 pt-4 max-w-prose mx-auto w-full flex flex-col"
-        onMouseUp={handleMouseUp}
+        className="flex-1 overflow-hidden px-5 pt-4 max-w-prose mx-auto w-full flex flex-col select-text"
+        onPointerUp={handleMouseUp}
       >
         {pageIndex === 0 && (
           <>
@@ -495,32 +519,30 @@ export default function ReadPage() {
       <AnimatePresence>
         {selectionToolbar && (
           <motion.div
+            ref={toolbarRef}
             initial={{ opacity: 0, scale: 0.9, y: 4 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 4 }}
             transition={{ duration: 0.15 }}
-            className="fixed z-50 -translate-x-1/2 flex items-center gap-1 bg-gray-900 text-white rounded-xl px-2 py-1.5 shadow-xl"
+            onPointerDown={(e) => { e.stopPropagation(); e.preventDefault(); }}
+            className="fixed z-[60] -translate-x-1/2 -translate-y-full flex items-center gap-1 bg-gray-900 text-white rounded-xl px-2 py-1.5 shadow-xl"
             style={{
-              left: selectionToolbar.x,
-              top: selectionToolbar.y,
+              left: Math.min(Math.max(selectionToolbar.x, 60), window.innerWidth - 60),
+              top: selectionToolbar.y - 8,
             }}
           >
             <button
-              onMouseDown={(e) => {
-                e.preventDefault();
-                handleAddHighlight();
-              }}
-              className="flex items-center gap-1.5 text-xs font-semibold px-2 py-1 rounded-lg bg-amber-500 hover:bg-amber-400 transition-colors"
+              onClick={() => handleAddHighlight()}
+              className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 transition-colors cursor-pointer"
             >
               <span>✦</span> Highlight
             </button>
             <button
-              onMouseDown={(e) => {
-                e.preventDefault();
+              onClick={() => {
                 window.getSelection()?.removeAllRanges();
                 setSelectionToolbar(null);
               }}
-              className="text-gray-400 hover:text-white text-xs px-1.5 py-1 transition-colors"
+              className="text-gray-400 hover:text-white text-xs px-1.5 py-1 transition-colors cursor-pointer"
             >
               ✕
             </button>
@@ -582,7 +604,6 @@ export default function ReadPage() {
         )}
       </AnimatePresence>
 
-      <BottomNav />
     </div>
   );
 }
