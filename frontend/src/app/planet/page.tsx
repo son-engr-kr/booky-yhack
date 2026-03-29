@@ -10,9 +10,9 @@ import { getMyPlanet, getFriendPlanets, type PlanetData, type FriendPlanet } fro
 // Kepler orbit config: T ∝ r^(3/2)
 // Three orbit rings with radii (px). Duration in seconds ∝ r^(3/2) / base
 const ORBIT_RINGS = [
-  { id: 1, size: 160 },  // closest — fastest
-  { id: 2, size: 250 },  // medium
-  { id: 3, size: 340 },  // farthest — slowest
+  { id: 1, size: 260 },  // closest — fastest
+  { id: 2, size: 400 },  // medium
+  { id: 3, size: 540 },  // farthest — slowest
 ];
 
 // Base period at r=160 → T_base = 18s
@@ -38,13 +38,11 @@ function getAngleOffset(indexInOrbit: number, totalInOrbit: number): number {
   return (360 / totalInOrbit) * indexInOrbit + 45;
 }
 
-// Convert API planetImage ("planet4.png") → 3d version ("/assets/planet4-3d.jpg")
+// Convert API planetImage ("planet2.png") → asset path
 function toPlanetSrc(planetImage?: string): string {
-  if (!planetImage) return "/assets/planet2-3d.jpg";
+  if (!planetImage) return "/assets/planet2.png";
   if (planetImage.startsWith("/")) return planetImage;
-  // "planet4.png" → "planet4-3d.jpg"
-  const base = planetImage.replace(/\.png$/, "");
-  return `/assets/${base}-3d.jpg`;
+  return `/assets/${planetImage}`;
 }
 
 // 30 static twinkling stars with varied positions and timings
@@ -86,8 +84,16 @@ export default function PlanetPage() {
     orbitGroups[orbit].push(fp);
   });
 
-  // Friends with speech bubbles (first 3 that have latestFeed)
-  const speakingFriends = friendPlanets.filter((f) => f.latestFeed).slice(0, 3);
+  // Friends with speech bubbles — show one at a time, cycling
+  const speakingFriends = friendPlanets.filter((f) => f.latestFeed).slice(0, 4);
+  const [activeBubble, setActiveBubble] = useState(0);
+  useEffect(() => {
+    if (speakingFriends.length === 0) return;
+    const interval = setInterval(() => {
+      setActiveBubble((prev) => (prev + 1) % speakingFriends.length);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, [speakingFriends.length]);
 
   if (!myPlanet) return null;
 
@@ -301,10 +307,10 @@ export default function PlanetPage() {
           <Image
             src={myPlanetSrc}
             alt="My planet"
-            width={72}
-            height={72}
-            className="rounded-full object-cover w-full h-full"
-            style={{ boxShadow: "inset -6px -6px 12px rgba(0,0,0,0.4)" }}
+            width={90}
+            height={90}
+            className="rounded-full object-cover"
+            style={{ filter: "drop-shadow(0 0 16px rgba(100,180,100,0.4))" }}
           />
         </button>
 
@@ -315,7 +321,7 @@ export default function PlanetPage() {
           return friends.map((fp, idx) => {
             const total = friends.length;
             const startDeg = getAngleOffset(idx, total);
-            const planetSize = ring.id === 1 ? 40 : ring.id === 2 ? 34 : 28;
+            const planetSize = ring.id === 1 ? 56 : ring.id === 2 ? 48 : 40;
             const imgSrc = toPlanetSrc(fp.planetImage);
 
             return (
@@ -344,24 +350,23 @@ export default function PlanetPage() {
                   height={planetSize}
                   className="rounded-full object-cover w-full h-full"
                   style={{
-                    boxShadow: "0 0 10px rgba(0,0,0,0.5)",
-                    filter: `drop-shadow(0 0 6px rgba(150,150,200,0.3))`,
+                    filter: `drop-shadow(0 0 8px rgba(150,150,200,0.3))`,
                   }}
                 />
                 {/* Name label */}
                 <span className="absolute -bottom-4 left-1/2 -translate-x-1/2 text-[8px] text-gray-400 whitespace-nowrap font-medium">
                   {fp.name}
                 </span>
-                {/* Speech bubble attached to planet */}
-                {fp.latestFeed && speakingFriends.includes(fp) && (
+                {/* Speech bubble — only shown when this friend is active */}
+                {fp.latestFeed && speakingFriends[activeBubble]?.id === fp.id && (
                   <div
-                    className="absolute -top-12 left-1/2 -translate-x-1/2 speech-ambient bg-black/70 backdrop-blur-md border border-amber-500/20 rounded-lg px-2 py-1 max-w-[90px] pointer-events-none"
-                    style={{ "--duration": "6s", "--delay": `${idx * 1.5}s` } as React.CSSProperties}
+                    className="absolute -top-14 left-1/2 -translate-x-1/2 bg-black/80 backdrop-blur-md border border-amber-500/20 rounded-lg px-3 py-1.5 whitespace-nowrap pointer-events-none animate-[fadeInOut_4s_ease-in-out]"
                   >
-                    <div className="text-[7px] text-amber-400 font-semibold">{fp.name}</div>
-                    <div className="text-[7px] text-gray-300 leading-tight">
-                      {fp.latestFeed.length > 40 ? fp.latestFeed.slice(0, 40) + "..." : fp.latestFeed}
+                    <div className="text-[8px] text-amber-400 font-semibold">{fp.name}</div>
+                    <div className="text-[8px] text-gray-300 leading-tight">
+                      {fp.latestFeed.length > 50 ? fp.latestFeed.slice(0, 50) + "..." : fp.latestFeed}
                     </div>
+                    <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-black/80 border-r border-b border-amber-500/20 rotate-45" />
                   </div>
                 )}
               </button>

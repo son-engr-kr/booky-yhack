@@ -113,6 +113,14 @@ body {
   box-shadow: 4px 3px 0 0 rgba(255,255,255,0.4);
 }
 
+/* Fade in/out for speech bubbles */
+@keyframes fadeInOut {
+  0% { opacity: 0; transform: translateX(-50%) translateY(4px); }
+  10% { opacity: 1; transform: translateX(-50%) translateY(0); }
+  80% { opacity: 1; transform: translateX(-50%) translateY(0); }
+  100% { opacity: 0; transform: translateX(-50%) translateY(-3px); }
+}
+
 /* Page transition wrapper */
 .page-transition {
   animation: page-in 0.3s ease-out;
