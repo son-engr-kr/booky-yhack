@@ -29,8 +29,8 @@ export default function ChoicesPage() {
   return (
     <div className="min-h-screen bg-[#050507] pb-24">
       {/* Header */}
-      <div className="sticky top-0 z-20 bg-[#050507]/90 backdrop-blur-md px-4 pt-10 pb-3 border-b border-gray-200/60">
-        <h1 className="text-lg font-bold text-gray-900">Your Choice Tree</h1>
+      <div className="sticky top-0 z-20 bg-[#050507]/90 backdrop-blur-md px-4 pt-10 pb-3 border-b border-gray-100/60">
+        <h1 className="text-lg font-bold text-white">Your Choice Tree</h1>
         <p className="text-xs text-gray-400 mt-0.5">Tap any node to see full stats</p>
       </div>
 
@@ -59,7 +59,7 @@ export default function ChoicesPage() {
                         ? "bg-white/90 backdrop-blur-md border-amber-500/50 shadow-[0_0_24px_rgba(217,119,6,0.18)] p-4 cursor-default"
                         : isChosen
                         ? "bg-white/85 backdrop-blur-md border-amber-600/30 p-3 cursor-pointer hover:border-amber-500/50 hover:shadow-md"
-                        : "bg-white/40 backdrop-blur-md border-gray-200/50 opacity-50 p-3 cursor-pointer"}
+                        : "bg-white/40 backdrop-blur-md border-gray-100/50 opacity-50 p-3 cursor-pointer"}
                     `}
                   >
                     {/* Pulsing ring on current */}
@@ -168,7 +168,7 @@ export default function ChoicesPage() {
                       return (
                         <div
                           key={opt.id}
-                          className="flex-1 rounded-xl border border-gray-200/50 bg-white/40 backdrop-blur-md p-2 opacity-45"
+                          className="flex-1 rounded-xl border border-gray-100/50 bg-white/40 backdrop-blur-md p-2 opacity-45"
                         >
                           <div className="text-[9px] text-gray-400 font-semibold uppercase tracking-wide mb-0.5">
                             Not taken

@@ -116,7 +116,7 @@ export default function LibraryPage() {
                   )}
                 </div>
                 {/* Title */}
-                <p className="text-[11px] font-semibold text-gray-800 leading-tight line-clamp-2">
+                <p className="text-[11px] font-semibold text-gray-200 leading-tight line-clamp-2">
                   {book.title}
                 </p>
                 <p className="text-[10px] text-gray-400 mt-0.5 truncate">{book.author}</p>

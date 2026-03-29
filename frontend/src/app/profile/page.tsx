@@ -53,7 +53,7 @@ function DonutChart({ genres }: { genres: Record<string, number> }) {
             transition={{ duration: 0.8, delay: i * 0.1, ease: "easeOut" }}
           />
         ))}
-        <text x={cx} y={cy - 6} textAnchor="middle" fontSize={11} fill="#374151" fontWeight="700">
+        <text x={cx} y={cy - 6} textAnchor="middle" fontSize={11} fill="#fbbf24" fontWeight="700">
           {entries.length}
         </text>
         <text x={cx} y={cy + 8} textAnchor="middle" fontSize={8} fill="#9ca3af">
@@ -66,7 +66,7 @@ function DonutChart({ genres }: { genres: Record<string, number> }) {
           <div key={s.label} className="flex items-center gap-2">
             <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: s.color }} />
             <span className="text-[11px] text-gray-300 truncate flex-1">{s.label}</span>
-            <span className="text-[11px] font-semibold text-gray-500 flex-shrink-0">{Math.round(s.pct * 100)}%</span>
+            <span className="text-[11px] font-semibold text-gray-300 flex-shrink-0">{Math.round(s.pct * 100)}%</span>
           </div>
         ))}
       </div>
@@ -255,9 +255,9 @@ export default function ProfilePage() {
           <div className="flex flex-col gap-4">
             {planet.spectrum.map((item) => (
               <div key={item.label}>
-                <div className="flex justify-between text-[10px] text-gray-400 mb-1">
+                <div className="flex justify-between text-[10px] text-gray-300 mb-1">
                   <span>{item.left}</span>
-                  <span className="font-medium text-gray-600">{item.label}</span>
+                  <span className="font-medium text-gray-200">{item.label}</span>
                   <span>{item.right}</span>
                 </div>
                 <div className="relative h-2 bg-white/10 rounded-full">
@@ -297,7 +297,7 @@ export default function ProfilePage() {
                     r
                   )}
                   fill="none"
-                  stroke="#e5e7eb"
+                  stroke="rgba(255,255,255,0.15)"
                   strokeWidth={0.8}
                 />
               ))}
@@ -310,7 +310,7 @@ export default function ProfilePage() {
                   y1={cy}
                   x2={ep.x}
                   y2={ep.y}
-                  stroke="#e5e7eb"
+                  stroke="rgba(255,255,255,0.15)"
                   strokeWidth={0.8}
                 />
               ))}
@@ -338,7 +338,7 @@ export default function ProfilePage() {
                     textAnchor="middle"
                     dominantBaseline="central"
                     fontSize={7}
-                    fill="#6b7280"
+                    fill="#d1d5db"
                     fontWeight="600"
                   >
                     {RADAR_AXES[i]}
@@ -364,7 +364,7 @@ export default function ProfilePage() {
             <div className="flex flex-col gap-3">
               {planet.tendencies.map((t, i) => (
                 <div key={i} className="flex items-start gap-2">
-                  <div className="w-8 h-8 rounded-full bg-amber-50 border border-amber-200 flex items-center justify-center text-sm flex-shrink-0">
+                  <div className="w-8 h-8 rounded-full bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-sm flex-shrink-0">
                     {i === 0 ? "💛" : i === 1 ? "🔍" : "🌟"}
                   </div>
                   <div>
@@ -450,7 +450,7 @@ export default function ProfilePage() {
               ) : (
                 <button
                   onClick={() => setOpenNoteBookId(note.bookId)}
-                  className="w-full text-left bg-white/5 backdrop-blur-md rounded-2xl border border-white/10 shadow-sm px-4 py-3 hover:bg-gray-50 transition-colors"
+                  className="w-full text-left bg-white/5 backdrop-blur-md rounded-2xl border border-white/10 shadow-sm px-4 py-3 hover:bg-white/10 transition-colors"
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex-1 min-w-0">

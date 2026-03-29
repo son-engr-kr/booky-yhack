@@ -14,9 +14,17 @@ const tabs = [
 
 export default function BottomNav() {
   const pathname = usePathname();
-  const activeIndex = tabs.findIndex(
-    (tab) => pathname === tab.href || pathname?.startsWith(tab.href + "/")
-  );
+  // Match most specific path first — Profile (/planet/detail) before Home (/planet)
+  const activeIndex = (() => {
+    // Check exact matches and specific prefixes, longer paths first
+    const sorted = tabs
+      .map((tab, i) => ({ ...tab, i }))
+      .sort((a, b) => b.href.length - a.href.length);
+    const match = sorted.find(
+      (tab) => pathname === tab.href || pathname?.startsWith(tab.href + "/")
+    );
+    return match?.i ?? -1;
+  })();
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 bg-[#0a0b14]/95 backdrop-blur-lg border-t border-white/10">

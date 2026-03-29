@@ -9,7 +9,7 @@ import { getMyBooks, listBooks, type ReadingProgress, type Book } from "@/lib/ap
 
 function ProgressBar({ pct }: { pct: number }) {
   return (
-    <div className="h-1 bg-gray-100 rounded-full overflow-hidden">
+    <div className="h-1 bg-gray-200 rounded-full overflow-hidden">
       <div
         className="h-full bg-amber-500 rounded-full transition-all"
         style={{ width: `${pct}%` }}
@@ -39,7 +39,7 @@ function BookItem({
       {cover ? (
         <img src={cover} alt={title || progress.bookId} className="w-12 h-16 rounded-md object-cover flex-shrink-0 shadow-sm" />
       ) : (
-        <div className="w-12 h-16 rounded-md bg-gray-100 flex-shrink-0 shadow-sm" />
+        <div className="w-12 h-16 rounded-md bg-white flex-shrink-0 shadow-sm" />
       )}
 
       {/* Info */}
@@ -55,7 +55,7 @@ function BookItem({
           )}
         </div>
 
-        <div className="flex items-center gap-3 text-[11px] text-gray-400 mb-2">
+        <div className="flex items-center gap-3 text-[11px] text-gray-500 mb-2">
           <span className="flex items-center gap-1"><Image src="/assets/icons/hand-book.png" alt="Notes" width={14} height={14} /> {progress.notesCount} notes</span>
           <span className="flex items-center gap-1"><Image src="/assets/icons/galaxy.png" alt="Questions" width={14} height={14} /> {progress.questionsAnswered} Booky q's</span>
         </div>
@@ -63,7 +63,7 @@ function BookItem({
         {progress.status !== "completed" && (
           <>
             <ProgressBar pct={progress.percentage} />
-            <p className="text-[10px] text-gray-400 mt-1">
+            <p className="text-[10px] text-gray-500 mt-1">
               Ch. {progress.currentChapter} / {progress.totalChapters} ·{" "}
               {progress.percentage}%
             </p>
@@ -93,7 +93,7 @@ export default function MyBooksPage() {
   return (
     <div className="min-h-screen bg-[#050507] pb-24">
       {/* Header */}
-      <div className="sticky top-0 z-10 bg-[#050507]/95 backdrop-blur-md border-b border-white/60 px-4 py-3">
+      <div className="sticky top-0 z-10 bg-[#050507]/95 backdrop-blur-md border-b border-gray-100/60 px-4 py-3">
         <div className="max-w-md mx-auto">
           <h1 className="text-[20px] font-bold text-white tracking-tight">My Books</h1>
         </div>

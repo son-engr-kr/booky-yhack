@@ -55,14 +55,14 @@ export default function BookDetailPage() {
   return (
     <div className="min-h-screen bg-[#050507] pb-20">
       {/* Header */}
-      <div className="sticky top-0 z-30 bg-[#050507]/95 backdrop-blur-sm border-b border-gray-200/60 px-4 py-3 flex items-center gap-3">
+      <div className="sticky top-0 z-30 bg-[#050507]/95 backdrop-blur-sm border-b border-gray-100/60 px-4 py-3 flex items-center gap-3">
         <Link
           href="/library"
-          className="text-gray-600 hover:text-gray-900 transition-colors text-lg"
+          className="text-gray-400 hover:text-white transition-colors text-lg"
         >
           ←
         </Link>
-        <span className="text-sm font-semibold text-gray-900 truncate flex-1">
+        <span className="text-sm font-semibold text-white truncate flex-1">
           {book.title}
         </span>
       </div>
@@ -87,7 +87,7 @@ export default function BookDetailPage() {
           </motion.div>
 
           <div className="flex-1 pt-1">
-            <h1 className="text-xl font-bold text-gray-900 font-serif leading-tight mb-1">
+            <h1 className="text-xl font-bold text-white font-serif leading-tight mb-1">
               {book.title}
             </h1>
             <p className="text-sm text-gray-500 mb-1">{book.author}</p>
@@ -112,7 +112,7 @@ export default function BookDetailPage() {
         </div>
 
         {/* Description */}
-        <p className="text-sm text-gray-600 leading-relaxed mt-5">{book.description}</p>
+        <p className="text-sm text-gray-400 leading-relaxed mt-5">{book.description}</p>
       </div>
 
       {/* Friends reading */}
@@ -150,11 +150,11 @@ export default function BookDetailPage() {
       <div className="px-4 pb-4">
         <Link
           href={`/library/${bookId}/read?chapter=${currentChapter}`}
-          className="flex items-center justify-between w-full bg-gray-900 hover:bg-gray-800 text-white rounded-2xl px-5 py-4 shadow-sm transition-colors"
+          className="flex items-center justify-between w-full bg-white hover:bg-gray-50 rounded-2xl px-5 py-4 shadow-sm border border-gray-100 transition-colors"
         >
           <div>
-            <div className="text-xs text-gray-400 mb-0.5">Continue Reading</div>
-            <div className="text-sm font-semibold">Chapter {currentChapter}</div>
+            <div className="text-xs text-gray-500 mb-0.5">Continue Reading</div>
+            <div className="text-sm font-semibold text-gray-900">Chapter {currentChapter}</div>
           </div>
           <span className="text-gray-400 text-lg">→</span>
         </Link>

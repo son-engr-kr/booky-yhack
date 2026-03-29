@@ -109,7 +109,7 @@ export default function FriendPlanetDetailPage() {
                           className="w-full h-full object-cover"
                         />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center text-gray-600 text-xs text-center px-1">
+                        <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs text-center px-1">
                           {book?.title ?? p.bookId}
                         </div>
                       )}
