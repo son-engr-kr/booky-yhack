@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { motion } from "framer-motion";
 import BottomNav from "@/components/nav/BottomNav";
 import { getMyPlanet, getFriendPlanets, type PlanetData, type FriendPlanet } from "@/lib/api";
 
@@ -308,6 +309,30 @@ export default function PlanetPage() {
             </button>
           );
         })}
+
+        {/* === BOOKY sitting on my planet === */}
+        <img
+          src="/assets/booky-chracter.png"
+          alt="Booky"
+          className="absolute z-10 pointer-events-none animate-booky-idle"
+          style={{
+            width: "5vmin",
+            height: "5vmin",
+            objectFit: "contain",
+            filter: "drop-shadow(0 0 4px rgba(255,200,50,0.5))",
+            top: "calc(50% - 2vmin)",
+            left: "calc(50% - 2.5vmin)",
+          }}
+        />
+        <style>{`
+          @keyframes booky-idle {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            25% { transform: translate(3px, -2px) rotate(3deg); }
+            50% { transform: translate(-2px, -1px) rotate(-2deg); }
+            75% { transform: translate(1px, -3px) rotate(2deg); }
+          }
+          .animate-booky-idle { animation: booky-idle 6s ease-in-out infinite; }
+        `}</style>
 
         {/* === BOTTOM NAV (zoom 1.5 to match other pages) === */}
         <div style={{ zoom: 1.5 }}>
