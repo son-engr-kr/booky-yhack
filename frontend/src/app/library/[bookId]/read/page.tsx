@@ -14,6 +14,8 @@ import {
   getCharacters,
   getChoices,
   aiAuthorChat,
+  aiGenerateQuestions,
+  createHighlight,
   type Chapter,
   type Character,
   type Highlight,
@@ -28,21 +30,12 @@ const BOOK_CHARACTERS: Record<string, string[]> = {
   ],
 };
 
-// AI MC questions per chapter
-const AI_QUESTIONS: Record<string, string[]> = {
-  "great-gatsby": [
-    "Why do you think Gatsby throws such extravagant parties without attending them himself?",
-    "What does the green light across the bay symbolize to Gatsby — and to you?",
-    "How does Fitzgerald use setting (East Egg vs West Egg) to comment on class?",
-    "Is Gatsby's obsession with Daisy romantic or possessive? Where do you draw the line?",
-    "What does Tom's behavior at the dinner table reveal about old money values?",
-  ],
-};
-
-function getQuestion(bookId: string, chapterNum: number): string {
-  const qs = AI_QUESTIONS[bookId] ?? AI_QUESTIONS["great-gatsby"];
-  return qs[(chapterNum - 1) % qs.length];
-}
+// Fallback questions if AI generation fails
+const FALLBACK_QUESTIONS: string[] = [
+  "What stood out to you most in this passage?",
+  "How does this moment make you feel about the characters?",
+  "What would you have done differently in this situation?",
+];
 
 function getCharacterNames(bookId: string): string[] {
   return BOOK_CHARACTERS[bookId] ?? [];
@@ -236,6 +229,7 @@ export default function ReadPage() {
   const [hoveredHighlight, setHoveredHighlight] = useState<Highlight | null>(null);
   const [aiMCDismissed, setAIMCDismissed] = useState(false);
   const [showAIMCPopup, setShowAIMCPopup] = useState(false);
+  const [aiMCQuestion, setAIMCQuestion] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [selectionToolbar, setSelectionToolbar] = useState<SelectionToolbar | null>(null);
   const [activePanel, setActivePanel] = useState<"notes" | "characters" | "chat" | null>(initialPanel);
@@ -340,7 +334,6 @@ export default function ReadPage() {
   }, []);
 
   const handleAddHighlight = useCallback(() => {
-    // Read from ref — safe even if selection has been cleared by the click
     const text = selectedTextRef.current || selectionToolbar?.text;
     if (!text) return;
     const newHighlight: UserHighlight = {
@@ -352,7 +345,9 @@ export default function ReadPage() {
     setSelectionToolbar(null);
     selectedTextRef.current = "";
     window.getSelection()?.removeAllRanges();
-  }, [selectionToolbar]);
+    // Persist to backend
+    createHighlight(bookId, chapterNum, text);
+  }, [selectionToolbar, bookId, chapterNum]);
 
   const handleAnswer = (_answer: string) => {
     // answer is shown inline in AIMCCard
@@ -518,7 +513,13 @@ export default function ReadPage() {
             <button
               onClick={() => {
                 if (!aiMCDismissed && !showAIMCPopup) {
+                  // Generate AI question from current page text
+                  const pageText = paragraphs.slice(0, 3).join(" ").slice(0, 500);
+                  setAIMCQuestion("");
                   setShowAIMCPopup(true);
+                  aiGenerateQuestions(book?.title || bookId, book?.author || "", chapter?.title || "", pageText).then((res) => {
+                    setAIMCQuestion(res?.questions?.[0] || FALLBACK_QUESTIONS[Math.floor(Math.random() * FALLBACK_QUESTIONS.length)]);
+                  });
                 } else {
                   setPageIndex((p) => p + 1);
                   setShowAIMCPopup(false);
@@ -605,7 +606,7 @@ export default function ReadPage() {
               className="fixed bottom-0 left-0 right-0 z-50 px-4 pb-6 pt-2 max-w-prose mx-auto"
             >
               <AIMCCard
-                question={getQuestion(bookId, chapterNum)}
+                question={aiMCQuestion || "Thinking..."}
                 onAnswer={(answer) => {
                   handleAnswer(answer);
                   setTimeout(() => {
@@ -633,6 +634,159 @@ export default function ReadPage() {
             currentChapter={chapterNum}
             onClose={() => setSelectedCharacter(null)}
           />
+        )}
+      </AnimatePresence>
+
+      {/* Side panels */}
+      <AnimatePresence>
+        {activePanel && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[60] bg-black/40 backdrop-blur-sm"
+              onClick={() => setActivePanel(null)}
+            />
+            <motion.div
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ type: "spring", damping: 28, stiffness: 300 }}
+              className="fixed top-0 right-0 bottom-0 z-[70] w-[85%] max-w-sm bg-white shadow-2xl flex flex-col"
+            >
+              {/* Panel header */}
+              <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+                <h2 className="text-sm font-bold text-gray-900">
+                  {activePanel === "notes" && "My Notes"}
+                  {activePanel === "characters" && "Characters"}
+                  {activePanel === "chat" && "Booky Chat"}
+                </h2>
+                <button onClick={() => setActivePanel(null)} className="text-gray-400 hover:text-gray-600 text-lg">✕</button>
+              </div>
+
+              {/* Panel content */}
+              <div className="flex-1 overflow-y-auto p-4">
+                {/* Notes panel */}
+                {activePanel === "notes" && (
+                  <div className="flex flex-col gap-3">
+                    {userHighlights.length === 0 ? (
+                      <p className="text-sm text-gray-400 text-center py-8">No highlights yet. Select text while reading to add highlights.</p>
+                    ) : (
+                      userHighlights.map((hl) => (
+                        <div key={hl.id} className="bg-amber-50 border-l-4 border-amber-400 rounded-r-lg px-3 py-2">
+                          <p className="text-sm text-gray-800 italic">"{hl.text}"</p>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                )}
+
+                {/* Characters panel */}
+                {activePanel === "characters" && (
+                  <div className="flex flex-col gap-3">
+                    {characters.length === 0 ? (
+                      <p className="text-sm text-gray-400 text-center py-8">No characters found for this book.</p>
+                    ) : (
+                      characters.map((char) => (
+                        <button
+                          key={char.id}
+                          onClick={() => { setSelectedCharacter(char); setActivePanel(null); }}
+                          className="flex items-center gap-3 bg-gray-50 rounded-xl p-3 text-left hover:bg-amber-50 transition-colors"
+                        >
+                          <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center text-lg flex-shrink-0">
+                            {char.role.includes("protagonist") ? "🧑" : char.role.includes("love") ? "💚" : "👤"}
+                          </div>
+                          <div>
+                            <div className="text-sm font-semibold text-gray-900">{char.name}</div>
+                            <div className="text-xs text-gray-500 capitalize">{char.role}</div>
+                          </div>
+                        </button>
+                      ))
+                    )}
+                  </div>
+                )}
+
+                {/* Chat panel */}
+                {activePanel === "chat" && (
+                  <div className="flex flex-col h-full">
+                    <div className="flex-1 flex flex-col gap-3 mb-4">
+                      {chatMessages.length === 0 && (
+                        <div className="text-center py-8">
+                          <div className="text-2xl mb-2">📚</div>
+                          <p className="text-sm text-gray-500">Ask Booky anything about the book!</p>
+                        </div>
+                      )}
+                      {chatMessages.map((msg, i) => (
+                        <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
+                          <div className={`max-w-[80%] rounded-2xl px-3 py-2 text-sm ${
+                            msg.role === "user"
+                              ? "bg-amber-500 text-white"
+                              : "bg-gray-100 text-gray-800"
+                          }`}>
+                            {msg.content}
+                          </div>
+                        </div>
+                      ))}
+                      {chatLoading && (
+                        <div className="flex justify-start">
+                          <div className="bg-gray-100 rounded-2xl px-3 py-2 text-sm text-gray-400 animate-pulse">Thinking...</div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Chat input */}
+              {activePanel === "chat" && (
+                <div className="border-t border-gray-100 px-4 py-3 flex gap-2">
+                  <input
+                    value={chatInput}
+                    onChange={(e) => setChatInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && chatInput.trim() && !chatLoading) {
+                        const msg = chatInput.trim();
+                        setChatInput("");
+                        const newMessages = [...chatMessages, { role: "user", content: msg }];
+                        setChatMessages(newMessages);
+                        setChatLoading(true);
+                        aiAuthorChat(book?.title ?? "", book?.author ?? "", msg, newMessages)
+                          .then((res) => {
+                            if (res?.response) {
+                              setChatMessages((prev) => [...prev, { role: "assistant", content: res.response }]);
+                            }
+                          })
+                          .finally(() => setChatLoading(false));
+                      }
+                    }}
+                    placeholder="Ask about the book..."
+                    className="flex-1 text-sm bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-amber-400"
+                  />
+                  <button
+                    onClick={() => {
+                      if (!chatInput.trim() || chatLoading) return;
+                      const msg = chatInput.trim();
+                      setChatInput("");
+                      const newMessages = [...chatMessages, { role: "user", content: msg }];
+                      setChatMessages(newMessages);
+                      setChatLoading(true);
+                      aiAuthorChat(book?.title ?? "", book?.author ?? "", msg, newMessages)
+                        .then((res) => {
+                          if (res?.response) {
+                            setChatMessages((prev) => [...prev, { role: "assistant", content: res.response }]);
+                          }
+                        })
+                        .finally(() => setChatLoading(false));
+                    }}
+                    className="bg-amber-500 text-white text-sm font-medium px-4 py-2 rounded-xl hover:bg-amber-400 transition-colors"
+                  >
+                    Send
+                  </button>
+                </div>
+              )}
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
 

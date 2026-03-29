@@ -1,35 +1,50 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import { aiGenerateRecap } from "@/lib/api";
 
 interface RecapPanelProps {
   bookId: string;
+  bookTitle: string;
+  author: string;
   currentChapter: number;
+  chaptersSummary?: string;
   onContinue: () => void;
   onSkip: () => void;
 }
 
 interface RecapEntry {
   emoji: string;
+  title?: string;
   text: string;
 }
 
-const GATSBY_RECAP: RecapEntry[] = [
-  { emoji: "🏡", text: "Nick moves to West Egg, next door to a mysterious mansion." },
-  { emoji: "🥂", text: "Gatsby throws lavish parties every weekend. No one knows why." },
-  { emoji: "💚", text: "Nick sees Gatsby staring at a green light across the bay." },
-  { emoji: "👫", text: "Nick visits cousin Daisy & husband Tom. Tension is palpable." },
-  { emoji: "🗣️", text: "Jordan reveals: Gatsby & Daisy were once in love." },
-  { emoji: "☕", text: "Gatsby asks Nick to arrange tea with Daisy. The reunion is set." },
+const FALLBACK_RECAP: RecapEntry[] = [
+  { emoji: "📖", text: "Loading your story recap..." },
 ];
 
-function getRecap(bookId: string): RecapEntry[] {
-  if (bookId === "great-gatsby") return GATSBY_RECAP;
-  return GATSBY_RECAP;
-}
+export default function RecapPanel({ bookId, bookTitle, author, currentChapter, chaptersSummary, onContinue, onSkip }: RecapPanelProps) {
+  const [panels, setPanels] = useState<RecapEntry[]>(FALLBACK_RECAP);
+  const [loading, setLoading] = useState(true);
 
-export default function RecapPanel({ bookId, currentChapter, onContinue, onSkip }: RecapPanelProps) {
-  const panels = getRecap(bookId);
+  useEffect(() => {
+    if (!chaptersSummary) {
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
+    aiGenerateRecap(bookTitle, author, chaptersSummary).then((res) => {
+      if (res?.panels?.length) {
+        setPanels(res.panels.map((p) => ({
+          emoji: p.emoji || "📖",
+          title: p.title,
+          text: p.description,
+        })));
+      }
+      setLoading(false);
+    });
+  }, [bookTitle, author, chaptersSummary]);
 
   return (
     <div className="px-4 py-6">
@@ -45,9 +60,10 @@ export default function RecapPanel({ bookId, currentChapter, onContinue, onSkip 
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.07, type: "spring", damping: 24, stiffness: 300 }}
-            className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100"
+            className={`bg-white rounded-2xl p-4 shadow-sm border border-gray-100 ${loading ? "animate-pulse" : ""}`}
           >
             <div className="text-3xl mb-2 text-center">{panel.emoji}</div>
+            {panel.title && <p className="text-[10px] font-bold text-amber-700 text-center mb-1">{panel.title}</p>}
             <p className="text-xs text-gray-700 leading-relaxed text-center">{panel.text}</p>
           </motion.div>
         ))}

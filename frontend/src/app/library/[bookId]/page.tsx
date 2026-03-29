@@ -161,9 +161,9 @@ export default function BookDetailPage() {
       <div className="px-4 pb-4">
         <div className="grid grid-cols-3 gap-3">
           {[
-            { icon: "/assets/icons/hand-book.png", label: "Notes", href: `/library/${bookId}/read` },
-            { icon: "/assets/icons/planet-book.png", label: "Characters", href: `/library/${bookId}/read` },
-            { icon: "/assets/icons/galaxy.png", label: "Booky Chat", href: `/library/${bookId}/read` },
+            { icon: "/assets/icons/hand-book.png", label: "Notes", href: `/library/${bookId}/read?chapter=${currentChapter}&panel=notes` },
+            { icon: "/assets/icons/planet-book.png", label: "Characters", href: `/library/${bookId}/read?chapter=${currentChapter}&panel=characters` },
+            { icon: "/assets/icons/galaxy.png", label: "Booky Chat", href: `/library/${bookId}/read?chapter=${currentChapter}&panel=chat` },
           ].map((action) => (
             <Link
               key={action.label}
@@ -198,7 +198,10 @@ export default function BookDetailPage() {
             ) : (
               <RecapPanel
                 bookId={bookId}
+                bookTitle={book.title}
+                author={book.author}
                 currentChapter={currentChapter}
+                chaptersSummary={`${book.title} by ${book.author}. ${book.description || ""} Reader is at chapter ${currentChapter}.`}
                 onContinue={handleContinue}
                 onSkip={() => setShowRecap(false)}
               />
