@@ -152,7 +152,7 @@ function renderParagraph(
             <button
               key={i}
               onClick={() => handleCharacterTap(seg.content)}
-              className="text-amber-700 font-semibold bg-amber-100/70 px-0.5 rounded hover:bg-amber-200 transition-colors"
+              className="text-amber-700 font-semibold underline decoration-amber-400 decoration-2 underline-offset-2 hover:text-amber-900 transition-colors"
             >
               {seg.content}
             </button>
@@ -235,6 +235,9 @@ export default function ReadPage() {
   const [loading, setLoading] = useState(true);
   const [selectionToolbar, setSelectionToolbar] = useState<SelectionToolbar | null>(null);
 
+  // Store selected text in a ref so it survives the re-render caused by setSelectionToolbar
+  const selectedTextRef = useRef<string>("");
+
   const contentRef = useRef<HTMLDivElement>(null);
   const topRef = useRef<HTMLDivElement>(null);
 
@@ -300,12 +303,13 @@ export default function ReadPage() {
   // Text selection handler for highlight toolbar
   const toolbarRef = useRef<HTMLDivElement>(null);
   const handleMouseUp = useCallback((e: React.PointerEvent) => {
-    // Ignore if clicking on the toolbar itself
+    // Ignore if the pointer event originated inside the toolbar
     if (toolbarRef.current?.contains(e.target as Node)) return;
 
     setTimeout(() => {
       const selection = window.getSelection();
       if (!selection || selection.isCollapsed) {
+        // Only dismiss toolbar if there's truly no selection
         setSelectionToolbar(null);
         return;
       }
@@ -314,6 +318,8 @@ export default function ReadPage() {
         setSelectionToolbar(null);
         return;
       }
+      // Store in ref immediately — this survives the upcoming re-render
+      selectedTextRef.current = text;
       const range = selection.getRangeAt(0);
       const rect = range.getBoundingClientRect();
       setSelectionToolbar({
@@ -325,8 +331,9 @@ export default function ReadPage() {
   }, []);
 
   const handleAddHighlight = useCallback(() => {
-    if (!selectionToolbar) return;
-    const text = selectionToolbar.text;
+    // Read from ref — safe even if selection has been cleared by the click
+    const text = selectedTextRef.current || selectionToolbar?.text;
+    if (!text) return;
     const newHighlight: UserHighlight = {
       id: `user-${Date.now()}`,
       text,
@@ -334,6 +341,7 @@ export default function ReadPage() {
     };
     setUserHighlights((prev) => [...prev, newHighlight]);
     setSelectionToolbar(null);
+    selectedTextRef.current = "";
     window.getSelection()?.removeAllRanges();
   }, [selectionToolbar]);
 
@@ -402,24 +410,34 @@ export default function ReadPage() {
           <span className="text-lg">←</span>
           <span className="text-sm font-medium">Back</span>
         </Link>
-        <div className="text-center">
-          <div className="text-xs font-semibold text-gray-900 font-serif truncate max-w-[140px]">
-            {chapter.title}
+        <div className="flex items-center gap-2">
+          <div className="text-center">
+            <div className="text-xs font-semibold text-gray-900 font-serif truncate max-w-[120px]">
+              {chapter.title}
+            </div>
+            <div className="text-[10px] text-gray-500">
+              Chapter {chapterNum}{totalChapters > 0 ? ` of ${totalChapters}` : ""}
+              {totalPages > 1 && <span className="ml-1">· p.{pageIndex + 1}/{totalPages}</span>}
+            </div>
           </div>
-          <div className="text-[10px] text-gray-500">
-            Chapter {chapterNum}{totalChapters > 0 ? ` of ${totalChapters}` : ""}
-            {totalPages > 1 && <span className="ml-1">· p.{pageIndex + 1}/{totalPages}</span>}
+          {/* Ship-window porthole */}
+          <div className="w-6 h-6 rounded-full bg-[#0c0e1a] border-2 border-gray-600 flex items-center justify-center overflow-hidden flex-shrink-0">
+            <div className="w-1 h-1 rounded-full bg-white/60" />
           </div>
         </div>
+        {/* Pill toggle for friend highlights */}
         <button
           onClick={() => setFriendHighlightsOn((v) => !v)}
-          className={`text-xs font-semibold px-3 py-1.5 rounded-full border transition-all ${
-            friendHighlightsOn
-              ? "bg-blue-100 border-blue-300 text-blue-700"
-              : "bg-white border-gray-200 text-gray-500"
+          aria-label="Toggle friend highlights"
+          className={`relative inline-flex h-6 w-11 items-center rounded-full border transition-colors flex-shrink-0 ${
+            friendHighlightsOn ? "bg-blue-500 border-blue-600" : "bg-gray-200 border-gray-300"
           }`}
         >
-          {friendHighlightsOn ? "Friends ON" : "Friends OFF"}
+          <span
+            className={`inline-block h-4 w-4 rounded-full bg-white shadow transition-transform ${
+              friendHighlightsOn ? "translate-x-6" : "translate-x-1"
+            }`}
+          />
         </button>
       </div>
 
@@ -532,15 +550,20 @@ export default function ReadPage() {
             }}
           >
             <button
-              onClick={() => handleAddHighlight()}
+              onMouseDown={(e) => {
+                e.preventDefault(); // prevents blur/deselection before we read the selection
+                handleAddHighlight();
+              }}
               className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 transition-colors cursor-pointer"
             >
               <span>✦</span> Highlight
             </button>
             <button
-              onClick={() => {
+              onMouseDown={(e) => {
+                e.preventDefault();
                 window.getSelection()?.removeAllRanges();
                 setSelectionToolbar(null);
+                selectedTextRef.current = "";
               }}
               className="text-gray-400 hover:text-white text-xs px-1.5 py-1 transition-colors cursor-pointer"
             >

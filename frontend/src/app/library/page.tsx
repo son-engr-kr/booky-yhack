@@ -4,17 +4,23 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import BottomNav from "@/components/nav/BottomNav";
-import { listBooks, type Book } from "@/lib/api";
+import { listBooks, getMyBooks, type Book, type ReadingProgress } from "@/lib/api";
 
 export default function LibraryPage() {
   const [books, setBooks] = useState<Book[]>([]);
+  const [progressMap, setProgressMap] = useState<Record<string, ReadingProgress>>({});
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
-    listBooks()
-      .then(setBooks)
-      .finally(() => setLoading(false));
+    Promise.all([listBooks(), getMyBooks()]).then(([bookList, progressList]) => {
+      setBooks(bookList ?? []);
+      const map: Record<string, ReadingProgress> = {};
+      for (const p of (progressList ?? [])) {
+        map[p.bookId] = p;
+      }
+      setProgressMap(map);
+    }).finally(() => setLoading(false));
   }, []);
 
   const coverGradients = [
@@ -55,48 +61,71 @@ export default function LibraryPage() {
         )}
 
         <div className="grid grid-cols-3 gap-3">
-          {books.map((book, i) => (
-            <motion.button
-              key={book.id}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: i * 0.05, duration: 0.3, ease: "easeOut" }}
-              onClick={() => router.push(`/library/${book.id}`)}
-              className="flex flex-col items-stretch text-left"
-            >
-              {/* Cover */}
-              <div className="relative w-full aspect-[2/3] rounded-lg overflow-hidden shadow-md mb-1.5">
-                {book.cover ? (
-                  <img
-                    src={book.cover}
-                    alt={book.title}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div
-                    className={`w-full h-full bg-gradient-to-br ${
-                      coverGradients[i % coverGradients.length]
-                    } flex items-end p-2`}
-                  >
-                    <span className="text-white text-[9px] font-semibold leading-tight line-clamp-3">
-                      {book.title}
-                    </span>
-                  </div>
-                )}
-                {/* NEW badge */}
-                <div className="absolute top-1.5 left-1.5">
-                  <span className="text-[8px] font-bold bg-indigo-600 text-white px-1.5 py-0.5 rounded-full uppercase tracking-wide">
-                    NEW
-                  </span>
+          {books.map((book, i) => {
+            const progress = progressMap[book.id];
+            const isReading = progress?.status === "reading";
+            const isNew = !progress || progress.status === "not-started";
+            const pct = progress?.percentage ?? 0;
+            return (
+              <motion.button
+                key={book.id}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: i * 0.05, duration: 0.3, ease: "easeOut" }}
+                onClick={() => router.push(`/library/${book.id}`)}
+                className="flex flex-col items-stretch text-left"
+              >
+                {/* Cover */}
+                <div className="relative w-full aspect-[2/3] rounded-lg overflow-hidden shadow-md mb-1.5">
+                  {book.cover ? (
+                    <img
+                      src={book.cover}
+                      alt={book.title}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div
+                      className={`w-full h-full bg-gradient-to-br ${
+                        coverGradients[i % coverGradients.length]
+                      } flex items-end p-2`}
+                    >
+                      <span className="text-white text-[9px] font-semibold leading-tight line-clamp-3">
+                        {book.title}
+                      </span>
+                    </div>
+                  )}
+                  {/* NEW badge — only on unstarted books */}
+                  {isNew && (
+                    <div className="absolute top-1.5 left-1.5">
+                      <span className="text-[8px] font-bold bg-indigo-600 text-white px-1.5 py-0.5 rounded-full uppercase tracking-wide">
+                        NEW
+                      </span>
+                    </div>
+                  )}
+                  {/* Progress bar — only on books in progress */}
+                  {isReading && (
+                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-black/20">
+                      <div
+                        className="h-1 bg-amber-400"
+                        style={{ width: `${pct}%` }}
+                      />
+                    </div>
+                  )}
                 </div>
-              </div>
-              {/* Title */}
-              <p className="text-[11px] font-semibold text-gray-800 leading-tight line-clamp-2">
-                {book.title}
-              </p>
-              <p className="text-[10px] text-gray-400 mt-0.5 truncate">{book.author}</p>
-            </motion.button>
-          ))}
+                {/* Title */}
+                <p className="text-[11px] font-semibold text-gray-800 leading-tight line-clamp-2">
+                  {book.title}
+                </p>
+                <p className="text-[10px] text-gray-400 mt-0.5 truncate">{book.author}</p>
+                {/* Progress text for reading books */}
+                {isReading && (
+                  <p className="text-[9px] text-amber-600 mt-0.5 font-medium">
+                    Ch. {progress.currentChapter}/{progress.totalChapters}
+                  </p>
+                )}
+              </motion.button>
+            );
+          })}
         </div>
       </div>
 
