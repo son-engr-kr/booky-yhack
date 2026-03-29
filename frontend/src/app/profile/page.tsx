@@ -3,7 +3,76 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import BottomNav from "@/components/nav/BottomNav";
-import { getReadingProfile, getFriends, type ReadingProfile, type Friend } from "@/lib/api";
+import {
+  getReadingProfile, getFriends, getMyPlanet, getMyBooks, getMyReadingNotes, generateBookReadingNotes, updatePlanetName,
+  type ReadingProfile, type Friend, type PlanetData, type ReadingProgress, type SavedReadingNote, type Book,
+} from "@/lib/api";
+import ReadingNotesPanel from "@/components/reading/ReadingNotesPanel";
+
+const GENRE_COLORS = [
+  "#f59e0b", "#6366f1", "#ec4899", "#10b981", "#3b82f6",
+  "#f97316", "#8b5cf6", "#14b8a6", "#ef4444", "#84cc16",
+];
+
+function DonutChart({ genres }: { genres: Record<string, number> }) {
+  const entries = Object.entries(genres).sort((a, b) => b[1] - a[1]);
+  const total = entries.reduce((s, [, v]) => s + v, 0) || 1;
+  const r = 52;
+  const cx = 70;
+  const cy = 70;
+  const circumference = 2 * Math.PI * r;
+
+  let offset = 0;
+  const slices = entries.map(([label, value], i) => {
+    const pct = value / total;
+    const dash = pct * circumference;
+    const slice = { label, value, pct, dash, offset, color: GENRE_COLORS[i % GENRE_COLORS.length] };
+    offset += dash;
+    return slice;
+  });
+
+  return (
+    <div className="flex items-center gap-4">
+      <svg width={140} height={140} viewBox="0 0 140 140" className="flex-shrink-0">
+        {/* Background ring */}
+        <circle cx={cx} cy={cy} r={r} fill="none" stroke="#f3f4f6" strokeWidth={18} />
+        {slices.map((s, i) => (
+          <motion.circle
+            key={i}
+            cx={cx}
+            cy={cy}
+            r={r}
+            fill="none"
+            stroke={s.color}
+            strokeWidth={18}
+            strokeDasharray={`${s.dash} ${circumference - s.dash}`}
+            strokeDashoffset={-s.offset + circumference / 4}
+            strokeLinecap="butt"
+            initial={{ strokeDasharray: `0 ${circumference}` }}
+            animate={{ strokeDasharray: `${s.dash} ${circumference - s.dash}` }}
+            transition={{ duration: 0.8, delay: i * 0.1, ease: "easeOut" }}
+          />
+        ))}
+        <text x={cx} y={cy - 6} textAnchor="middle" fontSize={11} fill="#374151" fontWeight="700">
+          {entries.length}
+        </text>
+        <text x={cx} y={cy + 8} textAnchor="middle" fontSize={8} fill="#9ca3af">
+          genres
+        </text>
+      </svg>
+      {/* Legend */}
+      <div className="flex flex-col gap-1.5 flex-1 min-w-0">
+        {slices.map((s) => (
+          <div key={s.label} className="flex items-center gap-2">
+            <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: s.color }} />
+            <span className="text-[11px] text-gray-700 truncate flex-1">{s.label}</span>
+            <span className="text-[11px] font-semibold text-gray-500 flex-shrink-0">{Math.round(s.pct * 100)}%</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 const RADAR_AXES = ["Empathy", "Logic", "Adventure", "Caution", "Optimism"] as const;
 const RADAR_COUNT = RADAR_AXES.length;
@@ -28,11 +97,38 @@ function axisEndpoints(cx: number, cy: number, r: number) {
 export default function ProfilePage() {
   const [profile, setProfile] = useState<ReadingProfile | null>(null);
   const [friends, setFriends] = useState<Friend[]>([]);
+  const [planet, setPlanet] = useState<PlanetData | null>(null);
+  const [myBooks, setMyBooks] = useState<ReadingProgress[]>([]);
+  const [readingNotes, setReadingNotes] = useState<SavedReadingNote[]>([]);
+  const [generatable, setGeneratable] = useState<Book[]>([]);
+  const [openNoteBookId, setOpenNoteBookId] = useState<string | null>(null);
+  const [generating, setGenerating] = useState<string | null>(null);
+  const [editingName, setEditingName] = useState(false);
+  const [nameInput, setNameInput] = useState("");
 
   useEffect(() => {
     getReadingProfile().then(setProfile);
     getFriends().then(setFriends);
+    getMyPlanet().then(setPlanet);
+    getMyBooks().then((b) => setMyBooks(Array.isArray(b) ? b : []));
+    getMyReadingNotes().then((r) => {
+      if (r) {
+        setReadingNotes(r.notes ?? []);
+        setGeneratable(r.generatable ?? []);
+      }
+    });
   }, []);
+
+  const handleGenerate = async (bookId: string) => {
+    setGenerating(bookId);
+    const result = await generateBookReadingNotes(bookId);
+    if (result) {
+      setReadingNotes((prev) => [...prev.filter((n) => n.bookId !== bookId), result]);
+      setGeneratable((prev) => prev.filter((b) => b.id !== bookId));
+    }
+    setGenerating(null);
+    setOpenNoteBookId(bookId);
+  };
 
   if (!profile) {
     return (
@@ -62,9 +158,75 @@ export default function ProfilePage() {
             ✦
           </div>
         </div>
-        <h1 className="text-xl font-bold text-gray-900">My Reading Profile</h1>
+        {editingName ? (
+          <div className="flex items-center justify-center gap-2 mt-1">
+            <input
+              autoFocus
+              value={nameInput}
+              onChange={(e) => setNameInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  const trimmed = nameInput.trim();
+                  if (trimmed) {
+                    updatePlanetName(trimmed).then(() => {
+                      setPlanet((prev) => prev ? { ...prev, name: trimmed } : prev);
+                    });
+                  }
+                  setEditingName(false);
+                }
+                if (e.key === "Escape") setEditingName(false);
+              }}
+              onBlur={() => setEditingName(false)}
+              className="text-xl font-bold text-gray-900 bg-transparent border-b-2 border-amber-400 outline-none text-center w-48"
+            />
+          </div>
+        ) : (
+          <div className="flex items-center justify-center gap-1.5 mt-1">
+            <h1 className="text-xl font-bold text-gray-900">{planet?.name || "My Planet"}</h1>
+            <button
+              onClick={() => { setNameInput(planet?.name || ""); setEditingName(true); }}
+              className="text-gray-400 hover:text-amber-500 transition-colors"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+              </svg>
+            </button>
+          </div>
+        )}
         <p className="text-xs text-gray-400 mt-0.5">Based on your choices across all books</p>
       </div>
+
+      {/* 2x2 overview */}
+      {(() => {
+        const avgProgress = myBooks.length
+          ? Math.round(myBooks.reduce((s, b) => s + b.percentage, 0) / myBooks.length)
+          : 0;
+        const stats = [
+          { label: "books", value: planet?.booksRead ?? myBooks.length },
+          { label: "notes", value: planet?.totalNotes ?? 0 },
+          { label: "choices", value: planet?.totalChoices ?? 0 },
+          { label: "progress", value: `${avgProgress}%` },
+        ];
+        return (
+          <div className="px-4 mb-1">
+            <div className="grid grid-cols-2 gap-3">
+              {stats.map((s) => (
+                <motion.div
+                  key={s.label}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ type: "spring", damping: 22, stiffness: 280 }}
+                  className="bg-white/85 backdrop-blur-md rounded-2xl px-4 py-4 shadow-sm border border-white flex flex-col"
+                >
+                  <span className="text-2xl font-bold text-gray-900 leading-none">{s.value}</span>
+                  <span className="text-xs text-gray-400 mt-1">{s.label}</span>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        );
+      })()}
 
       <div className="px-4 flex flex-col gap-5">
         {/* Spectrum sliders */}
@@ -167,6 +329,14 @@ export default function ProfilePage() {
           </div>
         </div>
 
+        {/* Genre breakdown */}
+        {planet && Object.keys(planet.genres).length > 0 && (
+          <div className="bg-white/85 backdrop-blur-md rounded-2xl p-4 shadow-sm border border-white">
+            <h2 className="text-sm font-bold text-gray-800 mb-4">Genre Breakdown</h2>
+            <DonutChart genres={planet.genres} />
+          </div>
+        )}
+
         {/* Insights */}
         {profile.tendencies.length > 0 && (
           <div className="bg-white/85 backdrop-blur-md rounded-2xl p-4 shadow-sm border border-white">
@@ -241,6 +411,77 @@ export default function ProfilePage() {
                 );
               })}
             </div>
+          </div>
+        )}
+      </div>
+
+      {/* Reading Notes section */}
+      <div className="px-4 mt-1 flex flex-col gap-3">
+        <h2 className="text-sm font-bold text-gray-800 px-1">My Reading Notes</h2>
+
+        {/* Saved notes */}
+        {readingNotes.map((note) => (
+          <div key={note.bookId}>
+            {openNoteBookId === note.bookId ? (
+              <ReadingNotesPanel
+                bookId={note.bookId}
+                bookTitle={note.bookTitle}
+                onClose={() => setOpenNoteBookId(null)}
+              />
+            ) : (
+              <button
+                onClick={() => setOpenNoteBookId(note.bookId)}
+                className="w-full text-left bg-white rounded-2xl border border-gray-100 shadow-sm px-4 py-3 hover:bg-gray-50 transition-colors"
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex-1 min-w-0">
+                    <div className="text-xs font-semibold text-gray-900 truncate">{note.bookTitle}</div>
+                    <p className="text-[11px] text-gray-500 mt-0.5 line-clamp-2 leading-relaxed">
+                      {note.current?.synthesis}
+                    </p>
+                  </div>
+                  <div className="text-right flex-shrink-0">
+                    <div className="text-[10px] text-gray-400">
+                      {new Date(note.updatedAt).toLocaleDateString()}
+                    </div>
+                    {note.history.length > 0 && (
+                      <div className="text-[10px] text-indigo-400 mt-0.5">{note.history.length} prev</div>
+                    )}
+                  </div>
+                </div>
+              </button>
+            )}
+          </div>
+        ))}
+
+        {/* Generatable books */}
+        {generatable.length > 0 && (
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+            <div className="px-4 py-3 border-b border-gray-50">
+              <div className="text-xs font-semibold text-gray-700">Generate Reading Notes</div>
+              <div className="text-[10px] text-gray-400 mt-0.5">Books with highlights ready to analyze</div>
+            </div>
+            {generatable.map((book) => (
+              <div key={book.id} className="flex items-center gap-3 px-4 py-3 border-b border-gray-50 last:border-0">
+                <div className="flex-1 min-w-0">
+                  <div className="text-xs font-medium text-gray-900 truncate">{book.title}</div>
+                  <div className="text-[10px] text-gray-400">{book.author}</div>
+                </div>
+                <button
+                  onClick={() => handleGenerate(book.id)}
+                  disabled={generating === book.id}
+                  className="text-[11px] px-3 py-1.5 bg-gray-900 text-white rounded-lg disabled:opacity-50 flex-shrink-0"
+                >
+                  {generating === book.id ? "..." : "Generate"}
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {readingNotes.length === 0 && generatable.length === 0 && (
+          <div className="text-center py-6 text-xs text-gray-400">
+            Highlight passages while reading to generate your reading notes.
           </div>
         )}
       </div>

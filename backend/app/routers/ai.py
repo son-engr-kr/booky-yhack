@@ -32,6 +32,13 @@ class RecapRequest(BaseModel):
     chapters_summary: str
 
 
+class ReadingNotesRequest(BaseModel):
+    book_title: str
+    author: str
+    my_highlights: list[dict]
+    friend_highlights: list[dict]
+
+
 class SpoilerCheckRequest(BaseModel):
     text: str
     book_title: str
@@ -84,6 +91,21 @@ async def generate_recap(req: RecapRequest):
             clean = clean.split("\n", 1)[1].rsplit("```", 1)[0]
         panels = json.loads(clean)
         return {"panels": panels}
+    except (json.JSONDecodeError, IndexError):
+        return {"raw": result}
+
+
+@router.post("/reading-notes")
+async def generate_reading_notes(req: ReadingNotesRequest):
+    import json
+    result = await k2.generate_reading_notes(
+        req.book_title, req.author, req.my_highlights, req.friend_highlights
+    )
+    try:
+        clean = result.strip()
+        if clean.startswith("```"):
+            clean = clean.split("\n", 1)[1].rsplit("```", 1)[0]
+        return json.loads(clean)
     except (json.JSONDecodeError, IndexError):
         return {"raw": result}
 

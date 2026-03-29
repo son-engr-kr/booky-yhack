@@ -4,7 +4,7 @@ async function fetcher<T>(path: string): Promise<T> {
   try {
     const res = await fetch(`${API_BASE}${path}`);
     if (!res.ok) {
-      console.warn(`API ${res.status}: ${path}`);
+      if (res.status !== 404) console.warn(`API ${res.status}: ${path}`);
       return null as T;
     }
     return res.json();
@@ -34,8 +34,8 @@ export const getProgress = (bookId: string) =>
 // Highlights
 export const getMyHighlights = (bookId: string) =>
   fetcher<Highlight[]>(`/highlights/${bookId}`);
-export const getFriendHighlights = (bookId: string, chapter: number) =>
-  fetcher<Highlight[]>(`/highlights/${bookId}/friends?chapter=${chapter}`);
+export const getFriendHighlights = (bookId: string, chapter?: number) =>
+  fetcher<Highlight[]>(`/highlights/${bookId}/friends${chapter != null ? `?chapter=${chapter}` : ""}`);
 
 // Highlights - create & reply
 export const createHighlight = (bookId: string, chapter: number, text: string, note?: string) =>
@@ -66,6 +66,12 @@ export const getReadingProfile = () =>
 
 // Planet
 export const getMyPlanet = () => fetcher<PlanetData>("/planet/me");
+export const updatePlanetName = (name: string) =>
+  fetch(`${API_BASE}/planet/me`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name }),
+  }).then((r) => r.ok ? r.json() as Promise<{ name: string }> : null);
 export const getFriendPlanets = () =>
   fetcher<FriendPlanet[]>("/planet/friends");
 export const getConstellation = (bookId: string) =>
@@ -104,6 +110,54 @@ export const aiGenerateRecap = (bookTitle: string, author: string, chaptersSumma
 
 export const aiSpoilerCheck = (text: string, bookTitle: string, readerChapter: number) =>
   postJson<{ is_spoiler: boolean; reason: string }>("/ai/spoiler-check", { text, book_title: bookTitle, reader_chapter: readerChapter });
+
+export interface ReadingNotes {
+  shared_passages: {
+    text: string;
+    my_note: string;
+    my_insight: string;
+    friends: { name: string; note: string; insight: string }[];
+    tension: string;
+  }[];
+  only_me: { text: string; my_note: string; why_unique: string }[];
+  only_friends: { text: string; friend_name: string; note: string; what_you_missed: string }[];
+  reader_styles: { me: string; friends: { name: string; style: string }[] };
+  synthesis: string;
+}
+
+// Reading Notes (persisted)
+export interface SavedReadingNote {
+  userId: string;
+  bookId: string;
+  bookTitle: string;
+  author: string;
+  current: ReadingNotes;
+  history: { notes: ReadingNotes; generatedAt: string }[];
+  updatedAt: string;
+}
+
+export const getMyReadingNotes = () =>
+  fetcher<{ notes: SavedReadingNote[]; generatable: Book[] }>("/reading-notes/");
+
+export const getBookReadingNotes = (bookId: string) =>
+  fetcher<SavedReadingNote>(`/reading-notes/${bookId}`);
+
+export const generateBookReadingNotes = (bookId: string) =>
+  postJson<SavedReadingNote>(`/reading-notes/${bookId}/generate`, {});
+
+// AI reading notes (direct, no persistence)
+export const aiGenerateReadingNotes = (
+  bookTitle: string,
+  author: string,
+  myHighlights: { text: string; comment?: string }[],
+  friendHighlights: { text: string; userName?: string; comment?: string }[]
+) =>
+  postJson<ReadingNotes>("/ai/reading-notes", {
+    book_title: bookTitle,
+    author,
+    my_highlights: myHighlights,
+    friend_highlights: friendHighlights,
+  });
 
 // Comic recap
 export const generateComic = (bookTitle: string, author: string, chaptersSummary: string) =>

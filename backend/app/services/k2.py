@@ -113,6 +113,48 @@ async def generate_recap(book_title: str, author: str, chapters_summary: str) ->
     ])
 
 
+async def generate_reading_notes(
+    book_title: str,
+    author: str,
+    my_highlights: list[dict],
+    friend_highlights: list[dict],
+) -> str:
+    """Compare reader's highlights with friends' highlights and generate structured reading notes."""
+    my_hl_text = "\n".join(
+        f'- "{h["text"]}" — my note: {h.get("comment") or "(no note)"}'
+        for h in my_highlights
+    ) or "(no highlights yet)"
+
+    friend_hl_text = "\n".join(
+        f'- "{h["text"]}" — {h.get("userName", "Friend")}: {h.get("comment") or "(no note)"}'
+        for h in friend_highlights
+    ) or "(no friend highlights)"
+
+    return await chat([
+        {"role": "system", "content": (
+            "You are a literary analysis assistant for a social reading app. "
+            "Analyze a reader's highlights and their friends' highlights from the same book. "
+            "Identify: shared passages (semantically similar, not necessarily identical), "
+            "unique observations from the reader, unique observations from friends, "
+            "each person's reading style/lens, and an overall synthesis. "
+            "Respond with ONLY valid JSON in this exact format:\n"
+            '{"shared_passages": [{"text": "exact quote", "my_note": "...", "my_insight": "1 sentence", '
+            '"friends": [{"name": "...", "note": "...", "insight": "1 sentence"}], '
+            '"tension": "1-2 sentences comparing perspectives"}], '
+            '"only_me": [{"text": "exact quote", "my_note": "...", "why_unique": "1 sentence"}], '
+            '"only_friends": [{"text": "exact quote", "friend_name": "...", "note": "...", "what_you_missed": "1 sentence"}], '
+            '"reader_styles": {"me": "2-3 sentences", "friends": [{"name": "...", "style": "1-2 sentences"}]}, '
+            '"synthesis": "2-3 sentences overall comparison"}'
+        )},
+        {"role": "user", "content": (
+            f"Book: {book_title} by {author}\n\n"
+            f"MY highlights and notes:\n{my_hl_text}\n\n"
+            f"FRIENDS' highlights and notes:\n{friend_hl_text}\n\n"
+            "Generate the reading notes comparison JSON."
+        )},
+    ], temperature=0.5)
+
+
 async def check_spoiler(user_text: str, book_title: str, reader_chapter: int) -> str:
     """Check if a post contains spoilers beyond the reader's current chapter."""
     return await chat([

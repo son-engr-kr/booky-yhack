@@ -7,10 +7,12 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import BottomNav from "@/components/nav/BottomNav";
 import RecapPanel from "@/components/reading/RecapPanel";
+import ReadingNotesPanel from "@/components/reading/ReadingNotesPanel";
 import {
   getBook,
   getProgress,
   getFriends,
+  getMyHighlights,
   type Book,
   type ReadingProgress,
   type Friend,
@@ -24,13 +26,14 @@ export default function BookDetailPage() {
   const [progress, setProgress] = useState<ReadingProgress | null>(null);
   const [friends, setFriends] = useState<Friend[]>([]);
   const [showRecap, setShowRecap] = useState(false);
+  const [showNotes, setShowNotes] = useState(false);
+  const [hasHighlights, setHasHighlights] = useState(false);
 
   useEffect(() => {
     getBook(bookId).then(setBook);
-    getProgress(bookId).then((p) => {
-      setProgress(p);
-    });
+    getProgress(bookId).then(setProgress);
     getFriends().then(setFriends);
+    getMyHighlights(bookId).then((h) => h && setHasHighlights(h.length > 0));
   }, [bookId]);
 
   if (!book) {
@@ -208,6 +211,33 @@ export default function BookDetailPage() {
             )}
           </div>
         </div>
+      )}
+
+      {/* Reading Notes — only if has highlights */}
+      {hasHighlights && !showNotes && (
+        <div className="px-4 pb-4">
+          <button
+            onClick={() => setShowNotes(true)}
+            className="w-full flex items-center justify-between bg-white rounded-2xl border border-gray-100 shadow-sm px-5 py-4 hover:bg-gray-50 transition-colors"
+          >
+            <div className="flex items-center gap-3">
+              <span className="text-xl">📓</span>
+              <div className="text-left">
+                <div className="text-sm font-semibold text-gray-900">Reading Notes</div>
+                <div className="text-xs text-gray-500">Compare your highlights with friends</div>
+              </div>
+            </div>
+            <span className="text-gray-400 text-sm">▼</span>
+          </button>
+        </div>
+      )}
+
+      {showNotes && (
+        <ReadingNotesPanel
+          bookId={bookId}
+          bookTitle={book.title}
+          onClose={() => setShowNotes(false)}
+        />
       )}
 
       <BottomNav />

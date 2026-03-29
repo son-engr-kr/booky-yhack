@@ -1,4 +1,5 @@
 from fastapi import APIRouter
+from pydantic import BaseModel
 import math
 import json
 from pathlib import Path
@@ -28,6 +29,17 @@ def get_my_planet() -> dict:
         if p.to_dict().get("status") != "not-started"
     ]
     return {**me, "satellites": satellites}
+
+
+class PlanetUpdate(BaseModel):
+    name: str
+
+
+@router.patch("/me")
+def update_my_planet(body: PlanetUpdate) -> dict:
+    name = body.name.strip()
+    db.collection(USERS).document("me").update({"name": name})
+    return {"name": name}
 
 
 @router.get("/friends")

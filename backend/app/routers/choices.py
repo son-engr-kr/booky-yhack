@@ -37,8 +37,6 @@ def get_reading_profile() -> dict:
 def get_book_choices(book_id: str) -> list:
     docs = db.collection(COL).where("bookId", "==", book_id).stream()
     choices = [d.to_dict() for d in docs]
-    if not choices:
-        raise HTTPException(status_code=404, detail=f"No choices found for book '{book_id}'")
     return choices
 
 
