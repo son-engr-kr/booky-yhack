@@ -21,20 +21,6 @@ export default function BottomNav() {
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 bg-[#0a0b14]/95 backdrop-blur-lg border-t border-white/10">
       <div className="max-w-md mx-auto flex justify-around py-2 relative">
-        {/* Booky — positioned via CSS left, GPU-accelerated */}
-        {activeIndex >= 0 && (
-          <img
-            src="/assets/booky-chracter.png"
-            alt="Booky"
-            className="absolute -top-7 w-7 h-7 object-contain drop-shadow-lg pointer-events-none"
-            style={{
-              left: `${(activeIndex + 0.5) * (100 / tabs.length)}%`,
-              transform: "translateX(-50%)",
-              transition: "left 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-              willChange: "left",
-            }}
-          />
-        )}
         {tabs.map((tab, i) => {
           const isActive = i === activeIndex;
           return (
