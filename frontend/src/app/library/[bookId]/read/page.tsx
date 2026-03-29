@@ -545,17 +545,23 @@ export default function ReadPage() {
       {/* Page navigation — fixed at bottom */}
       <div className="flex-shrink-0 px-5 py-3 max-w-prose mx-auto w-full border-t border-gray-200 bg-[#f0f2f8]">
         <div className="flex items-center justify-between">
-          <button
-            onClick={() => setPageIndex((p) => p - 1)}
-            disabled={!hasPagePrev}
-            className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
-              hasPagePrev
-                ? "bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 shadow-sm"
-                : "text-gray-300 cursor-not-allowed"
-            }`}
-          >
-            ← Prev
-          </button>
+          {hasPagePrev ? (
+            <button
+              onClick={() => setPageIndex((p) => p - 1)}
+              className="px-4 py-2 rounded-xl text-sm font-medium bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 shadow-sm transition-all"
+            >
+              ← Prev
+            </button>
+          ) : chapterNum > 1 ? (
+            <Link
+              href={`/library/${bookId}/read?chapter=${chapterNum - 1}`}
+              className="px-4 py-2 rounded-xl text-sm font-medium bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 shadow-sm transition-all"
+            >
+              ← Ch.{chapterNum - 1}
+            </Link>
+          ) : (
+            <span className="px-4 py-2 text-sm text-gray-300">← Prev</span>
+          )}
           <div className="text-xs text-gray-400">
             {totalPages > 1 ? `${pageIndex + 1} / ${totalPages}` : ""}
           </div>
