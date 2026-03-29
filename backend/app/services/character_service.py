@@ -1,44 +1,43 @@
-"""Generate and cache character descriptions based on chapters read."""
+"""Generate and cache character descriptions per book+chapter in Firestore."""
 import json
 from pathlib import Path
 from app.services import k2
+from app.database import db
 
-CACHE_DIR = Path(__file__).parent.parent / "data" / "character_cache"
-CACHE_DIR.mkdir(exist_ok=True)
+COL = "character_cache"
 
 
-def _cache_path(book_id: str, chapter: int) -> Path:
-    return CACHE_DIR / f"{book_id}_ch{chapter}.json"
+def _doc_id(book_id: str, chapter: int) -> str:
+    return f"{book_id}_ch{chapter}"
 
 
 def get_cached(book_id: str, chapter: int) -> list[dict] | None:
-    path = _cache_path(book_id, chapter)
-    if path.exists():
-        with open(path, encoding="utf-8") as f:
-            return json.load(f)
+    doc = db.collection(COL).document(_doc_id(book_id, chapter)).get()
+    if doc.exists:
+        return doc.to_dict().get("characters")
     return None
 
 
 def save_cache(book_id: str, chapter: int, characters: list[dict]):
-    with open(_cache_path(book_id, chapter), "w", encoding="utf-8") as f:
-        json.dump(characters, f, ensure_ascii=False, indent=2)
+    db.collection(COL).document(_doc_id(book_id, chapter)).set({
+        "bookId": book_id,
+        "chapter": chapter,
+        "characters": characters,
+    })
 
 
 async def generate_characters(book_id: str, book_title: str, author: str, chapter: int) -> list[dict]:
-    """Generate character info from chapters 1..chapter using K2, with caching."""
-    # Check cache first
+    """Generate character info from chapters 1..chapter using K2, with Firestore caching."""
     cached = get_cached(book_id, chapter)
     if cached:
         return cached
 
-    # Also check if previous chapter cache exists — use it as context
     prev_context = ""
     if chapter > 1:
         prev = get_cached(book_id, chapter - 1)
         if prev:
             prev_context = f"\nPrevious character info (up to ch.{chapter-1}):\n{json.dumps(prev, ensure_ascii=False)}\n"
 
-    # Load chapter texts up to current chapter
     chapters_file = Path(__file__).parent.parent / "data" / "chapters.json"
     chapter_texts = ""
     if chapters_file.exists():
@@ -48,7 +47,6 @@ async def generate_characters(book_id: str, book_title: str, author: str, chapte
         for ch_num in range(1, chapter + 1):
             ch = book_chapters.get(str(ch_num))
             if ch:
-                # Use first 1000 chars per chapter to stay within token limits
                 text = ch.get("text", "")[:1000]
                 chapter_texts += f"\n--- Chapter {ch_num}: {ch.get('title', '')} ---\n{text}\n"
 

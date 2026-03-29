@@ -1,47 +1,49 @@
 from fastapi import APIRouter
-import json
 import math
+import json
 from pathlib import Path
-from typing import Any
+from app.database import db
 
 router = APIRouter()
+USERS = "users"
+PROGRESS = "reading_progress"
+FEED = "feed"
 DATA_DIR = Path(__file__).parent.parent / "data"
 
 
-def _load(filename: str) -> Any:
-    with open(DATA_DIR / filename, encoding="utf-8") as f:
-        return json.load(f)
+def _load_books() -> dict:
+    with open(DATA_DIR / "books.json", encoding="utf-8") as f:
+        books = json.load(f)
+    return {b["id"]: b["title"] for b in books}
 
 
 @router.get("/me")
 def get_my_planet() -> dict:
-    users = _load("users.json")
-    progress = _load("reading-progress.json")
-    me = next(u for u in users if u["id"] == "me")
-    books = _load("books.json")
-    book_titles = {b["id"]: b["title"] for b in books}
+    me = db.collection(USERS).document("me").get().to_dict()
+    book_titles = _load_books()
+    progress_docs = db.collection(PROGRESS).where("userId", "==", "me").stream()
     satellites = [
-        {**p, "bookTitle": book_titles.get(p["bookId"], p["bookId"])}
-        for p in progress
-        if p["userId"] == "me" and p.get("status") != "not-started"
+        {**p.to_dict(), "bookTitle": book_titles.get(p.to_dict()["bookId"], p.to_dict()["bookId"])}
+        for p in progress_docs
+        if p.to_dict().get("status") != "not-started"
     ]
     return {**me, "satellites": satellites}
 
 
 @router.get("/friends")
 def get_friend_planets() -> list:
-    users = _load("users.json")
-    feed = _load("feed.json")
-    feed_sorted = sorted(feed, key=lambda p: p["createdAt"], reverse=True)
+    friends = [d.to_dict() for d in db.collection(USERS).stream() if d.id != "me"]
+    feed_docs = sorted(
+        [d.to_dict() for d in db.collection(FEED).stream()],
+        key=lambda p: p["createdAt"],
+        reverse=True,
+    )
 
-    friends = [u for u in users if u["id"] != "me"]
     result = []
-
     for i, friend in enumerate(friends):
         similarity = friend.get("similarity", 50)
         distance = 100 - similarity
 
-        # Spread in a sphere using golden angle
         angle_h = i * 2.399
         angle_v = math.acos(1 - 2 * (i + 0.5) / len(friends))
 
@@ -49,7 +51,7 @@ def get_friend_planets() -> list:
         y = round(distance * math.sin(angle_v) * math.sin(angle_h), 2)
         z = round(distance * math.cos(angle_v), 2)
 
-        latest = next((p for p in feed_sorted if p["userId"] == friend["id"]), None)
+        latest = next((p for p in feed_docs if p["userId"] == friend["id"]), None)
         latest_feed = latest.get("text") if latest else None
 
         result.append({**friend, "position": {"x": x, "y": y, "z": z}, "latestFeed": latest_feed})
@@ -59,11 +61,10 @@ def get_friend_planets() -> list:
 
 @router.get("/constellation/{book_id}")
 def get_constellation(book_id: str) -> dict:
-    users = _load("users.json")
-    progress = _load("reading-progress.json")
-
-    readers_progress = [p for p in progress if p["bookId"] == book_id]
-    user_map = {u["id"]: u for u in users}
+    user_map = {d.id: d.to_dict() for d in db.collection(USERS).stream()}
+    readers_progress = [
+        d.to_dict() for d in db.collection(PROGRESS).where("bookId", "==", book_id).stream()
+    ]
 
     readers = []
     count = max(len(readers_progress), 1)

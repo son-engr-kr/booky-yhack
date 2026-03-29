@@ -1,39 +1,33 @@
 from fastapi import APIRouter, HTTPException
-import json
-from pathlib import Path
-from typing import Any
+from app.database import db
 
 router = APIRouter()
-DATA_DIR = Path(__file__).parent.parent / "data"
-
-
-def load_json(filename: str) -> Any:
-    with open(DATA_DIR / filename, encoding="utf-8") as f:
-        return json.load(f)
+USERS = "users"
+PROGRESS = "reading_progress"
 
 
 @router.get("/")
 def list_friends() -> list:
-    """Return all users except 'me', including their similarity score."""
-    users = load_json("users.json")
-    return [u for u in users if u["id"] != "me"]
+    docs = db.collection(USERS).stream()
+    return [d.to_dict() for d in docs if d.id != "me"]
 
 
 @router.get("/{user_id}")
 def get_friend(user_id: str) -> dict:
-    """Return detailed profile for a specific friend."""
-    users = load_json("users.json")
-    user = next((u for u in users if u["id"] == user_id and user_id != "me"), None)
-    if user is None:
+    if user_id == "me":
         raise HTTPException(status_code=404, detail=f"Friend '{user_id}' not found")
-    return user
+    doc = db.collection(USERS).document(user_id).get()
+    if not doc.exists:
+        raise HTTPException(status_code=404, detail=f"Friend '{user_id}' not found")
+    return doc.to_dict()
 
 
 @router.get("/{user_id}/progress")
 def get_friend_progress(user_id: str) -> list:
-    """Return all reading progress entries for a specific friend."""
-    users = load_json("users.json")
-    if not any(u["id"] == user_id and user_id != "me" for u in users):
+    if user_id == "me":
         raise HTTPException(status_code=404, detail=f"Friend '{user_id}' not found")
-    progress = load_json("reading-progress.json")
-    return [p for p in progress if p["userId"] == user_id]
+    user_doc = db.collection(USERS).document(user_id).get()
+    if not user_doc.exists:
+        raise HTTPException(status_code=404, detail=f"Friend '{user_id}' not found")
+    docs = db.collection(PROGRESS).where("userId", "==", user_id).stream()
+    return [d.to_dict() for d in docs]

@@ -1,23 +1,12 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-import json
 import uuid
 from datetime import datetime, timezone
-from pathlib import Path
-from typing import Any, Optional
+from typing import Optional
+from app.database import db
 
 router = APIRouter()
-DATA_DIR = Path(__file__).parent.parent / "data"
-
-
-def load_json(filename: str) -> Any:
-    with open(DATA_DIR / filename, encoding="utf-8") as f:
-        return json.load(f)
-
-
-def save_json(filename: str, data: Any) -> None:
-    with open(DATA_DIR / filename, "w", encoding="utf-8") as f:
-        json.dump(data, f, ensure_ascii=False, indent=2)
+COL = "highlights"
 
 
 class HighlightCreate(BaseModel):
@@ -33,25 +22,21 @@ class ReplyCreate(BaseModel):
 
 @router.get("/{book_id}")
 def get_my_highlights(book_id: str) -> list:
-    """Return all highlights created by the current user for a specific book."""
-    highlights = load_json("highlights.json")
-    return [h for h in highlights if h["userId"] == "me" and h["bookId"] == book_id]
+    docs = db.collection(COL).where("userId", "==", "me").where("bookId", "==", book_id).stream()
+    return [d.to_dict() for d in docs]
 
 
 @router.get("/{book_id}/friends")
 def get_friend_highlights(book_id: str, chapter: Optional[int] = None) -> list:
-    """Return highlights from friends for a book, optionally filtered by chapter number."""
-    highlights = load_json("highlights.json")
-    results = [h for h in highlights if h["userId"] != "me" and h["bookId"] == book_id]
+    docs = db.collection(COL).where("bookId", "==", book_id).stream()
+    results = [d.to_dict() for d in docs if d.to_dict().get("userId") != "me"]
     if chapter is not None:
-        results = [h for h in results if h["chapterNum"] <= chapter]
+        results = [h for h in results if h.get("chapterNum", 0) <= chapter]
     return results
 
 
 @router.post("/{book_id}")
 def create_highlight(book_id: str, body: HighlightCreate) -> dict:
-    """Create a new highlight and persist to JSON."""
-    highlights = load_json("highlights.json")
     new_hl = {
         "id": str(uuid.uuid4()),
         "bookId": book_id,
@@ -62,54 +47,52 @@ def create_highlight(book_id: str, body: HighlightCreate) -> dict:
         "comment": body.note or "",
         "color": body.color,
         "likes": 0,
+        "likers": [],
         "replies": [],
         "createdAt": datetime.now(timezone.utc).isoformat(),
     }
-    highlights.append(new_hl)
-    save_json("highlights.json", highlights)
+    db.collection(COL).document(new_hl["id"]).set(new_hl)
     return new_hl
 
 
 @router.delete("/{book_id}/{highlight_id}")
 def delete_highlight(book_id: str, highlight_id: str) -> dict:
-    """Delete a highlight owned by the current user."""
-    highlights = load_json("highlights.json")
-    hl = next((h for h in highlights if h["id"] == highlight_id), None)
-    if hl is None:
+    ref = db.collection(COL).document(highlight_id)
+    doc = ref.get()
+    if not doc.exists:
         raise HTTPException(status_code=404, detail="Highlight not found")
-    if hl["userId"] != "me":
+    if doc.to_dict().get("userId") != "me":
         raise HTTPException(status_code=403, detail="Not your highlight")
-    highlights = [h for h in highlights if h["id"] != highlight_id]
-    save_json("highlights.json", highlights)
+    ref.delete()
     return {"ok": True}
 
 
 @router.post("/{book_id}/{highlight_id}/like")
 def toggle_like(book_id: str, highlight_id: str) -> dict:
-    """Toggle like on a highlight. Returns new like count and liked state."""
-    highlights = load_json("highlights.json")
-    hl = next((h for h in highlights if h["id"] == highlight_id), None)
-    if hl is None:
+    ref = db.collection(COL).document(highlight_id)
+    doc = ref.get()
+    if not doc.exists:
         raise HTTPException(status_code=404, detail="Highlight not found")
-    likers = hl.setdefault("likers", [])
+    hl = doc.to_dict()
+    likers: list = hl.get("likers", [])
     if "me" in likers:
         likers.remove("me")
         liked = False
     else:
         likers.append("me")
         liked = True
-    hl["likes"] = len(likers)
-    save_json("highlights.json", highlights)
-    return {"likes": hl["likes"], "liked": liked}
+    likes = len(likers)
+    ref.update({"likers": likers, "likes": likes})
+    return {"likes": likes, "liked": liked}
 
 
 @router.post("/{book_id}/{highlight_id}/reply")
 def add_reply(book_id: str, highlight_id: str, body: ReplyCreate) -> dict:
-    """Add a reply/comment to a highlight."""
-    highlights = load_json("highlights.json")
-    hl = next((h for h in highlights if h["id"] == highlight_id), None)
-    if hl is None:
+    ref = db.collection(COL).document(highlight_id)
+    doc = ref.get()
+    if not doc.exists:
         raise HTTPException(status_code=404, detail="Highlight not found")
+    hl = doc.to_dict()
     reply = {
         "id": str(uuid.uuid4()),
         "userId": "me",
@@ -117,6 +100,7 @@ def add_reply(book_id: str, highlight_id: str, body: ReplyCreate) -> dict:
         "text": body.text,
         "createdAt": datetime.now(timezone.utc).isoformat(),
     }
-    hl.setdefault("replies", []).append(reply)
-    save_json("highlights.json", highlights)
+    replies = hl.get("replies", [])
+    replies.append(reply)
+    ref.update({"replies": replies})
     return reply

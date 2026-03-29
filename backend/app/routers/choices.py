@@ -1,21 +1,9 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-import json
-from pathlib import Path
-from typing import Any
+from app.database import db
 
 router = APIRouter()
-DATA_DIR = Path(__file__).parent.parent / "data"
-
-
-def _load(filename: str) -> Any:
-    with open(DATA_DIR / filename, encoding="utf-8") as f:
-        return json.load(f)
-
-
-def _save(filename: str, data: Any) -> None:
-    with open(DATA_DIR / filename, "w", encoding="utf-8") as f:
-        json.dump(data, f, ensure_ascii=False, indent=2)
+COL = "choices"
 
 
 class ChoiceSubmit(BaseModel):
@@ -47,40 +35,32 @@ def get_reading_profile() -> dict:
 
 @router.get("/{book_id}")
 def get_book_choices(book_id: str) -> list:
-    choices = _load("choices.json")
-    book_choices = [c for c in choices if c["bookId"] == book_id]
-    if not book_choices:
+    docs = db.collection(COL).where("bookId", "==", book_id).stream()
+    choices = [d.to_dict() for d in docs]
+    if not choices:
         raise HTTPException(status_code=404, detail=f"No choices found for book '{book_id}'")
-    return book_choices
+    return choices
 
 
 @router.get("/{book_id}/{choice_id}")
 def get_choice(book_id: str, choice_id: str) -> dict:
-    choices = _load("choices.json")
-    choice = next(
-        (c for c in choices if c["bookId"] == book_id and c["id"] == choice_id),
-        None,
-    )
-    if choice is None:
+    doc = db.collection(COL).document(choice_id).get()
+    if not doc.exists or doc.to_dict().get("bookId") != book_id:
         raise HTTPException(status_code=404, detail=f"Choice '{choice_id}' not found for book '{book_id}'")
-    return choice
+    return doc.to_dict()
 
 
 @router.post("/{book_id}/{choice_id}")
 def submit_choice(book_id: str, choice_id: str, body: ChoiceSubmit) -> dict:
-    choices = _load("choices.json")
-    choice = next(
-        (c for c in choices if c["bookId"] == book_id and c["id"] == choice_id),
-        None,
-    )
-    if choice is None:
+    ref = db.collection(COL).document(choice_id)
+    doc = ref.get()
+    if not doc.exists or doc.to_dict().get("bookId") != book_id:
         raise HTTPException(status_code=404, detail=f"Choice '{choice_id}' not found for book '{book_id}'")
+    choice = doc.to_dict()
     option = next((o for o in choice["options"] if o["id"] == body.optionId), None)
     if option is None:
         raise HTTPException(status_code=400, detail=f"Option '{body.optionId}' is not valid")
-    # Persist the choice
-    choice["myChoice"] = body.optionId
-    _save("choices.json", choices)
+    ref.update({"myChoice": body.optionId})
     return {
         "success": True,
         "bookId": book_id,

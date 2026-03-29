@@ -4,11 +4,17 @@ from firebase_admin import credentials, firestore, auth
 import chromadb
 from app.config import settings
 
+
+class _EmulatorCred(firebase_admin.credentials.Base):
+    def get_credential(self):
+        return None
+
+
 # Point to emulator if enabled
 if settings.use_firebase_emulator:
     os.environ["FIRESTORE_EMULATOR_HOST"] = settings.firestore_emulator_host
     os.environ["FIREBASE_AUTH_EMULATOR_HOST"] = settings.auth_emulator_host
-    firebase_admin.initialize_app(options={"projectId": "theta-bliss-486220-s1"})
+    firebase_admin.initialize_app(_EmulatorCred(), options={"projectId": "theta-bliss-486220-s1"})
 elif settings.firebase_credentials_path:
     cred = credentials.Certificate(settings.firebase_credentials_path)
     firebase_admin.initialize_app(cred)
