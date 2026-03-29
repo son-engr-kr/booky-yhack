@@ -1,32 +1,82 @@
 [
   {
-    "id": "great-gatsby",
-    "title": "The Great Gatsby",
-    "author": "F. Scott Fitzgerald",
-    "genre": "Literature",
-    "cover": "https://covers.openlibrary.org/b/id/8432047-L.jpg",
-    "totalChapters": 9,
-    "description": "A story of the mysteriously wealthy Jay Gatsby and his love for Daisy Buchanan.",
-    "year": 1925
+    "id": "1984",
+    "title": "1984",
+    "author": "George Orwell",
+    "genre": "dystopian",
+    "cover": "https://covers.openlibrary.org/b/isbn/9780451524935-L.jpg",
+    "totalChapters": 8,
+    "description": "In a totalitarian surveillance state, one man dares to think forbidden thoughts and love a forbidden woman — a chilling prophecy of power, language, and truth",
+    "year": 0
+  },
+  {
+    "id": "alice-wonderland",
+    "title": "Alice's Adventures in Wonderland",
+    "author": "Lewis Carroll",
+    "genre": "fantasy",
+    "cover": "https://covers.openlibrary.org/b/isbn/9780141439761-L.jpg",
+    "totalChapters": 8,
+    "description": "A young girl falls down a rabbit hole into a fantastical underground world of peculiar creatures, absurd logic, and unforgettable characters",
+    "year": 0
+  },
+  {
+    "id": "dracula",
+    "title": "Dracula",
+    "author": "Bram Stoker",
+    "genre": "horror",
+    "cover": "https://covers.openlibrary.org/b/isbn/9780141439846-L.jpg",
+    "totalChapters": 8,
+    "description": "A vampire count from Transylvania moves to England, preying on the innocent, while a band of heroes fights to stop his reign of terror",
+    "year": 0
   },
   {
     "id": "frankenstein",
     "title": "Frankenstein",
     "author": "Mary Shelley",
-    "genre": "Gothic",
-    "cover": "https://covers.openlibrary.org/b/id/12648289-L.jpg",
-    "totalChapters": 28,
-    "description": "A scientist creates a sentient creature in an unorthodox experiment, exploring themes of ambition, isolation, and humanity.",
-    "year": 1818
+    "genre": "gothic",
+    "cover": "https://covers.openlibrary.org/b/isbn/9780141439471-L.jpg",
+    "totalChapters": 8,
+    "description": "A young scientist's obsessive quest to create life leads to a terrifying creature and a haunting exploration of ambition, isolation, and what it means to be human",
+    "year": 0
+  },
+  {
+    "id": "great-gatsby",
+    "title": "The Great Gatsby",
+    "author": "F. Scott Fitzgerald",
+    "genre": "literary",
+    "cover": "https://covers.openlibrary.org/b/isbn/9780743273565-L.jpg",
+    "totalChapters": 9,
+    "description": "A tragic tale of love and the American Dream, set in the mysterious world of millionaire Jay Gatsby during the Jazz Age of the 1920s",
+    "year": 0
   },
   {
     "id": "pride-prejudice",
     "title": "Pride and Prejudice",
     "author": "Jane Austen",
-    "genre": "Romance",
-    "cover": "https://covers.openlibrary.org/b/id/12648289-L.jpg",
-    "totalChapters": 61,
-    "description": "Elizabeth Bennet navigates love, reputation, and misunderstanding in Regency England.",
-    "year": 1813
+    "genre": "romance",
+    "cover": "https://covers.openlibrary.org/b/isbn/9780141439518-L.jpg",
+    "totalChapters": 8,
+    "description": "A witty tale of love, class, and misjudgment in Regency-era England, following Elizabeth Bennet and the proud Mr. Darcy",
+    "year": 0
+  },
+  {
+    "id": "romeo-juliet",
+    "title": "Romeo and Juliet",
+    "author": "William Shakespeare",
+    "genre": "tragedy",
+    "cover": "https://covers.openlibrary.org/b/isbn/9780743477116-L.jpg",
+    "totalChapters": 8,
+    "description": "Two young lovers from feuding families in Verona defy fate and hatred in Shakespeare's most famous tragedy of passion and sacrifice",
+    "year": 0
+  },
+  {
+    "id": "sherlock-holmes",
+    "title": "The Adventures of Sherlock Holmes",
+    "author": "Arthur Conan Doyle",
+    "genre": "mystery",
+    "cover": "https://covers.openlibrary.org/b/isbn/9780140437713-L.jpg",
+    "totalChapters": 8,
+    "description": "The world's greatest detective and his loyal companion Dr. Watson solve London's most baffling cases through brilliant deduction and daring adventure",
+    "year": 0
   }
 ]

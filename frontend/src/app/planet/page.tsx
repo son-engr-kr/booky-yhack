@@ -55,8 +55,8 @@ export default function PlanetPage() {
   const [filter, setFilter] = useState("all");
 
   useEffect(() => {
-    getMyPlanet().then(setMyPlanet);
-    getFriendPlanets().then(setFriendPlanets);
+    getMyPlanet().then((d) => d && setMyPlanet(d));
+    getFriendPlanets().then((d) => d && setFriendPlanets(d));
   }, []);
 
   useEffect(() => {

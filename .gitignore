@@ -1,3 +1,13 @@
 CLAUDE.md
 AGENTS.md
 .omc/
+
+# Firebase
+firebase-service-account.json
+chroma_data/
+firestore_dump/
+
+# Env
+.env
+backend/.env
+frontend/.env.local
