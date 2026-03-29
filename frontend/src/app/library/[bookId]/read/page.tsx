@@ -92,17 +92,34 @@ function segmentText(
     }
   }
 
+  // Normalize whitespace for matching — selection may differ from source
+  const norm = (s: string) => s.replace(/\s+/g, " ").trim();
+  const textNorm = norm(text);
+
   for (const hl of friendHighlights) {
-    const idx = text.indexOf(hl.text);
+    const hlNorm = norm(hl.text);
+    let idx = text.indexOf(hl.text);
+    if (idx === -1) {
+      // Try normalized match
+      const nIdx = textNorm.indexOf(hlNorm);
+      if (nIdx !== -1) idx = nIdx;
+    }
     if (idx !== -1) {
-      ranges.push({ start: idx, end: idx + hl.text.length, kind: "friendHighlight", highlight: hl });
+      const len = Math.min(hl.text.length, text.length - idx);
+      ranges.push({ start: idx, end: idx + len, kind: "friendHighlight", highlight: hl });
     }
   }
 
   for (const hl of userHighlights) {
-    const idx = text.indexOf(hl.text);
+    const hlNorm = norm(hl.text);
+    let idx = text.indexOf(hl.text);
+    if (idx === -1) {
+      const nIdx = textNorm.indexOf(hlNorm);
+      if (nIdx !== -1) idx = nIdx;
+    }
     if (idx !== -1) {
-      ranges.push({ start: idx, end: idx + hl.text.length, kind: "userHighlight", userHighlight: hl });
+      const len = Math.min(hl.text.length, text.length - idx);
+      ranges.push({ start: idx, end: idx + len, kind: "userHighlight", userHighlight: hl });
     }
   }
 
@@ -352,7 +369,7 @@ export default function ReadPage() {
         setSelectionToolbar(null);
         return;
       }
-      const text = selection.toString().trim();
+      const text = selection.toString().replace(/\s+/g, " ").trim();
       if (!text || text.length < 3) {
         setSelectionToolbar(null);
         return;
@@ -387,6 +404,7 @@ export default function ReadPage() {
     selectedTextRef.current = "";
     const capturedText = highlightComment.text;
     createHighlight(bookId, chapterNum, capturedText, note).then((saved) => {
+      console.log("[Highlight] saved:", saved, "text:", JSON.stringify(capturedText));
       const newHighlight: UserHighlight = {
         id: saved?.id ?? `user-${Date.now()}`,
         text: capturedText,
@@ -397,7 +415,10 @@ export default function ReadPage() {
         likes: saved?.likes ?? 0,
         liked: false,
       };
-      setUserHighlights((prev) => [...prev, newHighlight]);
+      setUserHighlights((prev) => {
+        console.log("[Highlight] prev:", prev.length, "adding:", newHighlight.text.slice(0, 40));
+        return [...prev, newHighlight];
+      });
     });
   }, [highlightComment, commentInput, bookId, chapterNum]);
 
