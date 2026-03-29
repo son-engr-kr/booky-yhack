@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import BottomNav from "@/components/nav/BottomNav";
 import { listBooks, getMyBooks, type Book, type ReadingProgress } from "@/lib/api";
@@ -48,7 +49,9 @@ export default function LibraryPage() {
             <div className="w-6 h-6 rounded-full bg-[#0c0e1a] border-2 border-gray-700 flex items-center justify-center overflow-hidden flex-shrink-0">
               <div className="w-1 h-1 rounded-full bg-white/60" />
             </div>
-            <button className="text-gray-500 text-lg">🔍</button>
+            <button className="text-gray-500">
+              <Image src="/assets/icons/search-book.png" alt="Search" width={22} height={22} />
+            </button>
           </div>
         </div>
       </div>

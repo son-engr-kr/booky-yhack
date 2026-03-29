@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import type { FeedPost } from "@/lib/api";
 
@@ -49,7 +50,7 @@ function StoryCard({ post }: { post: FeedPost }) {
       <div className="flex-1">
         <p className="text-[13px] text-gray-800 leading-relaxed">{post.text}</p>
         <p className="text-[11px] text-gray-400 mt-1">
-          📖 {post.bookTitle}
+          <Image src="/assets/icons/simple-book.png" alt="Book" width={14} height={14} className="inline mr-0.5" /> {post.bookTitle}
         </p>
       </div>
     </div>

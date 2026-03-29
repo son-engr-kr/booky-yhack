@@ -64,28 +64,10 @@ export default function PlanetPage() {
     return () => { document.body.style.overflow = ""; };
   }, []);
 
-  const [zoomTarget, setZoomTarget] = useState<{
-    cx: number; cy: number; dx: number; dy: number; route: string;
-  } | null>(null);
-  const [zoomPhase, setZoomPhase] = useState<"idle" | "zooming" | "fading">("idle");
-
-  const handlePlanetTap = useCallback((e: React.MouseEvent, type: "me" | "friend", imgSrc: string, id?: string) => {
-    if (zoomPhase !== "idle") return;
-    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-    const cx = rect.left + rect.width / 2;
-    const cy = rect.top + rect.height / 2;
+  const handlePlanetTap = useCallback((_e: React.MouseEvent, type: "me" | "friend", _imgSrc: string, id?: string) => {
     const route = type === "me" ? "/planet/detail" : `/planet/friend/${id}`;
-    setZoomTarget({
-      cx,
-      cy,
-      dx: window.innerWidth / 2 - cx,
-      dy: window.innerHeight / 2 - cy,
-      route,
-    });
-    setZoomPhase("zooming");
-    setTimeout(() => setZoomPhase("fading"), 400);
-    setTimeout(() => router.push(route), 700);
-  }, [zoomPhase, router]);
+    router.push(route);
+  }, [router]);
 
   const filters = ["All", "Close friends", "Gatsby readers"];
 
@@ -132,21 +114,13 @@ export default function PlanetPage() {
           0%, 100% { opacity: 0.12; transform: translate(-50%, -50%) scale(1); }
           50%       { opacity: 0.22; transform: translate(-50%, -50%) scale(1.04); }
         }
-        @keyframes fadeIn {
-          from { opacity: 0; }
-          to { opacity: 1; }
-        }
       `}</style>
 
       <div
         className="h-screen w-full relative overflow-hidden bg-[#050507]"
         style={{
+          zoom: 1 / 1.5,
           maxHeight: "100dvh",
-          transformOrigin: zoomTarget ? `${zoomTarget.cx}px ${zoomTarget.cy}px` : "50% 50%",
-          transform: zoomPhase !== "idle" && zoomTarget
-            ? `translate(${zoomTarget.dx}px, ${zoomTarget.dy}px) scale(3)`
-            : "scale(1)",
-          transition: zoomPhase !== "idle" ? "transform 0.6s cubic-bezier(0.32, 0.72, 0, 1)" : "none",
         }}
       >
 
@@ -235,8 +209,8 @@ export default function PlanetPage() {
         </div>
 
 
-        {/* === FILTER PILLS === */}
-        <div className="absolute top-0 left-0 right-0 z-10 pt-8 px-4">
+        {/* === FILTER PILLS (zoom 1.5 to match other pages) === */}
+        <div className="absolute top-0 left-0 right-0 z-10 pt-8 px-4" style={{ zoom: 1.5 }}>
           <div className="flex gap-2">
             {filters.map((f) => (
               <button
@@ -356,16 +330,10 @@ export default function PlanetPage() {
           );
         })}
 
-        {/* === FADE OVERLAY for zoom transition === */}
-        {zoomPhase === "fading" && (
-          <div
-            className="fixed inset-0 z-50 bg-[#050507]"
-            style={{ animation: "fadeIn 0.5s ease-in forwards" }}
-          />
-        )}
-
-        {/* === BOTTOM NAV === */}
-        <BottomNav />
+        {/* === BOTTOM NAV (zoom 1.5 to match other pages) === */}
+        <div style={{ zoom: 1.5 }}>
+          <BottomNav />
+        </div>
       </div>
     </>
   );

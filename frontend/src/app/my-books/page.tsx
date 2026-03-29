@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import BottomNav from "@/components/nav/BottomNav";
 import { getMyBooks, type ReadingProgress } from "@/lib/api";
@@ -58,8 +59,8 @@ function BookItem({
         </div>
 
         <div className="flex items-center gap-3 text-[11px] text-gray-400 mb-2">
-          <span>📝 {progress.notesCount} notes</span>
-          <span>💬 {progress.questionsAnswered} Booky q's</span>
+          <span className="flex items-center gap-1"><Image src="/assets/icons/hand-book.png" alt="Notes" width={14} height={14} /> {progress.notesCount} notes</span>
+          <span className="flex items-center gap-1"><Image src="/assets/icons/galaxy.png" alt="Questions" width={14} height={14} /> {progress.questionsAnswered} Booky q's</span>
         </div>
 
         {progress.status !== "completed" && (
@@ -110,7 +111,7 @@ export default function MyBooksPage() {
         {reading.length > 0 && (
           <div>
             <h2 className="text-[13px] font-bold text-gray-500 uppercase tracking-widest mb-3">
-              📖 Reading
+              <Image src="/assets/icons/simple-book.png" alt="Reading" width={14} height={14} className="inline mr-1" /> Reading
             </h2>
             <div className="space-y-2">
               {reading.map((b, i) => (

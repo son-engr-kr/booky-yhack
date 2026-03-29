@@ -1,15 +1,16 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 
 const tabs = [
-  { href: "/planet", icon: "🪐", label: "Home" },
-  { href: "/library", icon: "📚", label: "Library" },
-  { href: "/feed", icon: "💬", label: "Feed" },
-  { href: "/my-books", icon: "📖", label: "Books" },
-  { href: "/planet/detail", icon: "👤", label: "Profile" },
+  { href: "/planet", icon: "/assets/icons/planet.png", label: "Home" },
+  { href: "/library", icon: "/assets/icons/opened-book.png", label: "Library" },
+  { href: "/feed", icon: "/assets/icons/galaxy.png", label: "Feed" },
+  { href: "/my-books", icon: "/assets/icons/simple-book.png", label: "Books" },
+  { href: "/planet/detail", icon: "/assets/icons/simple-planet.png", label: "Profile" },
 ];
 
 export default function BottomNav() {
@@ -27,7 +28,13 @@ export default function BottomNav() {
               href={tab.href}
               className="flex flex-col items-center gap-0.5 relative"
             >
-              <span className="text-lg">{tab.icon}</span>
+              <Image
+                src={tab.icon}
+                alt={tab.label}
+                width={22}
+                height={22}
+                className={`transition-opacity ${isActive ? "opacity-100" : "opacity-50"}`}
+              />
               <span
                 className={`text-[10px] font-medium ${
                   isActive ? "text-amber-700" : "text-gray-400"

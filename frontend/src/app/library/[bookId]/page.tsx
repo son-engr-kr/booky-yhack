@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import BottomNav from "@/components/nav/BottomNav";
 import RecapPanel from "@/components/reading/RecapPanel";
@@ -160,16 +161,16 @@ export default function BookDetailPage() {
       <div className="px-4 pb-4">
         <div className="grid grid-cols-3 gap-3">
           {[
-            { icon: "📝", label: "Notes", href: `/library/${bookId}/read` },
-            { icon: "👥", label: "Characters", href: `/library/${bookId}/read` },
-            { icon: "💬", label: "Booky Chat", href: `/library/${bookId}/read` },
+            { icon: "/assets/icons/hand-book.png", label: "Notes", href: `/library/${bookId}/read` },
+            { icon: "/assets/icons/planet-book.png", label: "Characters", href: `/library/${bookId}/read` },
+            { icon: "/assets/icons/galaxy.png", label: "Booky Chat", href: `/library/${bookId}/read` },
           ].map((action) => (
             <Link
               key={action.label}
               href={action.href}
               className="flex flex-col items-center gap-2 bg-white rounded-2xl py-4 shadow-sm border border-gray-100 hover:border-amber-300 hover:shadow-md transition-all"
             >
-              <span className="text-xl">{action.icon}</span>
+              <Image src={action.icon} alt={action.label} width={28} height={28} />
               <span className="text-xs font-medium text-gray-700">{action.label}</span>
             </Link>
           ))}
@@ -186,7 +187,7 @@ export default function BookDetailPage() {
                 className="w-full flex items-center justify-between px-5 py-4 hover:bg-gray-50 transition-colors"
               >
                 <div className="flex items-center gap-3">
-                  <span className="text-xl">📖</span>
+                  <Image src="/assets/icons/opened-book.png" alt="Recap" width={24} height={24} />
                   <div className="text-left">
                     <div className="text-sm font-semibold text-gray-900">Story Recap</div>
                     <div className="text-xs text-gray-500">Ch.1–{currentChapter - 1} summary</div>
