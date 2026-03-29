@@ -1,0 +1,470 @@
+[
+  {
+    "id": "choice-gatsby-1",
+    "bookId": "great-gatsby",
+    "chapterNum": 2,
+    "question": "Would you trust Tom Buchanan?",
+    "context": "You've just witnessed Tom's casual cruelty at the garage apartment — his affair with Myrtle displayed without a trace of shame, his money used as a shield against consequence. He laughs too loud and stands too close.",
+    "options": [
+      {
+        "id": "opt-gatsby-1-trust",
+        "text": "Trust him",
+        "description": "He's powerful and well-connected. People like Tom always land on their feet, and staying close has its advantages."
+      },
+      {
+        "id": "opt-gatsby-1-doubt",
+        "text": "Doubt him",
+        "description": "His charm is a performance. Behind those easy smiles is a man who hurts people and feels nothing."
+      }
+    ],
+    "stats": {
+      "opt-gatsby-1-trust": {
+        "percentage": 38,
+        "voters": [
+          {
+            "userId": "jake",
+            "userName": "Jake",
+            "comment": "I mean he's terrible but also kind of impressive? Like at least he owns it."
+          },
+          {
+            "userId": "sofia",
+            "userName": "Sofia",
+            "comment": "He's the kind of guy you hate but can't look away from."
+          }
+        ]
+      },
+      "opt-gatsby-1-doubt": {
+        "percentage": 62,
+        "voters": [
+          {
+            "userId": "alex",
+            "userName": "Alex",
+            "comment": "Tom is the villain of this book and he doesn't even know it. Classic old money arrogance."
+          },
+          {
+            "userId": "mina",
+            "userName": "Mina",
+            "comment": "He's going to ruin someone by the end. I can feel it from chapter one."
+          }
+        ]
+      }
+    },
+    "myChoice": "opt-gatsby-1-doubt"
+  },
+  {
+    "id": "choice-gatsby-2",
+    "bookId": "great-gatsby",
+    "chapterNum": 4,
+    "question": "Gatsby reveals his obsession with Daisy. Do you think he really loves her?",
+    "context": "In the car, Gatsby speaks about Daisy with a fervor that doesn't quite match the woman you've met. He's built something in his mind over five years — something no real person could ever live up to.",
+    "options": [
+      {
+        "id": "opt-gatsby-2-yes",
+        "text": "Yes, it's real love",
+        "description": "The depth of his longing, the years of waiting — whatever it is, it's genuine. Love doesn't have to be rational."
+      },
+      {
+        "id": "opt-gatsby-2-no",
+        "text": "No, it's an obsession",
+        "description": "He doesn't love Daisy — he loves the idea of her. She's a symbol of everything he wanted and lost. That's not love, it's hunger."
+      }
+    ],
+    "stats": {
+      "opt-gatsby-2-yes": {
+        "percentage": 31,
+        "voters": [
+          {
+            "userId": "sofia",
+            "userName": "Sofia",
+            "comment": "Unrealistic maybe, but the longing is real. I felt it."
+          }
+        ]
+      },
+      "opt-gatsby-2-no": {
+        "percentage": 69,
+        "voters": [
+          {
+            "userId": "mina",
+            "userName": "Mina",
+            "comment": "He's in love with a five-year-old memory. Daisy the person never had a chance."
+          },
+          {
+            "userId": "alex",
+            "userName": "Alex",
+            "comment": "The green light says it all. He needs the distance. Proximity would ruin it."
+          },
+          {
+            "userId": "jake",
+            "userName": "Jake",
+            "comment": "Gatsby is a man-made myth and Daisy is part of the myth. Real love doesn't work that way."
+          }
+        ]
+      }
+    },
+    "myChoice": "opt-gatsby-2-no"
+  },
+  {
+    "id": "choice-gatsby-3",
+    "bookId": "great-gatsby",
+    "chapterNum": 5,
+    "question": "Gatsby wants to reunite with Daisy. Would you stay or leave?",
+    "context": "You've arranged the meeting. Gatsby is pacing your garden in a white flannel suit, five years of anticipation coiled into every movement. Daisy's car is pulling up. Whatever happens next will shatter the dream or confirm it.",
+    "options": [
+      {
+        "id": "opt-gatsby-3-stay",
+        "text": "Stay and witness it",
+        "description": "This moment has been years in the making. You want to see whether hope or reality wins."
+      },
+      {
+        "id": "opt-gatsby-3-leave",
+        "text": "Leave them alone",
+        "description": "Some things are too private to watch. You slip out the back and let history happen without a witness."
+      }
+    ],
+    "stats": {
+      "opt-gatsby-3-stay": {
+        "percentage": 68,
+        "voters": [
+          {
+            "userId": "alex",
+            "userName": "Alex",
+            "comment": "You'd be a fool to leave. This is the whole novel happening right here."
+          },
+          {
+            "userId": "jake",
+            "userName": "Jake",
+            "comment": "Nick stays and so would I. You arranged it — you're responsible for whatever comes next."
+          },
+          {
+            "userId": "mina",
+            "userName": "Mina",
+            "comment": "That scene in the rain is one of the most beautiful things in American literature. Stay."
+          }
+        ]
+      },
+      "opt-gatsby-3-leave": {
+        "percentage": 32,
+        "voters": [
+          {
+            "userId": "sofia",
+            "userName": "Sofia",
+            "comment": "Honestly feels intrusive. Let them have their moment without an audience."
+          }
+        ]
+      }
+    },
+    "myChoice": "opt-gatsby-3-stay"
+  },
+  {
+    "id": "choice-1984-1",
+    "bookId": "1984",
+    "chapterNum": 1,
+    "question": "You notice your neighbor's child watching you suspiciously. Do you change your behavior?",
+    "context": "The Parsons boy has been trained by the Youth League to report thoughtcrime. He's seven years old and staring at you with a focus that no child should have. His sister is behind him. Both of them are watching.",
+    "options": [
+      {
+        "id": "opt-1984-1-change",
+        "text": "Change your behavior",
+        "description": "It's not worth the risk. Children have turned in parents before. You keep your face blank and your movements deliberate."
+      },
+      {
+        "id": "opt-1984-1-ignore",
+        "text": "Ignore them",
+        "description": "You refuse to let a child's gaze control you. Giving in to paranoia is how they win."
+      }
+    ],
+    "stats": {
+      "opt-1984-1-change": {
+        "percentage": 71,
+        "voters": [
+          {
+            "userId": "mina",
+            "userName": "Mina",
+            "comment": "Survival first. This isn't courage, it's just rational self-preservation."
+          },
+          {
+            "userId": "sofia",
+            "userName": "Sofia",
+            "comment": "A child reported their father in chapter two. I'm not taking chances."
+          },
+          {
+            "userId": "jake",
+            "userName": "Jake",
+            "comment": "The scariest part of this book is that the smart move is to live smaller. That's the point."
+          }
+        ]
+      },
+      "opt-1984-1-ignore": {
+        "percentage": 29,
+        "voters": [
+          {
+            "userId": "alex",
+            "userName": "Alex",
+            "comment": "Giving in is how the system perpetuates itself. I'd rather be defiant even if it costs me."
+          }
+        ]
+      }
+    },
+    "myChoice": "opt-1984-1-change"
+  },
+  {
+    "id": "choice-1984-2",
+    "bookId": "1984",
+    "chapterNum": 3,
+    "question": "Winston finds a blank diary. Would you write in it?",
+    "context": "The diary is cream-colored with a smooth marbled cover. The act of writing itself is not illegal — nothing is explicitly illegal under the Party — but a diary is evidence of a private self, which may be the most dangerous thing of all. Your hand is already moving.",
+    "options": [
+      {
+        "id": "opt-1984-2-write",
+        "text": "Write in it",
+        "description": "The need to be witnessed, even by yourself, is too strong to deny. You write because you must."
+      },
+      {
+        "id": "opt-1984-2-hide",
+        "text": "Hide it without writing",
+        "description": "Possession is already a risk. You hide it somewhere the telescreen can't see and wait."
+      }
+    ],
+    "stats": {
+      "opt-1984-2-write": {
+        "percentage": 78,
+        "voters": [
+          {
+            "userId": "alex",
+            "userName": "Alex",
+            "comment": "Writing is the first act of resistance. Winston's diary is a declaration of existence."
+          },
+          {
+            "userId": "mina",
+            "userName": "Mina",
+            "comment": "I would write too. The need to record your own truth is primal."
+          },
+          {
+            "userId": "jake",
+            "userName": "Jake",
+            "comment": "DOWN WITH BIG BROTHER. Scream it on the page even if nowhere else."
+          }
+        ]
+      },
+      "opt-1984-2-hide": {
+        "percentage": 22,
+        "voters": [
+          {
+            "userId": "sofia",
+            "userName": "Sofia",
+            "comment": "I want to write but I genuinely think I'd be too scared. At least hiding doesn't condemn you immediately."
+          }
+        ]
+      }
+    },
+    "myChoice": "opt-1984-2-write"
+  },
+  {
+    "id": "choice-1984-3",
+    "bookId": "1984",
+    "chapterNum": 5,
+    "question": "Julia passes you a note. Do you trust her?",
+    "context": "She hands you a folded scrap of paper in the corridor with the practiced ease of someone who has done this before. The note says four words. You haven't read it yet. She's already walking away, not looking back. She could be Thought Police.",
+    "options": [
+      {
+        "id": "opt-1984-3-trust",
+        "text": "Trust her",
+        "description": "Something in her eyes isn't Party. You pocket the note and read it alone."
+      },
+      {
+        "id": "opt-1984-3-report",
+        "text": "Report her",
+        "description": "You cannot afford the risk. She may be testing you. You bring the note unread to a supervisor."
+      }
+    ],
+    "stats": {
+      "opt-1984-3-trust": {
+        "percentage": 55,
+        "voters": [
+          {
+            "userId": "alex",
+            "userName": "Alex",
+            "comment": "Julia is the most alive person in the novel. You trust her or you choose to stay dead inside."
+          },
+          {
+            "userId": "mina",
+            "userName": "Mina",
+            "comment": "The note says 'I love you.' If someone risks everything to say that — you trust them."
+          },
+          {
+            "userId": "jake",
+            "userName": "Jake",
+            "comment": "It's risky but staying alone is worse. Winston needs this."
+          }
+        ]
+      },
+      "opt-1984-3-report": {
+        "percentage": 45,
+        "voters": [
+          {
+            "userId": "sofia",
+            "userName": "Sofia",
+            "comment": "After chapter one I don't trust anyone in this world. The paranoia is contagious — that's the genius of the book."
+          }
+        ]
+      }
+    },
+    "myChoice": "opt-1984-3-trust"
+  },
+  {
+    "id": "choice-pp-1",
+    "bookId": "pride-prejudice",
+    "chapterNum": 2,
+    "question": "Darcy insults you at the ball. How do you respond?",
+    "context": "He's standing with Bingley, glancing your way, and says you are 'tolerable, but not handsome enough to tempt him.' His voice carries. Half the room heard it. He looks entirely unbothered.",
+    "options": [
+      {
+        "id": "opt-pp-1-confront",
+        "text": "Confront him directly",
+        "description": "You hold his gaze and let him know you heard every word. You won't pretend otherwise."
+      },
+      {
+        "id": "opt-pp-1-ignore",
+        "text": "Ignore it and move on",
+        "description": "His opinion is not worth your energy. You turn back to your conversation and let the insult evaporate."
+      }
+    ],
+    "stats": {
+      "opt-pp-1-confront": {
+        "percentage": 41,
+        "voters": [
+          {
+            "userId": "alex",
+            "userName": "Alex",
+            "comment": "Elizabeth would confront. She's the only person in this novel with enough spine to do it."
+          },
+          {
+            "userId": "sofia",
+            "userName": "Sofia",
+            "comment": "The tension that creates is exactly what the whole story runs on."
+          }
+        ]
+      },
+      "opt-pp-1-ignore": {
+        "percentage": 59,
+        "voters": [
+          {
+            "userId": "mina",
+            "userName": "Mina",
+            "comment": "Ignoring it is its own kind of power. He expects a reaction. Give him nothing."
+          },
+          {
+            "userId": "jake",
+            "userName": "Jake",
+            "comment": "In Regency England you can't just call someone out. The social cost would fall on you, not him."
+          }
+        ]
+      }
+    },
+    "myChoice": "opt-pp-1-ignore"
+  },
+  {
+    "id": "choice-pp-2",
+    "bookId": "pride-prejudice",
+    "chapterNum": 4,
+    "question": "Wickham tells you his side of the story about Darcy. Do you believe him?",
+    "context": "Wickham is charming and his story is detailed — cheated out of a living, passed over for a position Darcy's father intended for him. He tells it with just the right amount of reluctance, as though the wound is still fresh. It's entirely plausible.",
+    "options": [
+      {
+        "id": "opt-pp-2-believe",
+        "text": "Believe Wickham",
+        "description": "His account is credible and Darcy has already shown himself to be arrogant. The pieces fit."
+      },
+      {
+        "id": "opt-pp-2-doubt",
+        "text": "Reserve judgment",
+        "description": "Something is too polished about how he tells it. You listen without committing either way."
+      }
+    ],
+    "stats": {
+      "opt-pp-2-believe": {
+        "percentage": 47,
+        "voters": [
+          {
+            "userId": "sofia",
+            "userName": "Sofia",
+            "comment": "First read I believed him completely. He's designed to be believed."
+          },
+          {
+            "userId": "jake",
+            "userName": "Jake",
+            "comment": "Austen is very deliberately making you trust the wrong person. It works on me every time."
+          }
+        ]
+      },
+      "opt-pp-2-doubt": {
+        "percentage": 53,
+        "voters": [
+          {
+            "userId": "mina",
+            "userName": "Mina",
+            "comment": "He's too smooth. People who've been genuinely wronged usually have more anger and less narrative."
+          },
+          {
+            "userId": "alex",
+            "userName": "Alex",
+            "comment": "Wickham is a study in how charm substitutes for character. I smell the manipulation immediately."
+          }
+        ]
+      }
+    },
+    "myChoice": "opt-pp-2-doubt"
+  },
+  {
+    "id": "choice-pp-3",
+    "bookId": "pride-prejudice",
+    "chapterNum": 6,
+    "question": "Collins proposes to you. What do you do?",
+    "context": "Mr. Collins has spent forty minutes building to this proposal with the methodical confidence of a man who has never considered refusal. He lists your family's financial situation, his own rectory, and Lady Catherine's approval. He is not asking — he is informing. Your mother is delighted.",
+    "options": [
+      {
+        "id": "opt-pp-3-refuse",
+        "text": "Refuse him",
+        "description": "No amount of financial security is worth a lifetime of that voice. You decline clearly and without apology."
+      },
+      {
+        "id": "opt-pp-3-accept",
+        "text": "Accept for security",
+        "description": "You're practical. Marriage is an economic reality, not a romance novel. He is harmless and stable."
+      }
+    ],
+    "stats": {
+      "opt-pp-3-refuse": {
+        "percentage": 84,
+        "voters": [
+          {
+            "userId": "alex",
+            "userName": "Alex",
+            "comment": "The refusal scene is one of the best in the book. 'I am not now, nor have I ever been...' Iconic."
+          },
+          {
+            "userId": "mina",
+            "userName": "Mina",
+            "comment": "Refuse. Obviously. A life with Collins would be a slow spiritual death."
+          },
+          {
+            "userId": "jake",
+            "userName": "Jake",
+            "comment": "Easy choice. Though Charlotte's decision makes complete sense given her circumstances — Austen doesn't judge her."
+          }
+        ]
+      },
+      "opt-pp-3-accept": {
+        "percentage": 16,
+        "voters": [
+          {
+            "userId": "sofia",
+            "userName": "Sofia",
+            "comment": "If I'm being honest about the historical reality — Charlotte made the rational choice. It's just not romantic."
+          }
+        ]
+      }
+    },
+    "myChoice": "opt-pp-3-refuse"
+  }
+]

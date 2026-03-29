@@ -1,0 +1,32 @@
+[
+  {
+    "id": "great-gatsby",
+    "title": "The Great Gatsby",
+    "author": "F. Scott Fitzgerald",
+    "genre": "Literature",
+    "cover": "https://covers.openlibrary.org/b/id/8432047-L.jpg",
+    "totalChapters": 9,
+    "description": "A story of the mysteriously wealthy Jay Gatsby and his love for Daisy Buchanan.",
+    "year": 1925
+  },
+  {
+    "id": "1984",
+    "title": "1984",
+    "author": "George Orwell",
+    "genre": "Dystopia",
+    "cover": "https://covers.openlibrary.org/b/id/12645114-L.jpg",
+    "totalChapters": 8,
+    "description": "A dystopian novel about totalitarianism, surveillance, and the destruction of truth.",
+    "year": 1949
+  },
+  {
+    "id": "pride-prejudice",
+    "title": "Pride and Prejudice",
+    "author": "Jane Austen",
+    "genre": "Romance",
+    "cover": "https://covers.openlibrary.org/b/id/12648289-L.jpg",
+    "totalChapters": 8,
+    "description": "Elizabeth Bennet navigates love, reputation, and misunderstanding in Regency England.",
+    "year": 1813
+  }
+]

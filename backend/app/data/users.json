@@ -1,0 +1,66 @@
+[
+  {
+    "id": "me",
+    "name": "You",
+    "avatar": null,
+    "planetImage": "planet2.png",
+    "planetStyle": "forest",
+    "level": 3,
+    "booksRead": 5,
+    "totalNotes": 42,
+    "totalChoices": 18,
+    "genres": {"Literature": 60, "Sci-Fi": 30, "Philosophy": 10}
+  },
+  {
+    "id": "alex",
+    "name": "Alex",
+    "avatar": null,
+    "planetImage": "planet3.png",
+    "planetStyle": "metallic",
+    "level": 5,
+    "booksRead": 8,
+    "totalNotes": 67,
+    "totalChoices": 32,
+    "genres": {"Literature": 40, "Adventure": 35, "Sci-Fi": 25},
+    "similarity": 91
+  },
+  {
+    "id": "mina",
+    "name": "Mina",
+    "avatar": null,
+    "planetImage": "planet1.png",
+    "planetStyle": "dark",
+    "level": 4,
+    "booksRead": 6,
+    "totalNotes": 53,
+    "totalChoices": 24,
+    "genres": {"Romance": 50, "Literature": 30, "Philosophy": 20},
+    "similarity": 45
+  },
+  {
+    "id": "jake",
+    "name": "Jake",
+    "avatar": null,
+    "planetImage": "planet1.png",
+    "planetStyle": "ice",
+    "level": 4,
+    "booksRead": 7,
+    "totalNotes": 45,
+    "totalChoices": 28,
+    "genres": {"Sci-Fi": 45, "Literature": 35, "Adventure": 20},
+    "similarity": 78
+  },
+  {
+    "id": "sofia",
+    "name": "Sofia",
+    "avatar": null,
+    "planetImage": "planet2.png",
+    "planetStyle": "crystal",
+    "level": 2,
+    "booksRead": 3,
+    "totalNotes": 18,
+    "totalChoices": 10,
+    "genres": {"Romance": 60, "Literature": 40},
+    "similarity": 62
+  }
+]

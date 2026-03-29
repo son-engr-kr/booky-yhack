@@ -1,0 +1,426 @@
+[
+  {
+    "id": "feed-1",
+    "type": "highlight",
+    "userId": "alex",
+    "userName": "Alex",
+    "bookId": "1984",
+    "bookTitle": "1984",
+    "chapterNum": 6,
+    "text": "This line stopped me cold. Orwell says it so plainly it almost doesn't register — and then it does.",
+    "quote": "War is peace. Freedom is slavery. Ignorance is strength.",
+    "likes": 14,
+    "comments": [
+      {
+        "userId": "jake",
+        "userName": "Jake",
+        "text": "The contradiction is the point. The Party doesn't care if it makes sense — it cares that you repeat it.",
+        "createdAt": "2026-03-27T11:42:00Z"
+      },
+      {
+        "userId": "mina",
+        "userName": "Mina",
+        "text": "I wrote this in my notebook and stared at it for like ten minutes.",
+        "createdAt": "2026-03-27T12:05:00Z"
+      }
+    ],
+    "createdAt": "2026-03-27T10:15:00Z",
+    "isSpoiler": false
+  },
+  {
+    "id": "feed-2",
+    "type": "story",
+    "userId": "mina",
+    "userName": "Mina",
+    "bookId": "great-gatsby",
+    "bookTitle": "The Great Gatsby",
+    "chapterNum": 3,
+    "text": "Just got through the party chapter. There are 300 people in Gatsby's house and he knows none of them. That's the loneliest thing I've ever read.",
+    "quote": null,
+    "likes": 9,
+    "comments": [
+      {
+        "userId": "me",
+        "userName": "You",
+        "text": "The way nobody even notices when he disappears from his own party...",
+        "createdAt": "2026-03-26T20:55:00Z"
+      },
+      {
+        "userId": "sofia",
+        "userName": "Sofia",
+        "text": "He throws parties to find one person. That is devastating.",
+        "createdAt": "2026-03-26T21:10:00Z"
+      }
+    ],
+    "createdAt": "2026-03-26T20:30:00Z",
+    "isSpoiler": false
+  },
+  {
+    "id": "feed-3",
+    "type": "completion",
+    "userId": "jake",
+    "userName": "Jake",
+    "bookId": "great-gatsby",
+    "bookTitle": "The Great Gatsby",
+    "chapterNum": 9,
+    "text": "Finished it. Every time I read the ending I forget how hard it hits. Fitzgerald earns that last line completely.",
+    "quote": "So we beat on, boats against the current, borne back ceaselessly into the past.",
+    "rating": 5,
+    "likes": 21,
+    "comments": [
+      {
+        "userId": "alex",
+        "userName": "Alex",
+        "text": "That last line is one of the greatest sentences in any language. Genuinely.",
+        "createdAt": "2026-03-25T16:20:00Z"
+      },
+      {
+        "userId": "mina",
+        "userName": "Mina",
+        "text": "Jake finishing before me and posting this with zero spoiler warning is criminal.",
+        "createdAt": "2026-03-25T16:45:00Z"
+      }
+    ],
+    "createdAt": "2026-03-25T15:50:00Z",
+    "isSpoiler": true
+  },
+  {
+    "id": "feed-4",
+    "type": "highlight",
+    "userId": "sofia",
+    "userName": "Sofia",
+    "bookId": "pride-prejudice",
+    "bookTitle": "Pride and Prejudice",
+    "chapterNum": 1,
+    "text": "I had to put the book down after this line. Austen in two sentences.",
+    "quote": "It is a truth universally acknowledged, that a single man in possession of a good fortune, must be in want of a wife.",
+    "likes": 18,
+    "comments": [
+      {
+        "userId": "mina",
+        "userName": "Mina",
+        "text": "The irony is so thick you could cut it. She's describing the women who think this, not endorsing it.",
+        "createdAt": "2026-03-26T09:15:00Z"
+      },
+      {
+        "userId": "jake",
+        "userName": "Jake",
+        "text": "People quote this constantly without realizing Austen is laughing at them when they do.",
+        "createdAt": "2026-03-26T09:50:00Z"
+      }
+    ],
+    "createdAt": "2026-03-26T08:55:00Z",
+    "isSpoiler": false
+  },
+  {
+    "id": "feed-5",
+    "type": "story",
+    "userId": "alex",
+    "userName": "Alex",
+    "bookId": "1984",
+    "bookTitle": "1984",
+    "chapterNum": 7,
+    "text": "The thing that gets me about 1984 is how the torture isn't about punishment — it's about conversion. O'Brien doesn't want Winston dead. He wants Winston to believe. That's so much worse.",
+    "quote": null,
+    "likes": 16,
+    "comments": [
+      {
+        "userId": "jake",
+        "userName": "Jake",
+        "text": "Room 101 isn't punishment. It's a correction. The distinction is unbearable.",
+        "createdAt": "2026-03-27T14:30:00Z"
+      }
+    ],
+    "createdAt": "2026-03-27T13:45:00Z",
+    "isSpoiler": true
+  },
+  {
+    "id": "feed-6",
+    "type": "highlight",
+    "userId": "jake",
+    "userName": "Jake",
+    "bookId": "1984",
+    "bookTitle": "1984",
+    "chapterNum": 4,
+    "text": "Orwell describing Winston's job. The mundanity of it is what makes it evil.",
+    "quote": "He who controls the past controls the future. He who controls the present controls the past.",
+    "likes": 12,
+    "comments": [
+      {
+        "userId": "alex",
+        "userName": "Alex",
+        "text": "Winston literally does this as his day job. Rewrites history. And he knows it. And he still does it.",
+        "createdAt": "2026-03-24T18:20:00Z"
+      },
+      {
+        "userId": "mina",
+        "userName": "Mina",
+        "text": "The complicity is what makes it work as a system. Everyone participates in their own oppression.",
+        "createdAt": "2026-03-24T19:00:00Z"
+      }
+    ],
+    "createdAt": "2026-03-24T17:55:00Z",
+    "isSpoiler": false
+  },
+  {
+    "id": "feed-7",
+    "type": "story",
+    "userId": "sofia",
+    "userName": "Sofia",
+    "bookId": "great-gatsby",
+    "bookTitle": "The Great Gatsby",
+    "chapterNum": 2,
+    "text": "Only on chapter 2 and I already kind of hate everyone except Nick. Tom is a nightmare. The Valley of Ashes is genuinely haunting as an image.",
+    "quote": null,
+    "likes": 7,
+    "comments": [
+      {
+        "userId": "mina",
+        "userName": "Mina",
+        "text": "Nick is... complicated though. Keep reading.",
+        "createdAt": "2026-03-26T11:30:00Z"
+      },
+      {
+        "userId": "me",
+        "userName": "You",
+        "text": "The eyes of Doctor T. J. Eckleburg watching over everything — one of the best symbols in the novel.",
+        "createdAt": "2026-03-26T11:45:00Z"
+      }
+    ],
+    "createdAt": "2026-03-26T11:00:00Z",
+    "isSpoiler": false
+  },
+  {
+    "id": "feed-8",
+    "type": "completion",
+    "userId": "alex",
+    "userName": "Alex",
+    "bookId": "1984",
+    "bookTitle": "1984",
+    "chapterNum": 8,
+    "text": "Done. One of the most important books I've read. Orwell gets the mechanics of authoritarianism right in a way that feels less like a novel and more like a manual for how to resist.",
+    "quote": null,
+    "rating": 5,
+    "likes": 19,
+    "comments": [
+      {
+        "userId": "jake",
+        "userName": "Jake",
+        "text": "I read it three times and every time I find something new to dread.",
+        "createdAt": "2026-03-22T10:15:00Z"
+      },
+      {
+        "userId": "sofia",
+        "userName": "Sofia",
+        "text": "I haven't started yet and now I'm scared to.",
+        "createdAt": "2026-03-22T10:55:00Z"
+      },
+      {
+        "userId": "mina",
+        "userName": "Mina",
+        "text": "Still on chapter 7 and already broken. Alex finishing is aspirational.",
+        "createdAt": "2026-03-22T11:20:00Z"
+      }
+    ],
+    "createdAt": "2026-03-22T09:40:00Z",
+    "isSpoiler": false
+  },
+  {
+    "id": "feed-9",
+    "type": "story",
+    "userId": "me",
+    "userName": "You",
+    "bookId": "great-gatsby",
+    "bookTitle": "The Great Gatsby",
+    "chapterNum": 5,
+    "text": "The reunion scene just happened and I'm not okay. Gatsby is shaking. Daisy is crying. And Nick is standing in his own garden like a ghost at someone else's life.",
+    "quote": null,
+    "likes": 11,
+    "comments": [
+      {
+        "userId": "alex",
+        "userName": "Alex",
+        "text": "That's the peak of the novel right there. It only goes one direction after this.",
+        "createdAt": "2026-03-28T08:30:00Z"
+      },
+      {
+        "userId": "mina",
+        "userName": "Mina",
+        "text": "The detail about the shirts always gets me. Daisy crying into the shirts. So much said in one image.",
+        "createdAt": "2026-03-28T08:45:00Z"
+      }
+    ],
+    "createdAt": "2026-03-28T08:00:00Z",
+    "isSpoiler": false
+  },
+  {
+    "id": "feed-10",
+    "type": "highlight",
+    "userId": "mina",
+    "userName": "Mina",
+    "bookId": "pride-prejudice",
+    "bookTitle": "Pride and Prejudice",
+    "chapterNum": 8,
+    "text": "Austen writes Elizabeth's internal shift better than almost any author I've read. This is the moment everything changes.",
+    "quote": "She began now to comprehend that he was exactly the man who, in disposition and talents, would most suit her.",
+    "likes": 13,
+    "comments": [
+      {
+        "userId": "sofia",
+        "userName": "Sofia",
+        "text": "Mina are you done already?? I'm on chapter 6!",
+        "createdAt": "2026-03-27T21:30:00Z"
+      },
+      {
+        "userId": "jake",
+        "userName": "Jake",
+        "text": "Austen earns this. It's not a sudden reversal — you can track every step of her changing mind.",
+        "createdAt": "2026-03-27T22:00:00Z"
+      }
+    ],
+    "createdAt": "2026-03-27T21:00:00Z",
+    "isSpoiler": true
+  },
+  {
+    "id": "feed-11",
+    "type": "completion",
+    "userId": "mina",
+    "userName": "Mina",
+    "bookId": "pride-prejudice",
+    "bookTitle": "Pride and Prejudice",
+    "chapterNum": 8,
+    "text": "Finished Pride and Prejudice for the second time and it gets better. Austen is funnier than people give her credit for — this book is comedy as much as romance.",
+    "quote": null,
+    "rating": 5,
+    "likes": 15,
+    "comments": [
+      {
+        "userId": "sofia",
+        "userName": "Sofia",
+        "text": "I need to read faster. Everyone is finishing before me.",
+        "createdAt": "2026-03-27T23:15:00Z"
+      },
+      {
+        "userId": "alex",
+        "userName": "Alex",
+        "text": "Austen invented the unreliable social narrator. Everything flows from her.",
+        "createdAt": "2026-03-27T23:45:00Z"
+      }
+    ],
+    "createdAt": "2026-03-27T22:50:00Z",
+    "isSpoiler": false
+  },
+  {
+    "id": "feed-12",
+    "type": "story",
+    "userId": "jake",
+    "userName": "Jake",
+    "bookId": "1984",
+    "bookTitle": "1984",
+    "chapterNum": 4,
+    "text": "Winston's job at the Ministry of Truth is described so matter-of-factly it's almost funny. He edits old newspaper articles so the Party's predictions are always 'correct.' Bureaucratic evil is somehow more disturbing than theatrical evil.",
+    "quote": null,
+    "likes": 10,
+    "comments": [
+      {
+        "userId": "alex",
+        "userName": "Alex",
+        "text": "He also writes substitute news stories about fictional war heroes. The creativity required for sustained lying is staggering.",
+        "createdAt": "2026-03-23T15:10:00Z"
+      }
+    ],
+    "createdAt": "2026-03-23T14:30:00Z",
+    "isSpoiler": false
+  },
+  {
+    "id": "feed-13",
+    "type": "highlight",
+    "userId": "alex",
+    "userName": "Alex",
+    "bookId": "great-gatsby",
+    "bookTitle": "The Great Gatsby",
+    "chapterNum": 7,
+    "text": "Nick's verdict on Gatsby — maybe the truest sentence in the novel.",
+    "quote": "They're a rotten crowd. You're worth the whole damn bunch put together.",
+    "likes": 17,
+    "comments": [
+      {
+        "userId": "jake",
+        "userName": "Jake",
+        "text": "Nick saying this knowing Gatsby is also kind of rotten — that's the ambiguity the whole book lives in.",
+        "createdAt": "2026-03-25T09:30:00Z"
+      },
+      {
+        "userId": "mina",
+        "userName": "Mina",
+        "text": "Nick doesn't compliment people easily. This one lands.",
+        "createdAt": "2026-03-25T09:55:00Z"
+      }
+    ],
+    "createdAt": "2026-03-25T09:00:00Z",
+    "isSpoiler": true
+  },
+  {
+    "id": "feed-14",
+    "type": "story",
+    "userId": "mina",
+    "userName": "Mina",
+    "bookId": "1984",
+    "bookTitle": "1984",
+    "chapterNum": 7,
+    "text": "Julia and Winston's relationship is so tender it makes the rest of the novel more brutal by contrast. Orwell gives you something real to lose before he takes it away. That's just cruel craft.",
+    "quote": null,
+    "likes": 14,
+    "comments": [
+      {
+        "userId": "alex",
+        "userName": "Alex",
+        "text": "Exactly. Love in a world designed to destroy it — the stakes become personal, not just political.",
+        "createdAt": "2026-03-26T17:40:00Z"
+      },
+      {
+        "userId": "jake",
+        "userName": "Jake",
+        "text": "Mina's post is a spoiler but I don't care because it's correct.",
+        "createdAt": "2026-03-26T18:00:00Z"
+      }
+    ],
+    "createdAt": "2026-03-26T17:00:00Z",
+    "isSpoiler": true
+  },
+  {
+    "id": "feed-15",
+    "type": "completion",
+    "userId": "jake",
+    "userName": "Jake",
+    "bookId": "1984",
+    "bookTitle": "1984",
+    "chapterNum": 8,
+    "text": "Second read of 1984 complete. The ending wrecked me both times for different reasons. First time: shock. Second time: grief, because you know exactly what's coming and you can't stop it.",
+    "quote": "He loved Big Brother.",
+    "rating": 5,
+    "likes": 23,
+    "comments": [
+      {
+        "userId": "alex",
+        "userName": "Alex",
+        "text": "Those last four words are the most devastating ending in English literature. I'll die on this hill.",
+        "createdAt": "2026-03-21T20:30:00Z"
+      },
+      {
+        "userId": "mina",
+        "userName": "Mina",
+        "text": "Still a chapter away. Do NOT do this to me Jake.",
+        "createdAt": "2026-03-21T20:45:00Z"
+      },
+      {
+        "userId": "sofia",
+        "userName": "Sofia",
+        "text": "I haven't started this book and now I'm emotionally preparing.",
+        "createdAt": "2026-03-21T21:00:00Z"
+      }
+    ],
+    "createdAt": "2026-03-21T20:00:00Z",
+    "isSpoiler": true
+  }
+]

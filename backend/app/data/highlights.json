@@ -1,0 +1,90 @@
+[
+  {
+    "id": "h1",
+    "userId": "me",
+    "userName": "You",
+    "bookId": "great-gatsby",
+    "chapterNum": 1,
+    "text": "So we beat on, boats against the current, borne back ceaselessly into the past.",
+    "comment": "Powerful ending. The futility of fighting time.",
+    "createdAt": "2024-01-20T14:35:00Z",
+    "color": "yellow"
+  },
+  {
+    "id": "h2",
+    "userId": "me",
+    "userName": "You",
+    "bookId": "great-gatsby",
+    "chapterNum": 3,
+    "text": "There was music from my neighbor's house through the summer nights.",
+    "comment": "Sets the mood perfectly.",
+    "createdAt": "2024-01-19T10:20:00Z",
+    "color": "blue"
+  },
+  {
+    "id": "h3",
+    "userId": "me",
+    "userName": "You",
+    "bookId": "1984",
+    "chapterNum": 1,
+    "text": "It was a bright cold day in April, and the clocks were striking thirteen.",
+    "comment": "Iconic opening. Immediately unsettling.",
+    "createdAt": "2024-01-17T20:10:00Z",
+    "color": "red"
+  },
+  {
+    "id": "h4",
+    "userId": "alex",
+    "userName": "Alex",
+    "bookId": "great-gatsby",
+    "chapterNum": 5,
+    "text": "Can't repeat the past? Why of course you can!",
+    "comment": "Gatsby's delusion laid bare.",
+    "createdAt": "2024-01-21T08:45:00Z",
+    "color": "yellow"
+  },
+  {
+    "id": "h5",
+    "userId": "alex",
+    "userName": "Alex",
+    "bookId": "great-gatsby",
+    "chapterNum": 7,
+    "text": "They were careless people, Tom and Daisy — they smashed up things and creatures.",
+    "comment": "Nick's moral judgment finally surfaces.",
+    "createdAt": "2024-01-21T09:30:00Z",
+    "color": "green"
+  },
+  {
+    "id": "h6",
+    "userId": "mina",
+    "userName": "Mina",
+    "bookId": "pride-prejudice",
+    "chapterNum": 3,
+    "text": "She is tolerable, but not handsome enough to tempt me.",
+    "comment": "First impression of Darcy — arrogance at peak.",
+    "createdAt": "2024-01-19T21:15:00Z",
+    "color": "pink"
+  },
+  {
+    "id": "h7",
+    "userId": "jake",
+    "userName": "Jake",
+    "bookId": "1984",
+    "chapterNum": 5,
+    "text": "Freedom is the freedom to say that two plus two make four.",
+    "comment": "The core thesis of the whole book.",
+    "createdAt": "2024-01-20T19:40:00Z",
+    "color": "yellow"
+  },
+  {
+    "id": "h8",
+    "userId": "sofia",
+    "userName": "Sofia",
+    "bookId": "pride-prejudice",
+    "chapterNum": 1,
+    "text": "It is a truth universally acknowledged, that a single man in possession of a good fortune, must be in want of a wife.",
+    "comment": "Satire disguised as declaration.",
+    "createdAt": "2024-01-22T12:30:00Z",
+    "color": "blue"
+  }
+]
