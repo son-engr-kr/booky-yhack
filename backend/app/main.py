@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
-from app.routers import books, reading, highlights, feed, friends, choices, planet, auth
+from app.routers import books, reading, highlights, feed, friends, choices, planet, auth, ai
 
 app = FastAPI(title="Booky API", version="0.1.0")
 
@@ -21,6 +21,7 @@ app.include_router(feed.router, prefix="/api/feed", tags=["feed"])
 app.include_router(friends.router, prefix="/api/friends", tags=["friends"])
 app.include_router(choices.router, prefix="/api/choices", tags=["choices"])
 app.include_router(planet.router, prefix="/api/planet", tags=["planet"])
+app.include_router(ai.router, prefix="/api/ai", tags=["ai"])
 
 
 @app.get("/api/health")

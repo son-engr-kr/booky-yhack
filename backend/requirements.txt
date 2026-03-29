@@ -8,5 +8,8 @@ pydantic-settings==2.6.0
 # Firebase + GCP
 firebase-admin==6.5.0
 
+# K2 Think V2
+httpx==0.28.1
+
 # Vector DB
 chromadb==0.5.5

@@ -13,6 +13,11 @@ class Settings(BaseSettings):
     firestore_emulator_host: str = "localhost:8080"
     auth_emulator_host: str = "localhost:9099"
 
+    # K2 Think V2
+    k2_api_key: str = ""
+    k2_api_url: str = "https://api.k2think.ai/v1/chat/completions"
+    k2_model: str = "MBZUAI-IFM/K2-Think-v2"
+
     # ChromaDB
     chroma_persist_dir: str = "./chroma_data"
 

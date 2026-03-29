@@ -61,6 +61,40 @@ export const getFriendPlanets = () =>
 export const getConstellation = (bookId: string) =>
   fetcher<ConstellationData>(`/planet/constellation/${bookId}`);
 
+// AI (K2 Think V2)
+async function postJson<T>(path: string, body: Record<string, unknown>): Promise<T> {
+  try {
+    const res = await fetch(`${API_BASE}${path}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) {
+      console.warn(`API ${res.status}: ${path}`);
+      return null as T;
+    }
+    return res.json();
+  } catch (e) {
+    console.warn(`API post failed: ${path}`, e);
+    return null as T;
+  }
+}
+
+export const aiGenerateQuestions = (bookTitle: string, author: string, chapterTitle: string, passage: string) =>
+  postJson<{ questions: string[] }>("/ai/questions", { book_title: bookTitle, author, chapter_title: chapterTitle, passage });
+
+export const aiAuthorChat = (bookTitle: string, author: string, message: string, history: { role: string; content: string }[] = []) =>
+  postJson<{ response: string }>("/ai/author-chat", { book_title: bookTitle, author, message, history });
+
+export const aiGenerateChoice = (bookTitle: string, author: string, chapterNum: number, context: string) =>
+  postJson<{ question: string; context: string; options: { id: string; text: string; description: string }[] }>("/ai/choice", { book_title: bookTitle, author, chapter_num: chapterNum, context });
+
+export const aiGenerateRecap = (bookTitle: string, author: string, chaptersSummary: string) =>
+  postJson<{ panels: { panel: number; emoji: string; title: string; description: string }[] }>("/ai/recap", { book_title: bookTitle, author, chapters_summary: chaptersSummary });
+
+export const aiSpoilerCheck = (text: string, bookTitle: string, readerChapter: number) =>
+  postJson<{ is_spoiler: boolean; reason: string }>("/ai/spoiler-check", { text, book_title: bookTitle, reader_chapter: readerChapter });
+
 // Types
 export interface User {
   id: string;
