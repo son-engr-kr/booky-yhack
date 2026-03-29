@@ -155,15 +155,7 @@ function renderParagraph(
           return <span key={i}>{seg.content}</span>;
         }
         if (seg.type === "character") {
-          return (
-            <button
-              key={i}
-              onClick={() => handleCharacterTap(seg.content)}
-              className="text-amber-700 font-semibold underline decoration-amber-400 decoration-2 underline-offset-2 hover:text-amber-900 transition-colors"
-            >
-              {seg.content}
-            </button>
-          );
+          return <span key={i}>{seg.content}</span>;
         }
         if (seg.type === "friendHighlight") {
           const hl = seg.highlight;
@@ -521,6 +513,26 @@ export default function ReadPage() {
           </>
         )}
 
+        {/* Characters on this page */}
+        {(() => {
+          const pageText = paragraphs.join(" ");
+          const found = characterNames.filter((name) => new RegExp(`\\b${name}\\b`).test(pageText));
+          if (found.length === 0) return null;
+          return (
+            <div className="flex flex-wrap gap-1.5 mb-3 flex-shrink-0">
+              {found.map((name) => (
+                <button
+                  key={name}
+                  onClick={() => handleCharacterTap(name)}
+                  className="text-[11px] px-2.5 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-700 font-medium hover:bg-amber-100 transition-colors"
+                >
+                  {name}
+                </button>
+              ))}
+            </div>
+          );
+        })()}
+
         <div className="flex-1 relative">
           {paragraphs.length > 0
             ? paragraphs.map((para, idx) =>
@@ -642,10 +654,11 @@ export default function ReadPage() {
                   setVoiceAsk((v) => v ? { ...v, listening: false, question: "(Speech recognition not supported)" } : v);
                   return;
                 }
-                const recognition = new (SpeechRecognition as new () => SpeechRecognition)();
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const recognition = new (SpeechRecognition as any)();
                 recognition.lang = "en-US";
                 recognition.interimResults = false;
-                recognition.onresult = (event: SpeechRecognitionEvent) => {
+                recognition.onresult = (event: any) => {
                   const transcript = event.results[0][0].transcript;
                   setVoiceAsk((v) => v ? { ...v, listening: false, question: transcript, loading: true } : v);
                   aiVoiceAsk(transcript, passage, book?.title || "", book?.author || "", chapterNum).then((res) => {
@@ -772,10 +785,11 @@ export default function ReadPage() {
                       setVoiceAsk({ passage, listening: true, question: "", answer: "", loading: false });
                       const SpeechRecognition = (window as unknown as Record<string, unknown>).SpeechRecognition || (window as unknown as Record<string, unknown>).webkitSpeechRecognition;
                       if (!SpeechRecognition) return;
-                      const recognition = new (SpeechRecognition as new () => SpeechRecognition)();
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const recognition = new (SpeechRecognition as any)();
                       recognition.lang = "en-US";
                       recognition.interimResults = false;
-                      recognition.onresult = (event: SpeechRecognitionEvent) => {
+                      recognition.onresult = (event: any) => {
                         const transcript = event.results[0][0].transcript;
                         setVoiceAsk((v) => v ? { ...v, listening: false, question: transcript, loading: true } : v);
                         aiVoiceAsk(transcript, passage, book?.title || "", book?.author || "", chapterNum).then((res) => {

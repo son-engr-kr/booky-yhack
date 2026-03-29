@@ -4,8 +4,8 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import BottomNav from "@/components/nav/BottomNav";
 import {
-  getReadingProfile, getFriends, getMyPlanet, getMyBooks, getMyReadingNotes, generateBookReadingNotes, updatePlanetName,
-  type ReadingProfile, type Friend, type PlanetData, type ReadingProgress, type SavedReadingNote, type Book,
+  getFriends, getMyPlanet, getMyBooks, getMyReadingNotes, generateBookReadingNotes, updatePlanetName, generatePlanetImage,
+  type Friend, type PlanetData, type ReadingProgress, type SavedReadingNote, type Book,
 } from "@/lib/api";
 import ReadingNotesPanel from "@/components/reading/ReadingNotesPanel";
 
@@ -95,7 +95,6 @@ function axisEndpoints(cx: number, cy: number, r: number) {
 }
 
 export default function ProfilePage() {
-  const [profile, setProfile] = useState<ReadingProfile | null>(null);
   const [friends, setFriends] = useState<Friend[]>([]);
   const [planet, setPlanet] = useState<PlanetData | null>(null);
   const [myBooks, setMyBooks] = useState<ReadingProgress[]>([]);
@@ -105,9 +104,9 @@ export default function ProfilePage() {
   const [generating, setGenerating] = useState<string | null>(null);
   const [editingName, setEditingName] = useState(false);
   const [nameInput, setNameInput] = useState("");
+  const [generatingPlanet, setGeneratingPlanet] = useState(false);
 
   useEffect(() => {
-    getReadingProfile().then(setProfile);
     getFriends().then(setFriends);
     getMyPlanet().then(setPlanet);
     getMyBooks().then((b) => setMyBooks(Array.isArray(b) ? b : []));
@@ -130,7 +129,7 @@ export default function ProfilePage() {
     setOpenNoteBookId(bookId);
   };
 
-  if (!profile) {
+  if (!planet) {
     return (
       <div className="min-h-screen bg-[#f0f2f8] flex items-center justify-center">
         <div className="text-gray-400 text-sm animate-pulse">Loading your profile...</div>
@@ -141,22 +140,43 @@ export default function ProfilePage() {
   const cx = 100;
   const cy = 100;
   const r = 70;
-  const radarValues = RADAR_AXES.map((ax) => profile.radar[ax] ?? 0);
+  const radarValues = RADAR_AXES.map((ax) => planet.radar?.[ax] ?? 0);
   const endpoints = axisEndpoints(cx, cy, r);
 
   return (
     <div className="min-h-screen bg-[#f0f2f8] pb-24">
       {/* Header */}
       <div className="px-4 pt-12 pb-4 text-center">
-        <div className="relative w-20 h-20 mx-auto mb-3">
-          <img
-            src="/assets/planet2.png"
-            alt="Your planet"
-            className="w-20 h-20 rounded-full object-cover border-4 border-white shadow-lg"
-          />
-          <div className="absolute -bottom-1 -right-1 bg-amber-500 rounded-full w-6 h-6 flex items-center justify-center text-[10px] text-white font-bold shadow">
-            ✦
-          </div>
+        <div className="relative w-24 h-24 mx-auto mb-3 group">
+          {generatingPlanet ? (
+            <div className="w-24 h-24 rounded-full border-4 border-white shadow-lg bg-gray-100 flex items-center justify-center">
+              <div className="w-8 h-8 rounded-full border-2 border-amber-300 border-t-amber-600 animate-spin" />
+            </div>
+          ) : (
+            <img
+              src={planet?.generatedPlanetImage || "/assets/planet2.png"}
+              alt="Your planet"
+              className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-lg"
+            />
+          )}
+          <button
+            onClick={async () => {
+              setGeneratingPlanet(true);
+              const res = await generatePlanetImage();
+              if (res?.success && res.image) {
+                setPlanet((prev) => prev ? { ...prev, generatedPlanetImage: res.image } : prev);
+              }
+              setGeneratingPlanet(false);
+            }}
+            disabled={generatingPlanet}
+            className="absolute -bottom-1 -right-1 bg-amber-500 hover:bg-amber-600 rounded-full w-7 h-7 flex items-center justify-center text-white shadow transition-colors disabled:opacity-50"
+            title="Generate planet image"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M23 4v6h-6" />
+              <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
+            </svg>
+          </button>
         </div>
         {editingName ? (
           <div className="flex items-center justify-center gap-2 mt-1">
@@ -233,7 +253,7 @@ export default function ProfilePage() {
         <div className="bg-white/85 backdrop-blur-md rounded-2xl p-4 shadow-sm border border-white">
           <h2 className="text-sm font-bold text-gray-800 mb-3">Reading Spectrum</h2>
           <div className="flex flex-col gap-4">
-            {profile.spectrum.map((item) => (
+            {planet.spectrum.map((item) => (
               <div key={item.label}>
                 <div className="flex justify-between text-[10px] text-gray-400 mb-1">
                   <span>{item.left}</span>
@@ -338,11 +358,11 @@ export default function ProfilePage() {
         )}
 
         {/* Insights */}
-        {profile.tendencies.length > 0 && (
+        {planet.tendencies.length > 0 && (
           <div className="bg-white/85 backdrop-blur-md rounded-2xl p-4 shadow-sm border border-white">
             <h2 className="text-sm font-bold text-gray-800 mb-3">Your Tendencies</h2>
             <div className="flex flex-col gap-3">
-              {profile.tendencies.map((t, i) => (
+              {planet.tendencies.map((t, i) => (
                 <div key={i} className="flex items-start gap-2">
                   <div className="w-8 h-8 rounded-full bg-amber-50 border border-amber-200 flex items-center justify-center text-sm flex-shrink-0">
                     {i === 0 ? "💛" : i === 1 ? "🔍" : "🌟"}
@@ -366,11 +386,11 @@ export default function ProfilePage() {
         )}
 
         {/* Friend comparison */}
-        {profile.friendComparison.length > 0 && (
+        {planet.friendComparison.length > 0 && (
           <div className="bg-white/85 backdrop-blur-md rounded-2xl p-4 shadow-sm border border-white">
             <h2 className="text-sm font-bold text-gray-800 mb-3">Friend Match</h2>
             <div className="flex flex-col gap-3">
-              {profile.friendComparison.map((fc) => {
+              {planet.friendComparison.map((fc) => {
                 const friend = friends.find((f) => f.id === fc.friendId);
                 const matchColor =
                   fc.matchPercentage >= 80

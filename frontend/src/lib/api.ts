@@ -63,8 +63,9 @@ export const getChoices = (bookId: string) =>
   fetcher<Choice[]>(`/choices/${bookId}`);
 export const getChoice = (bookId: string, choiceId: string) =>
   fetcher<Choice>(`/choices/${bookId}/${choiceId}`);
+/** @deprecated Use getMyPlanet() — profile is now merged into planet data */
 export const getReadingProfile = () =>
-  fetcher<ReadingProfile>("/choices/profile");
+  fetcher<ReadingProfile>("/planet/me");
 
 // Planet
 export const getMyPlanet = () => fetcher<PlanetData>("/planet/me");
@@ -78,6 +79,10 @@ export const getFriendPlanets = () =>
   fetcher<FriendPlanet[]>("/planet/friends");
 export const getConstellation = (bookId: string) =>
   fetcher<ConstellationData>(`/planet/constellation/${bookId}`);
+export const generatePlanetImage = () =>
+  postJson<{ success: boolean; image?: string; error?: string }>("/planet/me/generate-image", {});
+export const generateAllPlanetImages = () =>
+  postJson<{ results: { userId: string; name: string; success: boolean }[] }>("/planet/generate-all-images", {});
 
 // AI (K2 Think V2)
 async function postJson<T>(path: string, body: Record<string, unknown>): Promise<T> {
@@ -208,6 +213,7 @@ export interface Character {
   role: string;
   description: string;
   chapters: number[];
+  portrait?: string;
 }
 
 export interface ReadingProgress {
@@ -247,7 +253,7 @@ export interface FeedPost {
   quote?: string;
   rating?: number;
   likes: number;
-  comments: { userId: string; userName: string; text: string; createdAt: string }[];
+  comments: { id?: string; userId: string; userName: string; text: string; createdAt: string }[];
   createdAt: string;
   isSpoiler: boolean;
   planetImage?: string;
@@ -293,7 +299,13 @@ export interface PlanetData {
   totalNotes: number;
   totalChoices: number;
   genres: Record<string, number>;
+  generatedPlanetImage?: string;
   satellites: { bookId: string; bookTitle: string; status: string }[];
+  // Reading profile (merged)
+  spectrum: { label: string; left: string; right: string; value: number }[];
+  radar: Record<string, number>;
+  tendencies: { text: string; percentage: number }[];
+  friendComparison: { friendId: string; friendName: string; matchPercentage: number }[];
 }
 
 export interface FriendPlanet {

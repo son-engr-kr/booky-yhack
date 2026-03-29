@@ -4,7 +4,7 @@ from fastapi import APIRouter, HTTPException, Query
 import json
 from pathlib import Path
 from typing import Any
-from app.services import character_service
+from app.services import character_service, portrait_service
 
 router = APIRouter()
 DATA_DIR = Path(__file__).parent.parent / "data"
@@ -73,11 +73,41 @@ async def get_characters(book_id: str, chapter: int = Query(default=0)) -> dict:
             book_id, book["title"], book["author"], chapter
         )
         if characters:
+            # Attach cached portraits if available
+            for c in characters:
+                portrait = portrait_service.get_cached_portrait(book_id, c.get("id", ""))
+                if portrait:
+                    c["portrait"] = portrait
             return {"bookId": book_id, "characters": characters}
 
     # Fallback to hardcoded
     characters = BOOK_CHARACTERS.get(book_id, [])
+    for c in characters:
+        portrait = portrait_service.get_cached_portrait(book_id, c.get("id", ""))
+        if portrait:
+            c["portrait"] = portrait
     return {"bookId": book_id, "characters": characters}
+
+
+@router.post("/{book_id}/characters/generate-portraits")
+async def generate_character_portraits(book_id: str, chapter: int = Query(default=0)) -> dict:
+    """Pre-generate portrait illustrations for all characters in a book."""
+    books = _load("books.json")
+    book = next((b for b in books if b["id"] == book_id), None)
+    if not book:
+        raise HTTPException(status_code=404, detail=f"Book '{book_id}' not found")
+
+    # Get characters
+    characters = []
+    if chapter > 0:
+        characters = await character_service.generate_characters(
+            book_id, book["title"], book["author"], chapter
+        )
+    if not characters:
+        characters = BOOK_CHARACTERS.get(book_id, [])
+
+    results = await portrait_service.generate_portraits_for_book(book_id, characters, book["title"])
+    return {"bookId": book_id, "generated": len([r for r in results if r.get("image")]), "total": len(results), "results": results}
 
 
 @router.get("/{book_id}")

@@ -11,12 +11,10 @@ import {
   getMyBooks,
   getMyReadingNotes,
   getChoices,
-  getReadingProfile,
   type PlanetData,
   type ReadingProgress,
   type SavedReadingNote,
   type Choice,
-  type ReadingProfile,
 } from "@/lib/api";
 
 export default function MyPlanetDetailPage() {
@@ -26,13 +24,11 @@ export default function MyPlanetDetailPage() {
   const [readingNotes, setReadingNotes] = useState<SavedReadingNote[]>([]);
   const [openNoteBookId, setOpenNoteBookId] = useState<string | null>(null);
   const [choices, setChoices] = useState<Choice[]>([]);
-  const [profile, setProfile] = useState<ReadingProfile | null>(null);
   const [activeTab, setActiveTab] = useState<"overview" | "notes">("overview");
 
   useEffect(() => {
     getMyPlanet().then(setPlanet);
     getMyBooks().then(setBooks);
-    getReadingProfile().then(setProfile);
     getMyReadingNotes().then((r) => {
       if (r) setReadingNotes(r.notes ?? []);
     });

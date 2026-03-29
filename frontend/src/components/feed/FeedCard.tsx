@@ -240,7 +240,7 @@ export default function FeedCard({ post, onDelete }: FeedCardProps) {
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            deleteFeedComment(post.id, c.id).then((ok) => {
+                            deleteFeedComment(post.id, c.id!).then((ok) => {
                               if (ok) setComments((prev) => prev.filter((_, j) => j !== i));
                             });
                           }}

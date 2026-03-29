@@ -41,11 +41,19 @@ export default function CharacterPopup({ character, onClose, currentChapter = 1 
             ✕
           </button>
 
-          {/* Character icon + name */}
+          {/* Character portrait + name */}
           <div className="flex items-center gap-4 mb-4">
-            <div className="w-16 h-16 rounded-2xl bg-amber-100 flex items-center justify-center text-3xl shadow-sm">
-              {roleIcon(character.role)}
-            </div>
+            {character.portrait ? (
+              <img
+                src={character.portrait}
+                alt={character.name}
+                className="w-16 h-16 rounded-2xl object-cover shadow-sm"
+              />
+            ) : (
+              <div className="w-16 h-16 rounded-2xl bg-amber-100 flex items-center justify-center text-3xl shadow-sm">
+                {roleIcon(character.role)}
+              </div>
+            )}
             <div>
               <h2 className="text-xl font-bold text-gray-900 font-serif">{character.name}</h2>
               <span className="text-xs font-semibold uppercase tracking-wide text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full">

@@ -11,29 +11,6 @@ class ChoiceSubmit(BaseModel):
     optionId: str
 
 
-@router.get("/profile")
-def get_reading_profile() -> dict:
-    return {
-        "spectrum": [
-            {"label": "Moral Compass", "left": "Idealist", "right": "Realist", "value": 72},
-            {"label": "Action Style", "left": "Cautious", "right": "Bold", "value": 65},
-            {"label": "Trust", "left": "Skeptic", "right": "Trusting", "value": 40},
-        ],
-        "radar": {"Empathy": 85, "Logic": 60, "Adventure": 45, "Caution": 70, "Optimism": 75},
-        "tendencies": [
-            {"text": "You tend to forgive. 78% of the time you chose mercy over justice.", "percentage": 78},
-            {"text": "You lean toward hope even when the odds are against it.", "percentage": 71},
-            {"text": "You prefer observing before acting.", "percentage": 65},
-        ],
-        "friendComparison": [
-            {"friendId": "friend-alex", "friendName": "Alex Kim", "matchPercentage": 91},
-            {"friendId": "friend-mina", "friendName": "Mina Park", "matchPercentage": 45},
-            {"friendId": "friend-jake", "friendName": "Jake Lee", "matchPercentage": 78},
-            {"friendId": "friend-sofia", "friendName": "Sofia Chen", "matchPercentage": 62},
-        ],
-    }
-
-
 @router.get("/{book_id}")
 def get_book_choices(book_id: str) -> list:
     return [_clean(d) for d in db[COL].find({"bookId": book_id})]
