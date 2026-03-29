@@ -804,6 +804,33 @@ export default function ReadPage() {
                   </div>
                 )}
 
+                {/* Text input fallback — always available when not loading/answered */}
+                {!voiceAsk.loading && !voiceAsk.answer && (
+                  <div className="flex gap-2 mb-3">
+                    <input
+                      placeholder="Or type your question here..."
+                      className="flex-1 text-sm bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-indigo-300"
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          const q = (e.target as HTMLInputElement).value.trim();
+                          if (!q) return;
+                          setVoiceAsk((v) => v ? { ...v, listening: false, question: q, loading: true } : v);
+                          aiVoiceAsk(q, voiceAsk.passage, book?.title || "", book?.author || "", chapterNum).then((res) => {
+                            const answer = res?.answer || "Sorry, I couldn't generate an answer.";
+                            setVoiceAsk((v) => v ? { ...v, loading: false, answer } : v);
+                            if ("speechSynthesis" in window) {
+                              const utter = new SpeechSynthesisUtterance(answer);
+                              utter.rate = 1.0;
+                              utter.lang = "en-US";
+                              window.speechSynthesis.speak(utter);
+                            }
+                          });
+                        }
+                      }}
+                    />
+                  </div>
+                )}
+
                 {/* Question */}
                 {voiceAsk.question && (
                   <div className="mb-3">
