@@ -58,41 +58,52 @@ async def generate_scene_prompts(book_title: str, author: str, chapters_summary:
         return []
 
 
-async def generate_image(prompt: str, token: str) -> str | None:
-    """Generate a single panel image using Vertex AI Imagen Fast."""
+async def generate_image(prompt: str, token: str, retries: int = 2) -> str | None:
+    """Generate a single panel image using Vertex AI Imagen Fast with retry."""
     styled = f"Comic book panel, illustration style, vibrant colors, clean ink lines: {prompt}"
-    async with httpx.AsyncClient(timeout=60.0) as client:
-        resp = await client.post(
-            IMAGEN_URL,
-            headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"},
-            json={
-                "instances": [{"prompt": styled}],
-                "parameters": {"sampleCount": 1, "aspectRatio": "1:1"},
-            },
-        )
-        if resp.status_code != 200:
-            print(f"[Imagen] error {resp.status_code}: {resp.text[:300]}")
-            return None
-        predictions = resp.json().get("predictions", [])
-        if predictions:
-            b64 = predictions[0].get("bytesBase64Encoded")
-            return f"data:image/png;base64,{b64}" if b64 else None
+    for attempt in range(retries + 1):
+        async with httpx.AsyncClient(timeout=60.0) as client:
+            resp = await client.post(
+                IMAGEN_URL,
+                headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"},
+                json={
+                    "instances": [{"prompt": styled}],
+                    "parameters": {"sampleCount": 1, "aspectRatio": "1:1"},
+                },
+            )
+            if resp.status_code == 200:
+                predictions = resp.json().get("predictions", [])
+                if predictions:
+                    b64 = predictions[0].get("bytesBase64Encoded")
+                    if b64:
+                        return f"data:image/png;base64,{b64}"
+            print(f"[Imagen] attempt {attempt+1} failed ({resp.status_code}): {resp.text[:200]}")
+            if attempt < retries:
+                await asyncio.sleep(1.5 * (attempt + 1))
     return None
 
 
 async def generate_comic(book_title: str, author: str, chapters_summary: str) -> dict:
-    """Generate 6-panel comic: scene descriptions + 6 images in parallel."""
+    """Generate 6-panel comic: scene descriptions + 6 images with staggered requests."""
     panels = await generate_scene_prompts(book_title, author, chapters_summary)
     if not panels:
         return {"image": None, "panels": []}
 
     token = _get_access_token()
 
-    # Generate all 6 images in parallel
-    images = await asyncio.gather(*[
+    # Stagger requests in batches of 3 to avoid rate limits
+    batch1 = panels[:3]
+    batch2 = panels[3:]
+
+    images1 = await asyncio.gather(*[
         generate_image(p.get("image_prompt") or p.get("description", ""), token)
-        for p in panels
+        for p in batch1
     ])
+    images2 = await asyncio.gather(*[
+        generate_image(p.get("image_prompt") or p.get("description", ""), token)
+        for p in batch2
+    ])
+    images = list(images1) + list(images2)
 
     result_panels = [
         {
