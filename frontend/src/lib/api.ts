@@ -95,6 +95,13 @@ export const aiGenerateRecap = (bookTitle: string, author: string, chaptersSumma
 export const aiSpoilerCheck = (text: string, bookTitle: string, readerChapter: number) =>
   postJson<{ is_spoiler: boolean; reason: string }>("/ai/spoiler-check", { text, book_title: bookTitle, reader_chapter: readerChapter });
 
+// Comic recap
+export const generateComic = (bookTitle: string, author: string, chaptersSummary: string) =>
+  postJson<{ panels: { panel: number; title: string; description: string; image: string | null }[] }>("/comic/generate", { book_title: bookTitle, author, chapters_summary: chaptersSummary });
+
+export const generateComicScenes = (bookTitle: string, author: string, chaptersSummary: string) =>
+  postJson<{ panels: { panel: number; title: string; description: string; image_prompt: string }[] }>("/comic/scenes", { book_title: bookTitle, author, chapters_summary: chaptersSummary });
+
 // Types
 export interface User {
   id: string;
@@ -168,6 +175,7 @@ export interface FeedPost {
   comments: { userId: string; userName: string; text: string; createdAt: string }[];
   createdAt: string;
   isSpoiler: boolean;
+  planetImage?: string;
 }
 
 export interface Friend {

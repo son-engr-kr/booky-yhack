@@ -13,10 +13,12 @@ import {
   getFriendHighlights,
   getCharacters,
   getChoices,
+  aiAuthorChat,
   type Chapter,
   type Character,
   type Highlight,
   type Choice,
+  type Book,
 } from "@/lib/api";
 
 // Character names to detect per book (extend as needed)
@@ -182,8 +184,8 @@ function renderParagraph(
                     exit={{ opacity: 0, y: -4 }}
                     className="absolute bottom-full left-0 z-40 mb-1 bg-gray-900 text-white text-xs rounded-xl px-3 py-2 shadow-xl min-w-[160px] max-w-[220px]"
                   >
-                    <div className="font-semibold text-amber-400 mb-1">{hl.userName}</div>
-                    <div className="leading-relaxed">{hl.comment}</div>
+                    <span className="block font-semibold text-amber-400 mb-1">{hl.userName}</span>
+                    <span className="block leading-relaxed">{hl.comment}</span>
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -220,8 +222,10 @@ export default function ReadPage() {
 
   const bookId = params.bookId as string;
   const chapterNum = parseInt(searchParams.get("chapter") ?? "1", 10);
+  const initialPanel = searchParams.get("panel") as "notes" | "characters" | "chat" | null;
 
   const [chapter, setChapter] = useState<Chapter | null>(null);
+  const [book, setBook] = useState<Book | null>(null);
   const [totalChapters, setTotalChapters] = useState<number>(0);
   const [characters, setCharacters] = useState<Character[]>([]);
   const [friendHighlights, setFriendHighlights] = useState<Highlight[]>([]);
@@ -234,6 +238,10 @@ export default function ReadPage() {
   const [showAIMCPopup, setShowAIMCPopup] = useState(false);
   const [loading, setLoading] = useState(true);
   const [selectionToolbar, setSelectionToolbar] = useState<SelectionToolbar | null>(null);
+  const [activePanel, setActivePanel] = useState<"notes" | "characters" | "chat" | null>(initialPanel);
+  const [chatMessages, setChatMessages] = useState<{ role: string; content: string }[]>([]);
+  const [chatInput, setChatInput] = useState("");
+  const [chatLoading, setChatLoading] = useState(false);
 
   // Store selected text in a ref so it survives the re-render caused by setSelectionToolbar
   const selectedTextRef = useRef<string>("");
@@ -252,8 +260,9 @@ export default function ReadPage() {
       getFriendHighlights(bookId, chapterNum),
       getChoices(bookId),
       getBook(bookId),
-    ]).then(([ch, charResp, fh, ch2, book]) => {
+    ]).then(([ch, charResp, fh, ch2, bookData]) => {
       setChapter(ch);
+      setBook(bookData);
 
       // Bug 1 fix: API may return {bookId, characters:[...]} or a plain array
       const charList = Array.isArray(charResp)
@@ -263,7 +272,7 @@ export default function ReadPage() {
 
       setFriendHighlights(Array.isArray(fh) ? fh : []);
       setChoices(Array.isArray(ch2) ? ch2 : []);
-      setTotalChapters(book.totalChapters ?? 0);
+      setTotalChapters(bookData.totalChapters ?? 0);
       setLoading(false);
     }).catch(() => {
       setLoading(false);
@@ -451,10 +460,10 @@ export default function ReadPage() {
         </div>
       )}
 
-      {/* Chapter text — fixed height, no scroll */}
+      {/* Chapter text — scrollable */}
       <div
         ref={contentRef}
-        className="flex-1 overflow-hidden px-5 pt-4 max-w-prose mx-auto w-full flex flex-col select-text"
+        className="flex-1 overflow-y-auto px-5 pt-4 max-w-prose mx-auto w-full flex flex-col select-text"
         onPointerUp={handleMouseUp}
       >
         {pageIndex === 0 && (
@@ -466,7 +475,7 @@ export default function ReadPage() {
           </>
         )}
 
-        <div className="flex-1 overflow-hidden relative">
+        <div className="flex-1 relative">
           {paragraphs.length > 0
             ? paragraphs.map((para, idx) =>
                 renderParagraph(

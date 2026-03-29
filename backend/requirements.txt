@@ -11,5 +11,8 @@ firebase-admin==6.5.0
 # K2 Think V2
 httpx==0.28.1
 
+# GCP Vertex AI (Imagen)
+google-auth==2.38.0
+
 # Vector DB
 chromadb==0.5.5
