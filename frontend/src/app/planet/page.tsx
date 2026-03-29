@@ -1,39 +1,33 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { motion } from "framer-motion";
 import BottomNav from "@/components/nav/BottomNav";
 import { getMyPlanet, getFriendPlanets, type PlanetData, type FriendPlanet } from "@/lib/api";
 
-// Kepler orbit config: T ∝ r^(3/2)
-// Three orbit rings with sizes in vmin units
-const ORBIT_RINGS = [
-  { id: 1, size: 65 },   // closest — fastest
-  { id: 2, size: 100 },  // medium
-  { id: 3, size: 135 },  // farthest — slowest
-];
+// Generate one orbit per friend — sizes in vmin, evenly spaced from 55 to 140
+function generateOrbits(count: number) {
+  if (count === 0) return [];
+  const minSize = 55;
+  const maxSize = 140;
+  const step = count > 1 ? (maxSize - minSize) / (count - 1) : 0;
+  return Array.from({ length: count }, (_, i) => ({
+    id: i,
+    size: minSize + step * i,
+  }));
+}
 
-// Base period at r=160 → T_base = 18s
-// r=250 → T = 18 * (250/160)^(3/2) ≈ 18 * 2.44 ≈ 44s  (actually (250/160)^1.5 = 1.5625^1.5 ≈ 1.953 → 35s)
-// r=340 → T = 18 * (340/160)^1.5 = 18 * 2.125^1.5 ≈ 18 * 3.096 ≈ 56s
+// Kepler period: T ∝ r^(3/2)
 function keplerPeriod(r: number): number {
-  const base = 360; // very slow: 360s base period
-  const rBase = 160;
+  const base = 60;
+  const rBase = 30;
   return base * Math.pow(r / rBase, 1.5);
 }
 
-// Assign each friend to a unique orbit ring (round-robin across rings)
-function getOrbitForIndex(index: number): number {
-  return (index % ORBIT_RINGS.length) + 1;
-}
-
-// Spread friends around orbit — different start angles per orbit ring for variety
-function getAngleOffset(indexInOrbit: number, totalInOrbit: number, ringId: number): number {
-  const ringOffset = ringId * 120; // each ring starts at a different angle
-  if (totalInOrbit === 1) return ringOffset + 30;
-  return (360 / totalInOrbit) * indexInOrbit + ringOffset;
+// Each friend gets a unique start angle offset
+function getStartAngle(index: number): number {
+  return index * 137.5; // golden angle for even spread
 }
 
 // Convert API planetImage ("planet2.png") → asset path
@@ -70,22 +64,33 @@ export default function PlanetPage() {
     return () => { document.body.style.overflow = ""; };
   }, []);
 
-  const handlePlanetTap = (type: "me" | "friend", id?: string) => {
-    if (type === "me") {
-      router.push("/planet/detail");
-    } else if (id) {
-      router.push(`/planet/friend/${id}`);
-    }
-  };
+  const [zoomTarget, setZoomTarget] = useState<{
+    cx: number; cy: number; dx: number; dy: number; route: string;
+  } | null>(null);
+  const [zoomPhase, setZoomPhase] = useState<"idle" | "zooming" | "fading">("idle");
+
+  const handlePlanetTap = useCallback((e: React.MouseEvent, type: "me" | "friend", imgSrc: string, id?: string) => {
+    if (zoomPhase !== "idle") return;
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    const route = type === "me" ? "/planet/detail" : `/planet/friend/${id}`;
+    setZoomTarget({
+      cx,
+      cy,
+      dx: window.innerWidth / 2 - cx,
+      dy: window.innerHeight / 2 - cy,
+      route,
+    });
+    setZoomPhase("zooming");
+    setTimeout(() => setZoomPhase("fading"), 400);
+    setTimeout(() => router.push(route), 700);
+  }, [zoomPhase, router]);
 
   const filters = ["All", "Close friends", "Gatsby readers"];
 
-  // Group friends by orbit ring
-  const orbitGroups: Record<number, FriendPlanet[]> = { 1: [], 2: [], 3: [] };
-  friendPlanets.forEach((fp, idx) => {
-    const orbit = getOrbitForIndex(idx);
-    orbitGroups[orbit].push(fp);
-  });
+  // One orbit per friend
+  const friendOrbits = generateOrbits(friendPlanets.length);
 
   // Friends with speech bubbles — show one at a time, cycling
   const speakingFriends = friendPlanets.filter((f) => f.latestFeed).slice(0, 4);
@@ -127,9 +132,23 @@ export default function PlanetPage() {
           0%, 100% { opacity: 0.12; transform: translate(-50%, -50%) scale(1); }
           50%       { opacity: 0.22; transform: translate(-50%, -50%) scale(1.04); }
         }
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
       `}</style>
 
-      <div className="h-screen w-full relative overflow-hidden bg-[#050507]" style={{ maxHeight: "100dvh" }}>
+      <div
+        className="h-screen w-full relative overflow-hidden bg-[#050507]"
+        style={{
+          maxHeight: "100dvh",
+          transformOrigin: zoomTarget ? `${zoomTarget.cx}px ${zoomTarget.cy}px` : "50% 50%",
+          transform: zoomPhase !== "idle" && zoomTarget
+            ? `translate(${zoomTarget.dx}px, ${zoomTarget.dy}px) scale(3)`
+            : "scale(1)",
+          transition: zoomPhase !== "idle" ? "transform 0.6s cubic-bezier(0.32, 0.72, 0, 1)" : "none",
+        }}
+      >
 
         {/* === MILKY WAY — subtle diagonal gradient band === */}
         <div
@@ -237,13 +256,13 @@ export default function PlanetPage() {
         </div>
 
         {/* === ORBIT RINGS === */}
-        {ORBIT_RINGS.map((ring) => (
+        {friendOrbits.map((orbit) => (
           <div
-            key={ring.id}
+            key={orbit.id}
             className="absolute rounded-full pointer-events-none"
             style={{
-              width: `${ring.size}vmin`,
-              height: `${ring.size}vmin`,
+              width: `${orbit.size}vmin`,
+              height: `${orbit.size}vmin`,
               top: "50%",
               left: "50%",
               transform: "translate(-50%, -50%)",
@@ -255,7 +274,7 @@ export default function PlanetPage() {
 
         {/* === MY PLANET (center) === */}
         <button
-          onClick={() => handlePlanetTap("me")}
+          onClick={(e) => handlePlanetTap(e, "me", myPlanetSrc)}
           className="absolute rounded-full flex items-center justify-center"
           style={{
             width: "33vmin",
@@ -280,68 +299,70 @@ export default function PlanetPage() {
           />
         </button>
 
-        {/* === FRIEND PLANETS on orbits === */}
-        {ORBIT_RINGS.map((ring) => {
-          const friends = orbitGroups[ring.id];
-          const period = keplerPeriod(ring.size / 2);
-          return friends.map((fp, idx) => {
-            const total = friends.length;
-            const startDeg = getAngleOffset(idx, total, ring.id);
-            const planetVmin = ring.id === 1 ? 19 : ring.id === 2 ? 19 : 15;
-            const imgSrc = toPlanetSrc(fp.planetImage);
+        {/* === FRIEND PLANETS — one per orbit === */}
+        {friendPlanets.map((fp, idx) => {
+          const orbit = friendOrbits[idx];
+          if (!orbit) return null;
+          const period = keplerPeriod(orbit.size / 2);
+          const startDeg = getStartAngle(idx);
+          const planetVmin = 16;
+          const imgSrc = toPlanetSrc(fp.planetImage);
 
-            return (
-              <button
-                key={fp.id}
-                className="orbit-planet"
-                onClick={() => handlePlanetTap("friend", fp.id)}
+          return (
+            <button
+              key={fp.id}
+              className="orbit-planet"
+              onClick={(e) => handlePlanetTap(e, "friend", imgSrc, fp.id)}
+              style={{
+                width: `${planetVmin}vmin`,
+                height: `${planetVmin}vmin`,
+                zIndex: 4,
+                padding: 0,
+                border: "none",
+                background: "none",
+                "--orbit-r": `${orbit.size / 2}vmin`,
+                "--orbit-duration": `${period}s`,
+                "--start-angle": `${startDeg}deg`,
+                animationDelay: `${-(period * startDeg) / 360}s`,
+              } as React.CSSProperties}
+              title={`${fp.name} · ${fp.similarity}%`}
+            >
+              <Image
+                src={imgSrc}
+                alt={fp.name}
+                width={112}
+                height={112}
+                className="rounded-full object-cover w-full h-full"
                 style={{
-                  width: `${planetVmin}vmin`,
-                  height: `${planetVmin}vmin`,
-                  zIndex: 4,
-                  padding: 0,
-                  border: "none",
-                  background: "none",
-                  "--orbit-r": `${ring.size / 2}vmin`,
-                  "--orbit-duration": `${period}s`,
-                  "--start-angle": `${startDeg}deg`,
-                  animationDelay: `${-(period * startDeg) / 360}s`,
-                } as React.CSSProperties}
-                title={`${fp.name} · ${fp.similarity}%`}
-              >
-                <Image
-                  src={imgSrc}
-                  alt={fp.name}
-                  width={112}
-                  height={112}
-                  className="rounded-full object-cover w-full h-full"
-                  style={{
-                    filter: `drop-shadow(0 0 8px rgba(150,150,200,0.3))`,
-                  }}
-                />
-                {/* Name label */}
-                <span className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-[12px] text-gray-400 whitespace-nowrap font-medium">
-                  {fp.name}
-                </span>
-                {/* Speech bubble — only shown when this friend is active */}
-                {fp.latestFeed && speakingFriends[activeBubble]?.id === fp.id && (
-                  <div
-                    className="absolute bg-black/80 backdrop-blur-md border border-amber-500/20 rounded-lg px-3 py-2 pointer-events-none animate-[fadeInOut_4s_ease-in-out]"
-                    style={{ bottom: `calc(${planetVmin}vmin + 12px)`, right: -10, maxWidth: "45vmin", minWidth: "25vmin" }}
-                  >
-                    <div className="text-[13px] text-amber-400 font-semibold">{fp.name}</div>
-                    <div className="text-[12px] text-gray-300 leading-snug">
-                      {fp.latestFeed.length > 30 ? fp.latestFeed.slice(0, 30) + "..." : fp.latestFeed}
-                    </div>
-                    <div className="absolute -bottom-1 right-4 w-2.5 h-2.5 bg-black/80 border-r border-b border-amber-500/20 rotate-45" />
+                  filter: `drop-shadow(0 0 8px rgba(150,150,200,0.3))`,
+                }}
+              />
+              <span className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-[12px] text-gray-400 whitespace-nowrap font-medium">
+                {fp.name}
+              </span>
+              {fp.latestFeed && speakingFriends[activeBubble]?.id === fp.id && (
+                <div
+                  className="absolute bg-black/80 backdrop-blur-md border border-amber-500/20 rounded-lg px-3 py-2 pointer-events-none animate-[fadeInOut_4s_ease-in-out]"
+                  style={{ bottom: `calc(${planetVmin}vmin + 12px)`, right: -10, maxWidth: "45vmin", minWidth: "25vmin" }}
+                >
+                  <div className="text-[13px] text-amber-400 font-semibold">{fp.name}</div>
+                  <div className="text-[12px] text-gray-300 leading-snug">
+                    {fp.latestFeed.length > 30 ? fp.latestFeed.slice(0, 30) + "..." : fp.latestFeed}
                   </div>
-                )}
-              </button>
-            );
-          });
+                  <div className="absolute -bottom-1 right-4 w-2.5 h-2.5 bg-black/80 border-r border-b border-amber-500/20 rotate-45" />
+                </div>
+              )}
+            </button>
+          );
         })}
 
-        {/* Speech bubbles now attached to orbiting planets above */}
+        {/* === FADE OVERLAY for zoom transition === */}
+        {zoomPhase === "fading" && (
+          <div
+            className="fixed inset-0 z-50 bg-[#050507]"
+            style={{ animation: "fadeIn 0.5s ease-in forwards" }}
+          />
+        )}
 
         {/* === BOTTOM NAV === */}
         <BottomNav />
