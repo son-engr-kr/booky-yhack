@@ -21,6 +21,7 @@ import {
   deleteHighlight,
   deleteHighlightReply,
   toggleHighlightLike,
+  aiVoiceAsk,
   type Chapter,
   type Character,
   type Highlight,
@@ -253,6 +254,7 @@ export default function ReadPage() {
   const [chatLoading, setChatLoading] = useState(false);
   const [viewingHighlight, setViewingHighlight] = useState<(UserHighlight | Highlight) | null>(null);
   const [replyInput, setReplyInput] = useState("");
+  const [voiceAsk, setVoiceAsk] = useState<{ passage: string; listening: boolean; question: string; answer: string; loading: boolean } | null>(null);
 
   // Store selected text in a ref so it survives the re-render caused by setSelectionToolbar
   const selectedTextRef = useRef<string>("");
@@ -629,6 +631,48 @@ export default function ReadPage() {
               onPointerDown={(e) => {
                 e.stopPropagation();
                 e.preventDefault();
+                const passage = selectedTextRef.current || selectionToolbar?.text || "";
+                window.getSelection()?.removeAllRanges();
+                setSelectionToolbar(null);
+                selectedTextRef.current = "";
+                setVoiceAsk({ passage, listening: true, question: "", answer: "", loading: false });
+                // Start speech recognition
+                const SpeechRecognition = (window as unknown as Record<string, unknown>).SpeechRecognition || (window as unknown as Record<string, unknown>).webkitSpeechRecognition;
+                if (!SpeechRecognition) {
+                  setVoiceAsk((v) => v ? { ...v, listening: false, question: "(Speech recognition not supported)" } : v);
+                  return;
+                }
+                const recognition = new (SpeechRecognition as new () => SpeechRecognition)();
+                recognition.lang = "en-US";
+                recognition.interimResults = false;
+                recognition.onresult = (event: SpeechRecognitionEvent) => {
+                  const transcript = event.results[0][0].transcript;
+                  setVoiceAsk((v) => v ? { ...v, listening: false, question: transcript, loading: true } : v);
+                  aiVoiceAsk(transcript, passage, book?.title || "", book?.author || "", chapterNum).then((res) => {
+                    const answer = res?.answer || "Sorry, I couldn't generate an answer.";
+                    setVoiceAsk((v) => v ? { ...v, loading: false, answer } : v);
+                    // TTS
+                    if ("speechSynthesis" in window) {
+                      const utter = new SpeechSynthesisUtterance(answer);
+                      utter.rate = 1.0;
+                      utter.lang = "en-US";
+                      window.speechSynthesis.speak(utter);
+                    }
+                  });
+                };
+                recognition.onerror = () => {
+                  setVoiceAsk((v) => v ? { ...v, listening: false, question: "(Could not hear you. Try again.)" } : v);
+                };
+                recognition.start();
+              }}
+              className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-indigo-500 hover:bg-indigo-400 transition-colors cursor-pointer"
+            >
+              <span>🎤</span> Ask
+            </button>
+            <button
+              onPointerDown={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
                 window.getSelection()?.removeAllRanges();
                 setSelectionToolbar(null);
                 selectedTextRef.current = "";
@@ -638,6 +682,126 @@ export default function ReadPage() {
               ✕
             </button>
           </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Voice Ask Modal */}
+      <AnimatePresence>
+        {voiceAsk && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[70] bg-black/40"
+              onClick={() => { setVoiceAsk(null); window.speechSynthesis?.cancel(); }}
+            />
+            <motion.div
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 40 }}
+              className="fixed bottom-0 left-0 right-0 z-[70] bg-white rounded-t-3xl shadow-2xl max-h-[70vh] overflow-y-auto"
+            >
+              <div className="px-5 pt-5 pb-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg">🎤</span>
+                    <span className="text-sm font-bold text-gray-900">Ask about this passage</span>
+                  </div>
+                  <button onClick={() => { setVoiceAsk(null); window.speechSynthesis?.cancel(); }} className="text-gray-400 text-lg">✕</button>
+                </div>
+
+                {/* Selected passage */}
+                <div className="bg-amber-50 border-l-4 border-amber-400 rounded-r-lg px-3 py-2 mb-4">
+                  <p className="text-xs text-gray-600 italic leading-relaxed line-clamp-3">"{voiceAsk.passage}"</p>
+                </div>
+
+                {/* Listening state */}
+                {voiceAsk.listening && (
+                  <div className="flex flex-col items-center gap-3 py-6">
+                    <motion.div
+                      className="w-16 h-16 rounded-full bg-indigo-500 flex items-center justify-center"
+                      animate={{ scale: [1, 1.2, 1] }}
+                      transition={{ duration: 1.5, repeat: Infinity }}
+                    >
+                      <span className="text-2xl text-white">🎤</span>
+                    </motion.div>
+                    <p className="text-sm text-gray-500">Listening... Ask your question</p>
+                  </div>
+                )}
+
+                {/* Question */}
+                {voiceAsk.question && (
+                  <div className="mb-3">
+                    <p className="text-[10px] text-gray-400 font-semibold uppercase mb-1">Your question</p>
+                    <p className="text-sm text-gray-800">{voiceAsk.question}</p>
+                  </div>
+                )}
+
+                {/* Loading */}
+                {voiceAsk.loading && (
+                  <div className="flex items-center gap-2 py-4">
+                    <motion.div className="flex gap-1">
+                      {[0, 1, 2].map((i) => (
+                        <motion.div
+                          key={i}
+                          className="w-2 h-2 rounded-full bg-indigo-400"
+                          animate={{ opacity: [0.3, 1, 0.3] }}
+                          transition={{ duration: 1, delay: i * 0.2, repeat: Infinity }}
+                        />
+                      ))}
+                    </motion.div>
+                    <span className="text-xs text-gray-400">Gemini is thinking...</span>
+                  </div>
+                )}
+
+                {/* Answer */}
+                {voiceAsk.answer && (
+                  <div className="bg-indigo-50 rounded-xl px-4 py-3">
+                    <p className="text-[10px] text-indigo-400 font-semibold uppercase mb-1">Gemini</p>
+                    <p className="text-sm text-gray-800 leading-relaxed">{voiceAsk.answer}</p>
+                  </div>
+                )}
+
+                {/* Ask again button */}
+                {voiceAsk.answer && (
+                  <button
+                    onClick={() => {
+                      window.speechSynthesis?.cancel();
+                      const passage = voiceAsk.passage;
+                      setVoiceAsk({ passage, listening: true, question: "", answer: "", loading: false });
+                      const SpeechRecognition = (window as unknown as Record<string, unknown>).SpeechRecognition || (window as unknown as Record<string, unknown>).webkitSpeechRecognition;
+                      if (!SpeechRecognition) return;
+                      const recognition = new (SpeechRecognition as new () => SpeechRecognition)();
+                      recognition.lang = "en-US";
+                      recognition.interimResults = false;
+                      recognition.onresult = (event: SpeechRecognitionEvent) => {
+                        const transcript = event.results[0][0].transcript;
+                        setVoiceAsk((v) => v ? { ...v, listening: false, question: transcript, loading: true } : v);
+                        aiVoiceAsk(transcript, passage, book?.title || "", book?.author || "", chapterNum).then((res) => {
+                          const answer = res?.answer || "Sorry, I couldn't generate an answer.";
+                          setVoiceAsk((v) => v ? { ...v, loading: false, answer } : v);
+                          if ("speechSynthesis" in window) {
+                            const utter = new SpeechSynthesisUtterance(answer);
+                            utter.rate = 1.0;
+                            utter.lang = "en-US";
+                            window.speechSynthesis.speak(utter);
+                          }
+                        });
+                      };
+                      recognition.onerror = () => {
+                        setVoiceAsk((v) => v ? { ...v, listening: false, question: "(Could not hear you. Try again.)" } : v);
+                      };
+                      recognition.start();
+                    }}
+                    className="mt-4 w-full py-2.5 bg-indigo-500 text-white text-sm font-medium rounded-xl hover:bg-indigo-400 transition-colors"
+                  >
+                    🎤 Ask another question
+                  </button>
+                )}
+              </div>
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
 

@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
-from app.services import k2
+from app.services import k2, gemini
 
 router = APIRouter()
 
@@ -30,6 +30,14 @@ class RecapRequest(BaseModel):
     book_title: str
     author: str
     chapters_summary: str
+
+
+class VoiceAskRequest(BaseModel):
+    question: str
+    passage: str
+    book_title: str
+    author: str
+    chapter_num: int
 
 
 class ReadingNotesRequest(BaseModel):
@@ -93,6 +101,14 @@ async def generate_recap(req: RecapRequest):
         return {"panels": panels}
     except (json.JSONDecodeError, IndexError):
         return {"raw": result}
+
+
+@router.post("/voice-ask")
+async def voice_ask(req: VoiceAskRequest):
+    answer = await gemini.ask_about_book(
+        req.question, req.passage, req.book_title, req.author, req.chapter_num
+    )
+    return {"answer": answer}
 
 
 @router.post("/reading-notes")

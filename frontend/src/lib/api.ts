@@ -116,6 +116,9 @@ export const addFeedComment = (postId: string, text: string) =>
 export const deleteFeedComment = (postId: string, commentId: string) =>
   fetch(`${API_BASE}/feed/${postId}/comment/${commentId}`, { method: "DELETE" }).then((r) => r.ok);
 
+export const aiVoiceAsk = (question: string, passage: string, bookTitle: string, author: string, chapterNum: number) =>
+  postJson<{ answer: string }>("/ai/voice-ask", { question, passage, book_title: bookTitle, author, chapter_num: chapterNum });
+
 export const aiSpoilerCheck = (text: string, bookTitle: string, readerChapter: number) =>
   postJson<{ is_spoiler: boolean; reason: string }>("/ai/spoiler-check", { text, book_title: bookTitle, reader_chapter: readerChapter });
 
