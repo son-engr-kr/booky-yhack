@@ -1,9 +1,17 @@
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8001/api";
 
 async function fetcher<T>(path: string): Promise<T> {
-  const res = await fetch(`${API_BASE}${path}`);
-  if (!res.ok) throw new Error(`API error: ${res.status}`);
-  return res.json();
+  try {
+    const res = await fetch(`${API_BASE}${path}`);
+    if (!res.ok) {
+      console.warn(`API ${res.status}: ${path}`);
+      return null as T;
+    }
+    return res.json();
+  } catch (e) {
+    console.warn(`API fetch failed: ${path}`, e);
+    return null as T;
+  }
 }
 
 // Auth
