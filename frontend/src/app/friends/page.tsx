@@ -29,11 +29,11 @@ export default function FriendsPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#f0f2f8] pb-24">
+    <div className="min-h-screen bg-[#050507] pb-24">
       {/* Header */}
-      <div className="sticky top-0 z-10 bg-[#f0f2f8]/95 backdrop-blur-md border-b border-white/60 px-4 py-3">
+      <div className="sticky top-0 z-10 bg-[#050507]/95 backdrop-blur-md border-b border-white/60 px-4 py-3">
         <div className="max-w-md mx-auto flex items-center justify-between">
-          <h1 className="text-[20px] font-bold text-gray-900 tracking-tight">Friends</h1>
+          <h1 className="text-[20px] font-bold text-white tracking-tight">Friends</h1>
           <button className="text-[12px] font-semibold text-indigo-600 bg-indigo-50 border border-indigo-200 px-3 py-1.5 rounded-full">
             + Add
           </button>

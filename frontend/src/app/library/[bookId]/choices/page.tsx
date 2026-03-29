@@ -20,16 +20,16 @@ export default function ChoicesPage() {
 
   if (choices.length === 0) {
     return (
-      <div className="min-h-screen bg-[#f0f2f8] flex items-center justify-center">
+      <div className="min-h-screen bg-[#050507] flex items-center justify-center">
         <div className="text-gray-400 text-sm animate-pulse">Loading story branches...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#f0f2f8] pb-24">
+    <div className="min-h-screen bg-[#050507] pb-24">
       {/* Header */}
-      <div className="sticky top-0 z-20 bg-[#f0f2f8]/90 backdrop-blur-md px-4 pt-10 pb-3 border-b border-gray-200/60">
+      <div className="sticky top-0 z-20 bg-[#050507]/90 backdrop-blur-md px-4 pt-10 pb-3 border-b border-gray-200/60">
         <h1 className="text-lg font-bold text-gray-900">Your Choice Tree</h1>
         <p className="text-xs text-gray-400 mt-0.5">Tap any node to see full stats</p>
       </div>

@@ -65,7 +65,7 @@ function DonutChart({ genres }: { genres: Record<string, number> }) {
         {slices.map((s) => (
           <div key={s.label} className="flex items-center gap-2">
             <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: s.color }} />
-            <span className="text-[11px] text-gray-700 truncate flex-1">{s.label}</span>
+            <span className="text-[11px] text-gray-300 truncate flex-1">{s.label}</span>
             <span className="text-[11px] font-semibold text-gray-500 flex-shrink-0">{Math.round(s.pct * 100)}%</span>
           </div>
         ))}
@@ -131,7 +131,7 @@ export default function ProfilePage() {
 
   if (!planet) {
     return (
-      <div className="min-h-screen bg-[#f0f2f8] flex items-center justify-center">
+      <div className="min-h-screen bg-[#050507] flex items-center justify-center">
         <div className="text-gray-400 text-sm animate-pulse">Loading your profile...</div>
       </div>
     );
@@ -144,12 +144,12 @@ export default function ProfilePage() {
   const endpoints = axisEndpoints(cx, cy, r);
 
   return (
-    <div className="min-h-screen bg-[#f0f2f8] pb-24">
+    <div className="min-h-screen bg-[#050507] pb-24">
       {/* Header */}
       <div className="px-4 pt-12 pb-4 text-center">
         <div className="relative w-24 h-24 mx-auto mb-3 group">
           {generatingPlanet ? (
-            <div className="w-24 h-24 rounded-full border-4 border-white shadow-lg bg-gray-100 flex items-center justify-center">
+            <div className="w-24 h-24 rounded-full border-4 border-white shadow-lg bg-white/10 flex items-center justify-center">
               <div className="w-8 h-8 rounded-full border-2 border-amber-300 border-t-amber-600 animate-spin" />
             </div>
           ) : (
@@ -197,12 +197,12 @@ export default function ProfilePage() {
                 if (e.key === "Escape") setEditingName(false);
               }}
               onBlur={() => setEditingName(false)}
-              className="text-xl font-bold text-gray-900 bg-transparent border-b-2 border-amber-400 outline-none text-center w-48"
+              className="text-xl font-bold text-white bg-transparent border-b-2 border-amber-400 outline-none text-center w-48"
             />
           </div>
         ) : (
           <div className="flex items-center justify-center gap-1.5 mt-1">
-            <h1 className="text-xl font-bold text-gray-900">{planet?.name || "My Planet"}</h1>
+            <h1 className="text-xl font-bold text-white">{planet?.name || "My Planet"}</h1>
             <button
               onClick={() => { setNameInput(planet?.name || ""); setEditingName(true); }}
               className="text-gray-400 hover:text-amber-500 transition-colors"
@@ -237,9 +237,9 @@ export default function ProfilePage() {
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ type: "spring", damping: 22, stiffness: 280 }}
-                  className="bg-white/85 backdrop-blur-md rounded-2xl px-4 py-4 shadow-sm border border-white flex flex-col"
+                  className="bg-white/5 backdrop-blur-md rounded-2xl px-4 py-4 shadow-sm border border-white/10 flex flex-col"
                 >
-                  <span className="text-2xl font-bold text-gray-900 leading-none">{s.value}</span>
+                  <span className="text-2xl font-bold text-white leading-none">{s.value}</span>
                   <span className="text-xs text-gray-400 mt-1">{s.label}</span>
                 </motion.div>
               ))}
@@ -250,8 +250,8 @@ export default function ProfilePage() {
 
       <div className="px-4 flex flex-col gap-5">
         {/* Spectrum sliders */}
-        <div className="bg-white/85 backdrop-blur-md rounded-2xl p-4 shadow-sm border border-white">
-          <h2 className="text-sm font-bold text-gray-800 mb-3">Reading Spectrum</h2>
+        <div className="bg-white/5 backdrop-blur-md rounded-2xl p-4 shadow-sm border border-white/10">
+          <h2 className="text-sm font-bold text-gray-200 mb-3">Reading Spectrum</h2>
           <div className="flex flex-col gap-4">
             {planet.spectrum.map((item) => (
               <div key={item.label}>
@@ -260,7 +260,7 @@ export default function ProfilePage() {
                   <span className="font-medium text-gray-600">{item.label}</span>
                   <span>{item.right}</span>
                 </div>
-                <div className="relative h-2 bg-gray-100 rounded-full">
+                <div className="relative h-2 bg-white/10 rounded-full">
                   <motion.div
                     initial={{ left: "50%" }}
                     animate={{ left: `${item.value}%` }}
@@ -282,8 +282,8 @@ export default function ProfilePage() {
         </div>
 
         {/* Radar chart */}
-        <div className="bg-white/85 backdrop-blur-md rounded-2xl p-4 shadow-sm border border-white">
-          <h2 className="text-sm font-bold text-gray-800 mb-3">Reader Archetype</h2>
+        <div className="bg-white/5 backdrop-blur-md rounded-2xl p-4 shadow-sm border border-white/10">
+          <h2 className="text-sm font-bold text-gray-200 mb-3">Reader Archetype</h2>
           <div className="flex justify-center">
             <svg viewBox="0 0 200 200" className="w-48 h-48">
               {/* Concentric grid rings */}
@@ -351,16 +351,16 @@ export default function ProfilePage() {
 
         {/* Genre breakdown */}
         {planet && Object.keys(planet.genres).length > 0 && (
-          <div className="bg-white/85 backdrop-blur-md rounded-2xl p-4 shadow-sm border border-white">
-            <h2 className="text-sm font-bold text-gray-800 mb-4">Genre Breakdown</h2>
+          <div className="bg-white/5 backdrop-blur-md rounded-2xl p-4 shadow-sm border border-white/10">
+            <h2 className="text-sm font-bold text-gray-200 mb-4">Genre Breakdown</h2>
             <DonutChart genres={planet.genres} />
           </div>
         )}
 
         {/* Insights */}
         {planet.tendencies.length > 0 && (
-          <div className="bg-white/85 backdrop-blur-md rounded-2xl p-4 shadow-sm border border-white">
-            <h2 className="text-sm font-bold text-gray-800 mb-3">Your Tendencies</h2>
+          <div className="bg-white/5 backdrop-blur-md rounded-2xl p-4 shadow-sm border border-white/10">
+            <h2 className="text-sm font-bold text-gray-200 mb-3">Your Tendencies</h2>
             <div className="flex flex-col gap-3">
               {planet.tendencies.map((t, i) => (
                 <div key={i} className="flex items-start gap-2">
@@ -368,8 +368,8 @@ export default function ProfilePage() {
                     {i === 0 ? "💛" : i === 1 ? "🔍" : "🌟"}
                   </div>
                   <div>
-                    <p className="text-xs text-gray-700 leading-relaxed">{t.text}</p>
-                    <div className="mt-1 h-1 bg-gray-100 rounded-full w-32 overflow-hidden">
+                    <p className="text-xs text-gray-300 leading-relaxed">{t.text}</p>
+                    <div className="mt-1 h-1 bg-white/10 rounded-full w-32 overflow-hidden">
                       <motion.div
                         initial={{ width: 0 }}
                         animate={{ width: `${t.percentage}%` }}
@@ -387,8 +387,8 @@ export default function ProfilePage() {
 
         {/* Friend comparison */}
         {planet.friendComparison.length > 0 && (
-          <div className="bg-white/85 backdrop-blur-md rounded-2xl p-4 shadow-sm border border-white">
-            <h2 className="text-sm font-bold text-gray-800 mb-3">Friend Match</h2>
+          <div className="bg-white/5 backdrop-blur-md rounded-2xl p-4 shadow-sm border border-white/10">
+            <h2 className="text-sm font-bold text-gray-200 mb-3">Friend Match</h2>
             <div className="flex flex-col gap-3">
               {planet.friendComparison.map((fc) => {
                 const friend = friends.find((f) => f.id === fc.friendId);
@@ -412,9 +412,9 @@ export default function ProfilePage() {
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="text-xs font-semibold text-gray-800">{fc.friendName}</div>
+                      <div className="text-xs font-semibold text-gray-200">{fc.friendName}</div>
                       <div className="mt-1 flex items-center gap-2">
-                        <div className="h-1.5 bg-gray-100 rounded-full flex-1 overflow-hidden">
+                        <div className="h-1.5 bg-white/10 rounded-full flex-1 overflow-hidden">
                           <motion.div
                             initial={{ width: 0 }}
                             animate={{ width: `${fc.matchPercentage}%` }}
@@ -422,7 +422,7 @@ export default function ProfilePage() {
                             className={`h-full rounded-full ${matchColor}`}
                           />
                         </div>
-                        <span className="text-[11px] font-bold text-gray-700 w-8 text-right">
+                        <span className="text-[11px] font-bold text-gray-300 w-8 text-right">
                           {fc.matchPercentage}%
                         </span>
                       </div>
@@ -438,7 +438,7 @@ export default function ProfilePage() {
       {/* Reading Notes section — only show if notes exist */}
       {readingNotes.length > 0 && (
         <div className="px-4 mt-1 flex flex-col gap-3 pb-4">
-          <h2 className="text-sm font-bold text-gray-800 px-1">My Reading Notes</h2>
+          <h2 className="text-sm font-bold text-gray-200 px-1">My Reading Notes</h2>
           {readingNotes.map((note) => (
             <div key={note.bookId}>
               {openNoteBookId === note.bookId ? (
@@ -450,11 +450,11 @@ export default function ProfilePage() {
               ) : (
                 <button
                   onClick={() => setOpenNoteBookId(note.bookId)}
-                  className="w-full text-left bg-white/85 backdrop-blur-md rounded-2xl border border-white shadow-sm px-4 py-3 hover:bg-gray-50 transition-colors"
+                  className="w-full text-left bg-white/5 backdrop-blur-md rounded-2xl border border-white/10 shadow-sm px-4 py-3 hover:bg-gray-50 transition-colors"
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex-1 min-w-0">
-                      <div className="text-xs font-semibold text-gray-900 truncate">{note.bookTitle}</div>
+                      <div className="text-xs font-semibold text-white truncate">{note.bookTitle}</div>
                       <p className="text-[11px] text-gray-500 mt-0.5 line-clamp-2 leading-relaxed">
                         {note.current?.synthesis}
                       </p>

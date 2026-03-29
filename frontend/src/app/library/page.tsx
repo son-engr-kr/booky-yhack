@@ -34,12 +34,12 @@ export default function LibraryPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#f0f2f8] pb-24">
+    <div className="min-h-screen bg-[#050507] pb-24">
       {/* Header */}
-      <div className="sticky top-0 z-10 bg-[#f0f2f8]/95 backdrop-blur-md border-b border-white/60 px-4 py-3">
+      <div className="sticky top-0 z-10 bg-[#050507]/95 backdrop-blur-md border-b border-white/60 px-4 py-3">
         <div className="max-w-md mx-auto flex items-center justify-between">
           <div>
-            <h1 className="text-[20px] font-bold text-gray-900 tracking-tight">Library</h1>
+            <h1 className="text-[20px] font-bold text-white tracking-tight">Library</h1>
             <p className="text-[11px] text-indigo-500 font-medium mt-0.5">
               👥 3 friends reading now
             </p>

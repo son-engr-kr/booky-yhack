@@ -53,7 +53,7 @@ export default function FriendPlanetDetailPage() {
       {/* Planet image */}
       <div className="flex justify-center pt-16 pb-6">
         <motion.img
-          src={`/assets/${friend.planetImage || 'planet3.png'}`}
+          src={friend.generatedPlanetImage || `/assets/${friend.planetImage || 'planet3.png'}`}
           alt={friend.name}
           initial={{ scale: 0, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}

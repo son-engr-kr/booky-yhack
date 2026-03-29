@@ -38,7 +38,7 @@ export default function BookDetailPage() {
 
   if (!book) {
     return (
-      <div className="min-h-screen bg-[#f0f2f8] flex items-center justify-center">
+      <div className="min-h-screen bg-[#050507] flex items-center justify-center">
         <div className="text-amber-600 text-sm animate-pulse font-serif">Loading...</div>
       </div>
     );
@@ -53,9 +53,9 @@ export default function BookDetailPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f0f2f8] pb-20">
+    <div className="min-h-screen bg-[#050507] pb-20">
       {/* Header */}
-      <div className="sticky top-0 z-30 bg-[#f0f2f8]/95 backdrop-blur-sm border-b border-gray-200/60 px-4 py-3 flex items-center gap-3">
+      <div className="sticky top-0 z-30 bg-[#050507]/95 backdrop-blur-sm border-b border-gray-200/60 px-4 py-3 flex items-center gap-3">
         <Link
           href="/library"
           className="text-gray-600 hover:text-gray-900 transition-colors text-lg"

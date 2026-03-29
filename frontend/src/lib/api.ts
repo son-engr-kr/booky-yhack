@@ -329,6 +329,7 @@ export interface Friend {
   id: string;
   name: string;
   planetImage: string;
+  generatedPlanetImage?: string;
   planetStyle: string;
   level: number;
   booksRead: number;

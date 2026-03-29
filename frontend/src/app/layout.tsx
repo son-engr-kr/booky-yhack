@@ -24,7 +24,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${inter.variable} ${playfair.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col font-sans bg-[#f0f2f8]">
+      <body className="min-h-full flex flex-col font-sans bg-[#050507]">
         <main className="flex-1 w-full relative pb-16">
           {children}
         </main>

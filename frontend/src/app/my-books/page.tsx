@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import BottomNav from "@/components/nav/BottomNav";
-import { getMyBooks, type ReadingProgress } from "@/lib/api";
+import { getMyBooks, listBooks, type ReadingProgress, type Book } from "@/lib/api";
 
 function ProgressBar({ pct }: { pct: number }) {
   return (
@@ -20,20 +20,15 @@ function ProgressBar({ pct }: { pct: number }) {
 
 function BookItem({
   progress,
+  cover,
+  title,
   onClick,
 }: {
   progress: ReadingProgress;
+  cover?: string;
+  title?: string;
   onClick: () => void;
 }) {
-  const coverGradients = [
-    "from-indigo-400 to-purple-600",
-    "from-rose-400 to-orange-500",
-    "from-teal-400 to-cyan-600",
-    "from-amber-400 to-yellow-600",
-  ];
-  const gradIdx =
-    progress.bookId.charCodeAt(0) % coverGradients.length;
-
   return (
     <motion.button
       onClick={onClick}
@@ -41,15 +36,17 @@ function BookItem({
       className="w-full flex items-center gap-3 bg-white rounded-xl px-4 py-3 shadow-sm border border-gray-100 text-left"
     >
       {/* Cover thumbnail */}
-      <div
-        className={`w-12 h-16 rounded-md bg-gradient-to-br ${coverGradients[gradIdx]} flex-shrink-0 shadow-sm`}
-      />
+      {cover ? (
+        <img src={cover} alt={title || progress.bookId} className="w-12 h-16 rounded-md object-cover flex-shrink-0 shadow-sm" />
+      ) : (
+        <div className="w-12 h-16 rounded-md bg-gray-100 flex-shrink-0 shadow-sm" />
+      )}
 
       {/* Info */}
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-0.5">
           <p className="text-[14px] font-semibold text-gray-900 truncate flex-1">
-            {progress.bookId}
+            {title || progress.bookId}
           </p>
           {progress.status === "completed" && (
             <span className="text-[9px] font-bold bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full uppercase tracking-wide flex-shrink-0">
@@ -79,6 +76,7 @@ function BookItem({
 
 export default function MyBooksPage() {
   const [books, setBooks] = useState<ReadingProgress[]>([]);
+  const [bookCatalog, setBookCatalog] = useState<Book[]>([]);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
@@ -86,17 +84,18 @@ export default function MyBooksPage() {
     getMyBooks()
       .then(setBooks)
       .finally(() => setLoading(false));
+    listBooks().then((b) => setBookCatalog(Array.isArray(b) ? b : []));
   }, []);
 
   const reading = books.filter((b) => b.status === "reading");
   const done = books.filter((b) => b.status === "completed");
 
   return (
-    <div className="min-h-screen bg-[#f0f2f8] pb-24">
+    <div className="min-h-screen bg-[#050507] pb-24">
       {/* Header */}
-      <div className="sticky top-0 z-10 bg-[#f0f2f8]/95 backdrop-blur-md border-b border-white/60 px-4 py-3">
+      <div className="sticky top-0 z-10 bg-[#050507]/95 backdrop-blur-md border-b border-white/60 px-4 py-3">
         <div className="max-w-md mx-auto">
-          <h1 className="text-[20px] font-bold text-gray-900 tracking-tight">My Books</h1>
+          <h1 className="text-[20px] font-bold text-white tracking-tight">My Books</h1>
         </div>
       </div>
 
@@ -123,6 +122,8 @@ export default function MyBooksPage() {
                 >
                   <BookItem
                     progress={b}
+                    cover={bookCatalog.find((bc) => bc.id === b.bookId)?.cover}
+                    title={bookCatalog.find((bc) => bc.id === b.bookId)?.title}
                     onClick={() => router.push(`/library/${b.bookId}`)}
                   />
                 </motion.div>
@@ -147,6 +148,8 @@ export default function MyBooksPage() {
                 >
                   <BookItem
                     progress={b}
+                    cover={bookCatalog.find((bc) => bc.id === b.bookId)?.cover}
+                    title={bookCatalog.find((bc) => bc.id === b.bookId)?.title}
                     onClick={() => router.push(`/library/${b.bookId}`)}
                   />
                 </motion.div>
