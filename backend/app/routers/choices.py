@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from app.database import db
+from app.db_utils import clean as _clean
 
 router = APIRouter()
 COL = "choices"
@@ -35,30 +36,26 @@ def get_reading_profile() -> dict:
 
 @router.get("/{book_id}")
 def get_book_choices(book_id: str) -> list:
-    docs = db.collection(COL).where("bookId", "==", book_id).stream()
-    choices = [d.to_dict() for d in docs]
-    return choices
+    return [_clean(d) for d in db[COL].find({"bookId": book_id})]
 
 
 @router.get("/{book_id}/{choice_id}")
 def get_choice(book_id: str, choice_id: str) -> dict:
-    doc = db.collection(COL).document(choice_id).get()
-    if not doc.exists or doc.to_dict().get("bookId") != book_id:
+    doc = db[COL].find_one({"_id": choice_id})
+    if not doc or doc.get("bookId") != book_id:
         raise HTTPException(status_code=404, detail=f"Choice '{choice_id}' not found for book '{book_id}'")
-    return doc.to_dict()
+    return _clean(doc)
 
 
 @router.post("/{book_id}/{choice_id}")
 def submit_choice(book_id: str, choice_id: str, body: ChoiceSubmit) -> dict:
-    ref = db.collection(COL).document(choice_id)
-    doc = ref.get()
-    if not doc.exists or doc.to_dict().get("bookId") != book_id:
+    doc = db[COL].find_one({"_id": choice_id})
+    if not doc or doc.get("bookId") != book_id:
         raise HTTPException(status_code=404, detail=f"Choice '{choice_id}' not found for book '{book_id}'")
-    choice = doc.to_dict()
-    option = next((o for o in choice["options"] if o["id"] == body.optionId), None)
+    option = next((o for o in doc["options"] if o["id"] == body.optionId), None)
     if option is None:
         raise HTTPException(status_code=400, detail=f"Option '{body.optionId}' is not valid")
-    ref.update({"myChoice": body.optionId})
+    db[COL].update_one({"_id": choice_id}, {"$set": {"myChoice": body.optionId}})
     return {
         "success": True,
         "bookId": book_id,

@@ -1,4 +1,4 @@
-"""Generate and cache character descriptions per book+chapter in Firestore."""
+"""Generate and cache character descriptions per book+chapter in MongoDB."""
 import json
 from pathlib import Path
 from app.services import k2
@@ -12,22 +12,24 @@ def _doc_id(book_id: str, chapter: int) -> str:
 
 
 def get_cached(book_id: str, chapter: int) -> list[dict] | None:
-    doc = db.collection(COL).document(_doc_id(book_id, chapter)).get()
-    if doc.exists:
-        return doc.to_dict().get("characters")
+    doc = db[COL].find_one({"_id": _doc_id(book_id, chapter)})
+    if doc:
+        return doc.get("characters")
     return None
 
 
 def save_cache(book_id: str, chapter: int, characters: list[dict]):
-    db.collection(COL).document(_doc_id(book_id, chapter)).set({
+    doc_id = _doc_id(book_id, chapter)
+    db[COL].replace_one({"_id": doc_id}, {
+        "_id": doc_id,
         "bookId": book_id,
         "chapter": chapter,
         "characters": characters,
-    })
+    }, upsert=True)
 
 
 async def generate_characters(book_id: str, book_title: str, author: str, chapter: int) -> list[dict]:
-    """Generate character info from chapters 1..chapter using K2, with Firestore caching."""
+    """Generate character info from chapters 1..chapter using K2, with MongoDB caching."""
     cached = get_cached(book_id, chapter)
     if cached:
         return cached

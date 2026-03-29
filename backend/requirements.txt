@@ -5,8 +5,8 @@ python-dotenv==1.0.1
 pydantic==2.9.2
 pydantic-settings==2.6.0
 
-# Firebase + GCP
-firebase-admin==6.5.0
+# MongoDB
+pymongo
 
 # K2 Think V2
 httpx==0.28.1

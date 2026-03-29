@@ -2,11 +2,12 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { motion } from "framer-motion";
-import type { FeedPost } from "@/lib/api";
+import { motion, AnimatePresence } from "framer-motion";
+import { addFeedComment, deleteFeedComment, type FeedPost } from "@/lib/api";
 
 interface FeedCardProps {
   post: FeedPost;
+  onDelete?: (postId: string) => void;
 }
 
 function StarRating({ rating }: { rating: number }) {
@@ -82,23 +83,39 @@ function CompletionCard({ post }: { post: FeedPost }) {
   );
 }
 
-export default function FeedCard({ post }: FeedCardProps) {
+function timeAgo(iso: string) {
+  const diff = Date.now() - new Date(iso).getTime();
+  const m = Math.floor(diff / 60000);
+  if (m < 60) return `${m}m ago`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h}h ago`;
+  return `${Math.floor(h / 24)}d ago`;
+}
+
+export default function FeedCard({ post, onDelete }: FeedCardProps) {
   const [revealed, setRevealed] = useState(false);
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(post.likes);
+  const [showComments, setShowComments] = useState(false);
+  const [comments, setComments] = useState(post.comments || []);
+  const [commentInput, setCommentInput] = useState("");
+  const [deleted, setDeleted] = useState(false);
+  const isMine = post.userId === "me";
+
+  if (deleted) return null;
 
   const handleLike = () => {
     setLiked((prev) => !prev);
     setLikeCount((prev) => (liked ? prev - 1 : prev + 1));
   };
 
-  const timeAgo = (iso: string) => {
-    const diff = Date.now() - new Date(iso).getTime();
-    const m = Math.floor(diff / 60000);
-    if (m < 60) return `${m}m ago`;
-    const h = Math.floor(m / 60);
-    if (h < 24) return `${h}h ago`;
-    return `${Math.floor(h / 24)}d ago`;
+  const handleComment = () => {
+    const text = commentInput.trim();
+    if (!text) return;
+    setCommentInput("");
+    addFeedComment(post.id, text).then((reply) => {
+      if (reply) setComments((prev) => [...prev, reply]);
+    });
   };
 
   return (
@@ -120,9 +137,26 @@ export default function FeedCard({ post }: FeedCardProps) {
           <span className="text-[13px] font-semibold text-gray-900">{post.userName}</span>
           <span className="text-[11px] text-gray-400 ml-2">{timeAgo(post.createdAt)}</span>
         </div>
-        <span className="text-[10px] text-gray-400 uppercase tracking-wide font-medium">
-          {post.type}
-        </span>
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] text-gray-400 uppercase tracking-wide font-medium">
+            {post.type}
+          </span>
+          {isMine && post.type === "highlight" && onDelete && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                if (window.confirm("Delete this highlight?")) {
+                  onDelete(post.id);
+                  setDeleted(true);
+                }
+              }}
+              className="text-[12px] text-gray-400 hover:text-rose-500 transition-colors px-1 py-0.5"
+            >
+              ✕
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Body — with spoiler overlay */}
@@ -139,7 +173,7 @@ export default function FeedCard({ post }: FeedCardProps) {
                 onClick={() => setRevealed(true)}
                 className="text-[12px] font-medium bg-white/90 border border-amber-300 text-amber-700 px-4 py-2 rounded-full shadow-sm"
               >
-                🔒 Spoiler — Reveal anyway?
+                Spoiler — Reveal anyway?
               </button>
             </div>
           </div>
@@ -163,13 +197,82 @@ export default function FeedCard({ post }: FeedCardProps) {
         >
           {liked ? "♥" : "♡"} <span>{likeCount}</span>
         </motion.button>
-        <button className="flex items-center gap-1.5 text-[12px] text-gray-400 font-medium">
-          💬 <span>{post.comments.length}</span>
+        <button
+          onClick={() => setShowComments(!showComments)}
+          className={`flex items-center gap-1.5 text-[12px] font-medium transition-colors ${
+            showComments ? "text-indigo-500" : "text-gray-400"
+          }`}
+        >
+          💬 <span>{comments.length}</span>
         </button>
         <a href={`/library/${post.bookId}`} className="ml-auto text-[12px] text-indigo-500 font-medium hover:text-indigo-700 transition-colors">
           Start reading →
         </a>
       </div>
+
+      {/* Comments section */}
+      <AnimatePresence>
+        {showComments && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className="overflow-hidden border-t border-gray-50"
+          >
+            <div className="px-4 py-3">
+              {comments.length > 0 && (
+                <div className="flex flex-col gap-2.5 mb-3">
+                  {comments.map((c, i) => (
+                    <div key={i} className="flex items-start gap-2">
+                      <div className="w-5 h-5 rounded-full bg-gray-200 flex items-center justify-center text-[9px] font-bold text-gray-500 flex-shrink-0 mt-0.5">
+                        {c.userName?.charAt(0) || "?"}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-baseline gap-1.5">
+                          <span className="text-[11px] font-semibold text-gray-800">{c.userName}</span>
+                          {c.createdAt && (
+                            <span className="text-[9px] text-gray-400">{timeAgo(c.createdAt)}</span>
+                          )}
+                        </div>
+                        <p className="text-[12px] text-gray-600 leading-relaxed">{c.text}</p>
+                      </div>
+                      {c.userId === "me" && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            deleteFeedComment(post.id, c.id).then((ok) => {
+                              if (ok) setComments((prev) => prev.filter((_, j) => j !== i));
+                            });
+                          }}
+                          className="text-[10px] text-gray-300 hover:text-rose-500 transition-colors flex-shrink-0 mt-0.5"
+                        >
+                          ✕
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+              <div className="flex gap-2">
+                <input
+                  value={commentInput}
+                  onChange={(e) => setCommentInput(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleComment()}
+                  placeholder="Add a comment..."
+                  className="flex-1 text-[12px] bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 outline-none focus:border-indigo-300 transition-colors"
+                />
+                <button
+                  onClick={handleComment}
+                  disabled={!commentInput.trim()}
+                  className="text-[11px] font-semibold text-indigo-500 disabled:text-gray-300 px-2"
+                >
+                  Post
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }

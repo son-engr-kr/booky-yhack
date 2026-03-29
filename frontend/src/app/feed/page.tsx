@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import BottomNav from "@/components/nav/BottomNav";
 import FeedCard from "@/components/feed/FeedCard";
-import { getFeed, type FeedPost } from "@/lib/api";
+import { getFeed, deleteHighlight, type FeedPost } from "@/lib/api";
 
 export default function FeedPage() {
   const [posts, setPosts] = useState<FeedPost[]>([]);
@@ -56,7 +56,14 @@ export default function FeedPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.06, duration: 0.35, ease: "easeOut" }}
           >
-            <FeedCard post={post} />
+            <FeedCard
+              post={post}
+              onDelete={(id) => {
+                deleteHighlight(post.bookId, id).then((ok) => {
+                  if (ok) setPosts((prev) => prev.filter((p) => p.id !== id));
+                });
+              }}
+            />
           </motion.div>
         ))}
       </div>

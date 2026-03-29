@@ -44,6 +44,8 @@ export const addHighlightReply = (bookId: string, highlightId: string, text: str
   postJson<{ id: string; userId: string; userName: string; text: string; createdAt: string }>(`/highlights/${bookId}/${highlightId}/reply`, { text });
 export const deleteHighlight = (bookId: string, highlightId: string) =>
   fetch(`${API_BASE}/highlights/${bookId}/${highlightId}`, { method: "DELETE" }).then((r) => r.ok);
+export const deleteHighlightReply = (bookId: string, highlightId: string, replyId: string) =>
+  fetch(`${API_BASE}/highlights/${bookId}/${highlightId}/reply/${replyId}`, { method: "DELETE" }).then((r) => r.ok);
 export const toggleHighlightLike = (bookId: string, highlightId: string) =>
   postJson<{ likes: number; liked: boolean }>(`/highlights/${bookId}/${highlightId}/like`, {});
 
@@ -107,6 +109,12 @@ export const aiGenerateChoice = (bookTitle: string, author: string, chapterNum: 
 
 export const aiGenerateRecap = (bookTitle: string, author: string, chaptersSummary: string) =>
   postJson<{ panels: { panel: number; emoji: string; title: string; description: string }[] }>("/ai/recap", { book_title: bookTitle, author, chapters_summary: chaptersSummary });
+
+export const addFeedComment = (postId: string, text: string) =>
+  postJson<{ id: string; userId: string; userName: string; text: string; createdAt: string }>(`/feed/${postId}/comment`, { text });
+
+export const deleteFeedComment = (postId: string, commentId: string) =>
+  fetch(`${API_BASE}/feed/${postId}/comment/${commentId}`, { method: "DELETE" }).then((r) => r.ok);
 
 export const aiSpoilerCheck = (text: string, bookTitle: string, readerChapter: number) =>
   postJson<{ is_spoiler: boolean; reason: string }>("/ai/spoiler-check", { text, book_title: bookTitle, reader_chapter: readerChapter });

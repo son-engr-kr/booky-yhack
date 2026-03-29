@@ -20,7 +20,7 @@ IMAGEN_URL = (
 def _get_access_token() -> str:
     """Get OAuth2 access token from service account."""
     creds = service_account.Credentials.from_service_account_file(
-        settings.firebase_credentials_path, scopes=SCOPES
+        settings.gcp_credentials_path, scopes=SCOPES
     )
     creds.refresh(AuthRequest())
     return creds.token

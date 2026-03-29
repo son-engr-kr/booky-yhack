@@ -1,17 +1,15 @@
 from fastapi import APIRouter
 from app.database import db
+from app.db_utils import clean
 
 router = APIRouter()
-COL = "users"
 
 
 @router.get("/")
 def get_current_user() -> dict:
-    doc = db.collection(COL).document("me").get()
-    return doc.to_dict() if doc.exists else {}
+    return clean(db.users.find_one({"_id": "me"}))
 
 
 @router.get("/users")
 def get_all_users() -> list:
-    docs = db.collection(COL).stream()
-    return [d.to_dict() for d in docs]
+    return [clean(d) for d in db.users.find()]

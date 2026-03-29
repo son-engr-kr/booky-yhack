@@ -2,8 +2,11 @@ CLAUDE.md
 AGENTS.md
 .omc/
 
-# Firebase
+# Credentials
 firebase-service-account.json
+gcp-service-account.json
+
+# Data
 chroma_data/
 firestore_dump/
 

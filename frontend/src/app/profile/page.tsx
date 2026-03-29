@@ -415,76 +415,40 @@ export default function ProfilePage() {
         )}
       </div>
 
-      {/* Reading Notes section */}
-      <div className="px-4 mt-1 flex flex-col gap-3">
-        <h2 className="text-sm font-bold text-gray-800 px-1">My Reading Notes</h2>
-
-        {/* Saved notes */}
-        {readingNotes.map((note) => (
-          <div key={note.bookId}>
-            {openNoteBookId === note.bookId ? (
-              <ReadingNotesPanel
-                bookId={note.bookId}
-                bookTitle={note.bookTitle}
-                onClose={() => setOpenNoteBookId(null)}
-              />
-            ) : (
-              <button
-                onClick={() => setOpenNoteBookId(note.bookId)}
-                className="w-full text-left bg-white rounded-2xl border border-gray-100 shadow-sm px-4 py-3 hover:bg-gray-50 transition-colors"
-              >
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex-1 min-w-0">
-                    <div className="text-xs font-semibold text-gray-900 truncate">{note.bookTitle}</div>
-                    <p className="text-[11px] text-gray-500 mt-0.5 line-clamp-2 leading-relaxed">
-                      {note.current?.synthesis}
-                    </p>
-                  </div>
-                  <div className="text-right flex-shrink-0">
-                    <div className="text-[10px] text-gray-400">
+      {/* Reading Notes section — only show if notes exist */}
+      {readingNotes.length > 0 && (
+        <div className="px-4 mt-1 flex flex-col gap-3 pb-4">
+          <h2 className="text-sm font-bold text-gray-800 px-1">My Reading Notes</h2>
+          {readingNotes.map((note) => (
+            <div key={note.bookId}>
+              {openNoteBookId === note.bookId ? (
+                <ReadingNotesPanel
+                  bookId={note.bookId}
+                  bookTitle={note.bookTitle}
+                  onClose={() => setOpenNoteBookId(null)}
+                />
+              ) : (
+                <button
+                  onClick={() => setOpenNoteBookId(note.bookId)}
+                  className="w-full text-left bg-white/85 backdrop-blur-md rounded-2xl border border-white shadow-sm px-4 py-3 hover:bg-gray-50 transition-colors"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex-1 min-w-0">
+                      <div className="text-xs font-semibold text-gray-900 truncate">{note.bookTitle}</div>
+                      <p className="text-[11px] text-gray-500 mt-0.5 line-clamp-2 leading-relaxed">
+                        {note.current?.synthesis}
+                      </p>
+                    </div>
+                    <div className="text-[10px] text-gray-400 flex-shrink-0">
                       {new Date(note.updatedAt).toLocaleDateString()}
                     </div>
-                    {note.history.length > 0 && (
-                      <div className="text-[10px] text-indigo-400 mt-0.5">{note.history.length} prev</div>
-                    )}
                   </div>
-                </div>
-              </button>
-            )}
-          </div>
-        ))}
-
-        {/* Generatable books */}
-        {generatable.length > 0 && (
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-            <div className="px-4 py-3 border-b border-gray-50">
-              <div className="text-xs font-semibold text-gray-700">Generate Reading Notes</div>
-              <div className="text-[10px] text-gray-400 mt-0.5">Books with highlights ready to analyze</div>
-            </div>
-            {generatable.map((book) => (
-              <div key={book.id} className="flex items-center gap-3 px-4 py-3 border-b border-gray-50 last:border-0">
-                <div className="flex-1 min-w-0">
-                  <div className="text-xs font-medium text-gray-900 truncate">{book.title}</div>
-                  <div className="text-[10px] text-gray-400">{book.author}</div>
-                </div>
-                <button
-                  onClick={() => handleGenerate(book.id)}
-                  disabled={generating === book.id}
-                  className="text-[11px] px-3 py-1.5 bg-gray-900 text-white rounded-lg disabled:opacity-50 flex-shrink-0"
-                >
-                  {generating === book.id ? "..." : "Generate"}
                 </button>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {readingNotes.length === 0 && generatable.length === 0 && (
-          <div className="text-center py-6 text-xs text-gray-400">
-            Highlight passages while reading to generate your reading notes.
-          </div>
-        )}
-      </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
 
       <BottomNav />
     </div>

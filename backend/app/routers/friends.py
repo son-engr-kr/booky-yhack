@@ -2,32 +2,31 @@ from fastapi import APIRouter, HTTPException
 from app.database import db
 
 router = APIRouter()
-USERS = "users"
-PROGRESS = "reading_progress"
+
+
+from app.db_utils import clean as _clean
 
 
 @router.get("/")
 def list_friends() -> list:
-    docs = db.collection(USERS).stream()
-    return [d.to_dict() for d in docs if d.id != "me"]
+    return [_clean(d) for d in db.users.find({"id": {"$ne": "me"}})]
 
 
 @router.get("/{user_id}")
 def get_friend(user_id: str) -> dict:
     if user_id == "me":
         raise HTTPException(status_code=404, detail=f"Friend '{user_id}' not found")
-    doc = db.collection(USERS).document(user_id).get()
-    if not doc.exists:
+    doc = db.users.find_one({"_id": user_id})
+    if not doc:
         raise HTTPException(status_code=404, detail=f"Friend '{user_id}' not found")
-    return doc.to_dict()
+    return _clean(doc)
 
 
 @router.get("/{user_id}/progress")
 def get_friend_progress(user_id: str) -> list:
     if user_id == "me":
         raise HTTPException(status_code=404, detail=f"Friend '{user_id}' not found")
-    user_doc = db.collection(USERS).document(user_id).get()
-    if not user_doc.exists:
+    user = db.users.find_one({"_id": user_id})
+    if not user:
         raise HTTPException(status_code=404, detail=f"Friend '{user_id}' not found")
-    docs = db.collection(PROGRESS).where("userId", "==", user_id).stream()
-    return [d.to_dict() for d in docs]
+    return [_clean(d) for d in db.reading_progress.find({"userId": user_id})]

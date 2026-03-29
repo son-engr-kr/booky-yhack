@@ -4,29 +4,26 @@ import math
 import json
 from pathlib import Path
 from app.database import db
+from app.db_utils import clean as _clean
 
 router = APIRouter()
-USERS = "users"
-PROGRESS = "reading_progress"
-FEED = "feed"
 DATA_DIR = Path(__file__).parent.parent / "data"
 
 
 def _load_books() -> dict:
-    with open(DATA_DIR / "books.json", encoding="utf-8") as f:
-        books = json.load(f)
+    books = json.loads((DATA_DIR / "books.json").read_text(encoding="utf-8"))
     return {b["id"]: b["title"] for b in books}
 
 
 @router.get("/me")
 def get_my_planet() -> dict:
-    me = db.collection(USERS).document("me").get().to_dict()
+    me = _clean(db.users.find_one({"_id": "me"}))
     book_titles = _load_books()
-    progress_docs = db.collection(PROGRESS).where("userId", "==", "me").stream()
+    progress = [_clean(d) for d in db.reading_progress.find({"userId": "me"})]
     satellites = [
-        {**p.to_dict(), "bookTitle": book_titles.get(p.to_dict()["bookId"], p.to_dict()["bookId"])}
-        for p in progress_docs
-        if p.to_dict().get("status") != "not-started"
+        {**p, "bookTitle": book_titles.get(p.get("bookId", ""), p.get("bookId", ""))}
+        for p in progress
+        if p.get("status") != "not-started"
     ]
     return {**me, "satellites": satellites}
 
@@ -38,16 +35,16 @@ class PlanetUpdate(BaseModel):
 @router.patch("/me")
 def update_my_planet(body: PlanetUpdate) -> dict:
     name = body.name.strip()
-    db.collection(USERS).document("me").update({"name": name})
+    db.users.update_one({"_id": "me"}, {"$set": {"name": name}})
     return {"name": name}
 
 
 @router.get("/friends")
 def get_friend_planets() -> list:
-    friends = [d.to_dict() for d in db.collection(USERS).stream() if d.id != "me"]
+    friends = [_clean(d) for d in db.users.find({"_id": {"$ne": "me"}})]
     feed_docs = sorted(
-        [d.to_dict() for d in db.collection(FEED).stream()],
-        key=lambda p: p["createdAt"],
+        [_clean(d) for d in db.feed.find()],
+        key=lambda p: p.get("createdAt", ""),
         reverse=True,
     )
 
@@ -57,13 +54,13 @@ def get_friend_planets() -> list:
         distance = 100 - similarity
 
         angle_h = i * 2.399
-        angle_v = math.acos(1 - 2 * (i + 0.5) / len(friends))
+        angle_v = math.acos(1 - 2 * (i + 0.5) / max(len(friends), 1))
 
         x = round(distance * math.sin(angle_v) * math.cos(angle_h), 2)
         y = round(distance * math.sin(angle_v) * math.sin(angle_h), 2)
         z = round(distance * math.cos(angle_v), 2)
 
-        latest = next((p for p in feed_docs if p["userId"] == friend["id"]), None)
+        latest = next((p for p in feed_docs if p.get("userId") == friend.get("id")), None)
         latest_feed = latest.get("text") if latest else None
 
         result.append({**friend, "position": {"x": x, "y": y, "z": z}, "latestFeed": latest_feed})
@@ -73,15 +70,16 @@ def get_friend_planets() -> list:
 
 @router.get("/constellation/{book_id}")
 def get_constellation(book_id: str) -> dict:
-    user_map = {d.id: d.to_dict() for d in db.collection(USERS).stream()}
-    readers_progress = [
-        d.to_dict() for d in db.collection(PROGRESS).where("bookId", "==", book_id).stream()
-    ]
+    user_map = {}
+    for d in db.users.find():
+        uid = d["_id"]
+        user_map[uid] = _clean(d)
+    readers_progress = [_clean(d) for d in db.reading_progress.find({"bookId": book_id})]
 
     readers = []
     count = max(len(readers_progress), 1)
     for i, rp in enumerate(readers_progress):
-        uid = rp["userId"]
+        uid = rp.get("userId", "")
         user = user_map.get(uid, {})
         similarity = user.get("similarity", 50) if uid != "me" else 100
 
@@ -93,9 +91,9 @@ def get_constellation(book_id: str) -> dict:
         readers.append({
             "userId": uid,
             "userName": user.get("name", uid),
-            "currentChapter": rp["currentChapter"],
-            "percentage": rp["percentage"],
-            "status": rp["status"],
+            "currentChapter": rp.get("currentChapter", 0),
+            "percentage": rp.get("percentage", 0),
+            "status": rp.get("status", ""),
             "similarity": similarity,
             "position": {"x": x, "y": y},
         })

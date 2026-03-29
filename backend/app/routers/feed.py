@@ -1,12 +1,20 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
+import json
+from pathlib import Path
 from typing import Optional
 from app.database import db
 
 router = APIRouter()
-FEED = "feed"
-USERS = "users"
-PROGRESS = "reading_progress"
+DATA_DIR = Path(__file__).parent.parent / "data"
+
+
+def _book_titles() -> dict:
+    books = json.loads((DATA_DIR / "books.json").read_text(encoding="utf-8"))
+    return {b["id"]: b["title"] for b in books}
+
+
+from app.db_utils import clean as _clean
 
 
 class StoryPost(BaseModel):
@@ -15,21 +23,33 @@ class StoryPost(BaseModel):
     text: str
 
 
-class HighlightPost(BaseModel):
-    bookId: str
-    chapter: int
-    text: str
-    note: Optional[str] = None
-    color: str = "yellow"
-
-
 @router.get("/")
 def get_feed() -> list:
-    posts = [d.to_dict() for d in db.collection(FEED).stream()]
-    users = {d.id: d.to_dict() for d in db.collection(USERS).stream()}
+    posts = [_clean(d) for d in db.feed.find()]
+
+    book_titles = _book_titles()
+    for d in db.highlights.find():
+        hl = _clean(d)
+        posts.append({
+            "id": hl["id"],
+            "type": "highlight",
+            "userId": hl.get("userId", ""),
+            "userName": hl.get("userName", ""),
+            "bookId": hl.get("bookId", ""),
+            "bookTitle": book_titles.get(hl.get("bookId", ""), hl.get("bookId", "")),
+            "chapterNum": hl.get("chapterNum", 0),
+            "text": hl.get("comment", ""),
+            "quote": hl.get("text", ""),
+            "likes": hl.get("likes", 0),
+            "comments": hl.get("replies", []),
+            "createdAt": hl.get("createdAt", ""),
+            "isSpoiler": False,
+        })
+
+    users = {d["id"]: _clean(d) for d in db.users.find()}
     my_progress = {
-        d.to_dict()["bookId"]: d.to_dict()
-        for d in db.collection(PROGRESS).where("userId", "==", "me").stream()
+        d["bookId"]: _clean(d)
+        for d in db.reading_progress.find({"userId": "me"})
     }
 
     for post in posts:
@@ -42,29 +62,73 @@ def get_feed() -> list:
         elif post_chapter > book_prog.get("currentChapter", 0):
             post["isSpoiler"] = True
 
-    return sorted(posts, key=lambda p: p["createdAt"], reverse=True)
+    return sorted(posts, key=lambda p: p.get("createdAt", ""), reverse=True)
 
 
 @router.get("/spoiler-check")
 def spoiler_check(book_id: str, chapter: int) -> dict:
-    doc = db.collection(PROGRESS).document(f"me_{book_id}").get()
-    if not doc.exists:
+    doc = db.reading_progress.find_one({"_id": f"me_{book_id}"})
+    if not doc:
         return {"bookId": book_id, "chapter": chapter, "isSpoiler": True, "reason": "not_started"}
-    my_entry = doc.to_dict()
-    is_spoiler = chapter > my_entry["currentChapter"]
+    is_spoiler = chapter > doc["currentChapter"]
     return {
         "bookId": book_id,
         "chapter": chapter,
-        "myChapter": my_entry["currentChapter"],
+        "myChapter": doc["currentChapter"],
         "isSpoiler": is_spoiler,
     }
+
+
+class CommentCreate(BaseModel):
+    text: str
+
+
+@router.post("/{post_id}/comment")
+def add_comment(post_id: str, body: CommentCreate) -> dict:
+    """Add comment to a feed post or highlight."""
+    import uuid
+    from datetime import datetime, timezone
+
+    comment = {
+        "id": str(uuid.uuid4()),
+        "userId": "me",
+        "userName": "Hunjun",
+        "text": body.text,
+        "createdAt": datetime.now(timezone.utc).isoformat(),
+    }
+
+    # Try feed collection first
+    result = db.feed.update_one({"_id": post_id}, {"$push": {"comments": comment}})
+    if result.matched_count == 0:
+        # Must be a highlight-sourced post — store comment on the highlight
+        result = db.highlights.update_one({"_id": post_id}, {"$push": {"replies": comment}})
+        if result.matched_count == 0:
+            from fastapi import HTTPException
+            raise HTTPException(status_code=404, detail="Post not found")
+
+    return comment
+
+
+@router.delete("/{post_id}/comment/{comment_id}")
+def delete_comment(post_id: str, comment_id: str) -> dict:
+    """Delete a comment from a feed post or highlight."""
+    # Try feed collection
+    result = db.feed.update_one(
+        {"_id": post_id},
+        {"$pull": {"comments": {"id": comment_id}}}
+    )
+    if result.modified_count == 0:
+        # Try highlights
+        result = db.highlights.update_one(
+            {"_id": post_id},
+            {"$pull": {"replies": {"id": comment_id}}}
+        )
+        if result.modified_count == 0:
+            from fastapi import HTTPException
+            raise HTTPException(status_code=404, detail="Comment not found")
+    return {"ok": True}
 
 
 @router.post("/story")
 def create_story(body: StoryPost) -> dict:
     return {"success": True, "type": "story", "userId": "me", "bookId": body.bookId, "chapter": body.chapter, "text": body.text}
-
-
-@router.post("/highlight")
-def create_highlight_post(body: HighlightPost) -> dict:
-    return {"success": True, "type": "highlight", "userId": "me", "bookId": body.bookId, "chapter": body.chapter, "text": body.text, "note": body.note, "color": body.color}

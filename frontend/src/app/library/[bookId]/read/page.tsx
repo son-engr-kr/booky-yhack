@@ -19,6 +19,7 @@ import {
   getMyHighlights,
   addHighlightReply,
   deleteHighlight,
+  deleteHighlightReply,
   toggleHighlightLike,
   type Chapter,
   type Character,
@@ -755,10 +756,31 @@ export default function ReadPage() {
                           <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center text-[10px] font-bold text-gray-500 flex-shrink-0">
                             {r.userName[0]}
                           </div>
-                          <div>
+                          <div className="flex-1">
                             <span className="text-xs font-semibold text-gray-700">{r.userName}</span>
                             <p className="text-sm text-gray-600">{r.text}</p>
                           </div>
+                          {r.userId === "me" && r.id && (
+                            <button
+                              onClick={() => {
+                                deleteHighlightReply(hlBookId, viewingHighlight.id, r.id!).then((ok) => {
+                                  if (ok) {
+                                    setViewingHighlight((prev) => {
+                                      if (!prev) return prev;
+                                      const updated = { ...prev, replies: (prev.replies ?? []).filter((_, j) => j !== ri) };
+                                      if (!("userName" in prev) || (prev as Highlight).userId === "me") {
+                                        setUserHighlights((hs) => hs.map((h) => h.id === prev.id ? { ...h, replies: updated.replies } : h));
+                                      }
+                                      return updated;
+                                    });
+                                  }
+                                });
+                              }}
+                              className="text-[10px] text-gray-300 hover:text-rose-500 transition-colors flex-shrink-0 mt-0.5"
+                            >
+                              ✕
+                            </button>
+                          )}
                         </div>
                       ))}
                     </div>

@@ -5,15 +5,16 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import BottomNav from "@/components/nav/BottomNav";
+import ReadingNotesPanel from "@/components/reading/ReadingNotesPanel";
 import {
   getMyPlanet,
   getMyBooks,
-  getMyHighlights,
+  getMyReadingNotes,
   getChoices,
   getReadingProfile,
   type PlanetData,
   type ReadingProgress,
-  type Highlight,
+  type SavedReadingNote,
   type Choice,
   type ReadingProfile,
 } from "@/lib/api";
@@ -22,7 +23,8 @@ export default function MyPlanetDetailPage() {
   const router = useRouter();
   const [planet, setPlanet] = useState<PlanetData | null>(null);
   const [books, setBooks] = useState<ReadingProgress[]>([]);
-  const [highlights, setHighlights] = useState<Highlight[]>([]);
+  const [readingNotes, setReadingNotes] = useState<SavedReadingNote[]>([]);
+  const [openNoteBookId, setOpenNoteBookId] = useState<string | null>(null);
   const [choices, setChoices] = useState<Choice[]>([]);
   const [profile, setProfile] = useState<ReadingProfile | null>(null);
   const [activeTab, setActiveTab] = useState<"overview" | "notes">("overview");
@@ -31,13 +33,8 @@ export default function MyPlanetDetailPage() {
     getMyPlanet().then(setPlanet);
     getMyBooks().then(setBooks);
     getReadingProfile().then(setProfile);
-    // Fetch highlights and choices for all books
-    Promise.all([
-      getMyHighlights("great-gatsby"),
-      getMyHighlights("pride-prejudice"),
-      getMyHighlights("frankenstein"),
-    ]).then(([h1, h2, h3]) => {
-      setHighlights([...(h1 || []), ...(h2 || []), ...(h3 || [])]);
+    getMyReadingNotes().then((r) => {
+      if (r) setReadingNotes(r.notes ?? []);
     });
     Promise.all([
       getChoices("great-gatsby"),
@@ -109,97 +106,51 @@ export default function MyPlanetDetailPage() {
       <div className="px-4 flex flex-col gap-4">
         {activeTab === "notes" ? (
           <>
-            {/* My Highlights */}
+            {/* My Reading Notes */}
             <div className="bg-white/5 rounded-2xl p-4 border border-white/10">
               <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
-                My Highlights ({highlights.length})
+                My Reading Notes ({readingNotes.length})
               </h2>
-              {highlights.length === 0 ? (
-                <p className="text-xs text-gray-600 italic">No highlights yet. Start reading and highlight passages!</p>
+              {readingNotes.length === 0 ? (
+                <p className="text-xs text-gray-600 italic">No reading notes yet. Generate them from a book's detail page!</p>
               ) : (
                 <div className="flex flex-col gap-3">
-                  {highlights.map((hl, i) => (
-                    <motion.div
-                      key={hl.id}
-                      initial={{ opacity: 0, y: 8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: i * 0.05 }}
-                      className="bg-white/5 rounded-xl p-3 border border-white/5"
-                    >
-                      <div className="text-[10px] text-amber-500 mb-1 font-semibold">
-                        {hl.bookId.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())} · Ch.{hl.chapterNum}
-                      </div>
-                      <div className="text-xs text-gray-300 italic leading-relaxed mb-2 border-l-2 border-amber-500/30 pl-2">
-                        &ldquo;{hl.text.length > 120 ? hl.text.slice(0, 120) + "..." : hl.text}&rdquo;
-                      </div>
-                      {hl.comment && (
-                        <div className="text-xs text-gray-400">
-                          {hl.comment}
-                        </div>
+                  {readingNotes.map((note, i) => (
+                    <div key={note.bookId}>
+                      {openNoteBookId === note.bookId ? (
+                        <ReadingNotesPanel
+                          bookId={note.bookId}
+                          bookTitle={note.bookTitle}
+                          onClose={() => setOpenNoteBookId(null)}
+                        />
+                      ) : (
+                        <motion.button
+                          initial={{ opacity: 0, y: 8 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: i * 0.05 }}
+                          onClick={() => setOpenNoteBookId(note.bookId)}
+                          className="w-full text-left bg-white/5 rounded-xl p-3 border border-white/5 hover:border-amber-500/30 transition-colors"
+                        >
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="flex-1 min-w-0">
+                              <div className="text-[10px] text-amber-500 mb-1 font-semibold">{note.bookTitle}</div>
+                              <div className="text-xs text-gray-300 leading-relaxed line-clamp-2">
+                                {note.current?.synthesis}
+                              </div>
+                            </div>
+                            <div className="text-[10px] text-gray-600 flex-shrink-0">
+                              {new Date(note.updatedAt).toLocaleDateString()}
+                            </div>
+                          </div>
+                        </motion.button>
                       )}
-                    </motion.div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* My Choices */}
-            <div className="bg-white/5 rounded-2xl p-4 border border-white/10">
-              <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
-                My Choices ({choices.filter((c) => c.myChoice).length})
-              </h2>
-              {choices.filter((c) => c.myChoice).length === 0 ? (
-                <p className="text-xs text-gray-600 italic">No choices made yet.</p>
-              ) : (
-                <div className="flex flex-col gap-3">
-                  {choices.filter((c) => c.myChoice).map((choice, i) => {
-                    const myOption = choice.options.find((o) => o.id === choice.myChoice);
-                    return (
-                      <motion.div
-                        key={choice.id}
-                        initial={{ opacity: 0, y: 8 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: i * 0.05 }}
-                        className="bg-white/5 rounded-xl p-3 border border-white/5"
-                      >
-                        <div className="text-[10px] text-amber-500 mb-1 font-semibold">
-                          {choice.bookId.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())} · Ch.{choice.chapterNum}
-                        </div>
-                        <div className="text-xs text-gray-300 mb-1">
-                          {choice.question}
-                        </div>
-                        <div className="text-xs text-amber-400 font-semibold">
-                          → {myOption?.text || choice.myChoice}
-                        </div>
-                      </motion.div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-
-            {/* Reading Profile Summary */}
-            {profile && (
-              <div className="bg-white/5 rounded-2xl p-4 border border-white/10">
-                <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
-                  Reading Tendencies
-                </h2>
-                <div className="flex flex-col gap-2">
-                  {profile.tendencies.map((t, i) => (
-                    <div key={i} className="flex items-start gap-2">
-                      <span className="text-amber-400 text-xs font-bold flex-shrink-0">{t.percentage}%</span>
-                      <span className="text-xs text-gray-400">{t.text}</span>
                     </div>
                   ))}
                 </div>
-                <Link
-                  href="/profile"
-                  className="block mt-3 text-center text-xs text-amber-500 font-semibold"
-                >
-                  View Full Profile →
-                </Link>
-              </div>
-            )}
+              )}
+            </div>
+
+
           </>
         ) : (
         <>
