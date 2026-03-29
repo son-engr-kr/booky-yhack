@@ -16,7 +16,7 @@ Booky transforms solitary reading into a connected experience. Readers highlight
 
 | Book Viewer | AI Story Recap |
 |:-:|:-:|
-| ![Book Viewer](docs/images/book-viewer.png) | ![AI Story Recap](docs/images/6-cut-recap.jpeg) |
+| ![Book Viewer](docs/images/book-viewer.png) | ![AI Story Recap](docs/images/6-cut-recap-2.png) |
 
 ## Key Features
 
