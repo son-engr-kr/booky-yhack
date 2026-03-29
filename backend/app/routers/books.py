@@ -1,13 +1,15 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Query
 import json
 from pathlib import Path
 from typing import Any
+from app.services import character_service
 
 router = APIRouter()
 DATA_DIR = Path(__file__).parent.parent / "data"
 
+# Fallback hardcoded characters (used when K2 is unavailable)
 BOOK_CHARACTERS: dict[str, list[dict]] = {
     "great-gatsby": [
         {"id": "nick-carraway", "name": "Nick Carraway", "role": "narrator", "description": "A Yale-educated Midwesterner who moves to West Egg and becomes entangled in Gatsby's world.", "chapters": [1, 2, 3, 4, 5, 6, 7, 8, 9]},
@@ -59,10 +61,21 @@ def get_chapter(book_id: str, chapter_num: int) -> dict:
 
 
 @router.get("/{book_id}/characters")
-def get_characters(book_id: str) -> dict:
+async def get_characters(book_id: str, chapter: int = Query(default=0)) -> dict:
     books = _load("books.json")
-    if not any(b["id"] == book_id for b in books):
+    book = next((b for b in books if b["id"] == book_id), None)
+    if not book:
         raise HTTPException(status_code=404, detail=f"Book '{book_id}' not found")
+
+    # If chapter specified, use K2-generated characters (with cache)
+    if chapter > 0:
+        characters = await character_service.generate_characters(
+            book_id, book["title"], book["author"], chapter
+        )
+        if characters:
+            return {"bookId": book_id, "characters": characters}
+
+    # Fallback to hardcoded
     characters = BOOK_CHARACTERS.get(book_id, [])
     return {"bookId": book_id, "characters": characters}
 

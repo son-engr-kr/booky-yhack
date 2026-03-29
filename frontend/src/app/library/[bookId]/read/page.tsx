@@ -250,7 +250,7 @@ export default function ReadPage() {
 
     Promise.all([
       getChapter(bookId, chapterNum),
-      getCharacters(bookId),
+      getCharacters(bookId, chapterNum),
       getFriendHighlights(bookId, chapterNum),
       getChoices(bookId),
       getBook(bookId),
@@ -560,8 +560,9 @@ export default function ReadPage() {
             }}
           >
             <button
-              onMouseDown={(e) => {
-                e.preventDefault(); // prevents blur/deselection before we read the selection
+              onPointerDown={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
                 handleAddHighlight();
               }}
               className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 transition-colors cursor-pointer"
@@ -569,7 +570,8 @@ export default function ReadPage() {
               <span>✦</span> Highlight
             </button>
             <button
-              onMouseDown={(e) => {
+              onPointerDown={(e) => {
+                e.stopPropagation();
                 e.preventDefault();
                 window.getSelection()?.removeAllRanges();
                 setSelectionToolbar(null);

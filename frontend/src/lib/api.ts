@@ -23,8 +23,8 @@ export const listBooks = () => fetcher<Book[]>("/books/");
 export const getBook = (id: string) => fetcher<Book>(`/books/${id}`);
 export const getChapter = (bookId: string, num: number) =>
   fetcher<Chapter>(`/books/${bookId}/chapters/${num}`);
-export const getCharacters = (bookId: string) =>
-  fetcher<Character[]>(`/books/${bookId}/characters`);
+export const getCharacters = (bookId: string, chapter?: number) =>
+  fetcher<Character[]>(`/books/${bookId}/characters${chapter ? `?chapter=${chapter}` : ""}`);
 
 // Reading
 export const getMyBooks = () => fetcher<ReadingProgress[]>("/reading/");
@@ -36,6 +36,10 @@ export const getMyHighlights = (bookId: string) =>
   fetcher<Highlight[]>(`/highlights/${bookId}`);
 export const getFriendHighlights = (bookId: string, chapter: number) =>
   fetcher<Highlight[]>(`/highlights/${bookId}/friends?chapter=${chapter}`);
+
+// Highlights - create
+export const createHighlight = (bookId: string, chapter: number, text: string, note?: string) =>
+  postJson<Highlight>(`/highlights/${bookId}`, { chapter, text, note });
 
 // Feed
 export const getFeed = () => fetcher<FeedPost[]>("/feed/");
