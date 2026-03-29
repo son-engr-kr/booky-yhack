@@ -2,7 +2,7 @@
 
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls, Stars, Html, useTexture } from "@react-three/drei";
-import { Suspense, useRef, useState, useEffect } from "react";
+import { Suspense, useRef, useState, useEffect, useMemo } from "react";
 import * as THREE from "three";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -72,32 +72,30 @@ function PlanetSphere({
 
 function MyPlanet({
   planetImage,
-  satellites,
   onTap,
 }: {
   planetImage: string;
-  satellites: SatelliteData[];
   onTap: () => void;
 }) {
   const glowRef = useRef<THREE.Mesh>(null);
 
   useFrame((_, delta) => {
     if (glowRef.current) {
-      glowRef.current.rotation.y -= delta * 0.05;
+      glowRef.current.rotation.z -= delta * 0.05;
     }
   });
 
   return (
     <group>
-      {/* Glow ring */}
-      <mesh ref={glowRef}>
-        <torusGeometry args={[1.4, 0.02, 16, 64]} />
-        <meshBasicMaterial color="#FFD700" transparent opacity={0.15} />
+      {/* Glow ring — flat horizontal */}
+      <mesh ref={glowRef} rotation={[Math.PI / 2, 0, 0]}>
+        <torusGeometry args={[1.4, 0.015, 16, 64]} />
+        <meshBasicMaterial color="#FFD700" transparent opacity={0.12} />
       </mesh>
 
       {/* Planet with texture */}
       <PlanetSphere
-        imagePath={`/assets/${planetImage}`}
+        imagePath={`/assets/${planetImage.replace('.png', '-3d.jpg')}`}
         radius={0.8}
         onClick={onTap}
         rotationSpeed={0.15}
@@ -113,17 +111,6 @@ function MyPlanet({
           side={THREE.BackSide}
         />
       </mesh>
-
-      {/* Satellites (books) */}
-      {satellites.map((sat, i) => (
-        <Satellite
-          key={sat.bookId}
-          index={i}
-          total={satellites.length}
-          title={sat.bookTitle}
-          status={sat.status}
-        />
-      ))}
     </group>
   );
 }
@@ -186,8 +173,8 @@ function FriendPlanetMesh({
   onTap: () => void;
 }) {
   const [hovered, setHovered] = useState(false);
-  const baseScale = 0.3 + (data.similarity / 100) * 0.3;
-  const scale = hovered ? baseScale * 1.2 : baseScale;
+  const baseScale = 0.4;
+  const scale = hovered ? baseScale * 1.15 : baseScale;
 
   return (
     <group
@@ -198,9 +185,9 @@ function FriendPlanetMesh({
       onPointerOut={() => setHovered(false)}
     >
       <PlanetSphere
-        imagePath={`/assets/${data.planetImage}`}
+        imagePath={`/assets/${data.planetImage.replace('.png', '-3d.jpg')}`}
         radius={1}
-        rotationSpeed={0.2 + Math.random() * 0.1}
+        rotationSpeed={0.2}
       />
       {/* Atmosphere on hover */}
       {hovered && (
@@ -331,6 +318,24 @@ function Scene({
 }: PlanetSceneProps) {
   const [bubbleIndex, setBubbleIndex] = useState(0);
 
+  // Stable positions — computed once, never changes on re-render
+  const friendPositions = useMemo(() => {
+    return friendPlanets.map((fp, i) => {
+      const angle = (i / friendPlanets.length) * Math.PI * 2;
+      const orbitRadius = 2.0 + (1 - fp.similarity / 100) * 2.5;
+      // Deterministic small Y offset based on index
+      const yOffset = ((i % 3) - 1) * 0.15;
+      return {
+        ...fp,
+        position: {
+          x: Math.cos(angle) * orbitRadius,
+          y: yOffset,
+          z: Math.sin(angle) * orbitRadius,
+        },
+      };
+    });
+  }, [friendPlanets]);
+
   useEffect(() => {
     const interval = setInterval(() => {
       setBubbleIndex((prev) => (prev + 1) % friendPlanets.length);
@@ -341,7 +346,7 @@ function Scene({
   return (
     <>
       {/* Key light — strong directional from one side for shadow contrast */}
-      <directionalLight position={[5, 3, 4]} intensity={1.8} color="#fff5e0" />
+      <directionalLight position={[3, 8, 4]} intensity={1.8} color="#fff5e0" />
       {/* Fill light — dim opposite side so shadows aren't pitch black */}
       <pointLight position={[-4, -1, -3]} intensity={0.15} color="#4466ff" />
       {/* Ambient — very low to keep dark side visible but dark */}
@@ -362,11 +367,19 @@ function Scene({
 
       <MyPlanet
         planetImage={myPlanet.planetImage}
-        satellites={myPlanet.satellites}
         onTap={() => onPlanetTap?.("me")}
       />
 
-      {friendPlanets.map((fp, i) => (
+      {/* Orbit rings — flat horizontal */}
+      {[2.2, 3.2, 4.2].map((r, i) => (
+        <mesh key={`orbit-${i}`} rotation={[Math.PI / 2, 0, 0]}>
+          <torusGeometry args={[r, 0.005, 8, 128]} />
+          <meshBasicMaterial color="#ffffff" transparent opacity={0.04} />
+        </mesh>
+      ))}
+
+      {/* Friend planets on orbital plane — positions computed once via useMemo */}
+      {friendPositions.map((fp, i) => (
         <group key={fp.id}>
           <FriendPlanetMesh
             data={fp}
@@ -376,8 +389,8 @@ function Scene({
         </group>
       ))}
 
-      {/* Orbit lines */}
-      {friendPlanets.map((fp) => (
+      {/* Connection lines to friends */}
+      {friendPositions.map((fp) => (
         <line key={`line-${fp.id}`}>
           <bufferGeometry>
             <bufferAttribute
@@ -385,7 +398,7 @@ function Scene({
               args={[
                 new Float32Array([
                   0, 0, 0,
-                  fp.position.x, fp.position.y, fp.position.z,
+                  fp.position.x, 0, fp.position.z,
                 ]),
                 3,
               ]}
@@ -394,7 +407,7 @@ function Scene({
           <lineBasicMaterial
             color="#FFD700"
             transparent
-            opacity={fp.similarity / 400}
+            opacity={fp.similarity / 500}
           />
         </line>
       ))}
@@ -415,7 +428,7 @@ export default function PlanetScene(props: PlanetSceneProps) {
   return (
     <div className="w-full h-full absolute inset-0">
       <Canvas
-        camera={{ position: [0, 2, 6], fov: 50 }}
+        camera={{ position: [0, 6, 9], fov: 45 }}
         style={{ background: "#050507" }}
       >
         <Suspense fallback={null}>
