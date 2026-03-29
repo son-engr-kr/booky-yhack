@@ -107,7 +107,7 @@ export const aiSpoilerCheck = (text: string, bookTitle: string, readerChapter: n
 
 // Comic recap
 export const generateComic = (bookTitle: string, author: string, chaptersSummary: string) =>
-  postJson<{ panels: { panel: number; title: string; description: string; image: string | null }[] }>("/comic/generate", { book_title: bookTitle, author, chapters_summary: chaptersSummary });
+  postJson<{ image: string | null; panels: { panel: number; title: string; description: string; image: string | null }[] }>("/comic/generate", { book_title: bookTitle, author, chapters_summary: chaptersSummary });
 
 export const generateComicScenes = (bookTitle: string, author: string, chaptersSummary: string) =>
   postJson<{ panels: { panel: number; title: string; description: string; image_prompt: string }[] }>("/comic/scenes", { book_title: bookTitle, author, chapters_summary: chaptersSummary });

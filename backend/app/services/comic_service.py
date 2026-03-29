@@ -1,5 +1,5 @@
 """6-panel comic recap using K2 for scene descriptions + Vertex AI Imagen for images."""
-import base64
+import asyncio
 import json
 from google.oauth2 import service_account
 from google.auth.transport.requests import Request as AuthRequest
@@ -9,8 +9,8 @@ from app.services import k2
 
 SCOPES = ["https://www.googleapis.com/auth/cloud-platform"]
 PROJECT_ID = "theta-bliss-486220-s1"
-LOCATION = "us-east1"
-IMAGEN_MODEL = "imagegeneration@006"
+LOCATION = "us-central1"
+IMAGEN_MODEL = "imagen-3.0-fast-generate-001"
 IMAGEN_URL = (
     f"https://{LOCATION}-aiplatform.googleapis.com/v1/"
     f"projects/{PROJECT_ID}/locations/{LOCATION}/publishers/google/models/{IMAGEN_MODEL}:predict"
@@ -53,51 +53,49 @@ async def generate_scene_prompts(book_title: str, author: str, chapters_summary:
         return []
 
 
-async def generate_image(prompt: str) -> str | None:
-    """Generate an image using Vertex AI Imagen. Returns base64 encoded image."""
-    token = _get_access_token()
-    styled_prompt = f"Comic book illustration style, vibrant colors, clean lines: {prompt}"
-
+async def generate_image(prompt: str, token: str) -> str | None:
+    """Generate a single panel image using Vertex AI Imagen Fast."""
+    styled = f"Comic book panel, illustration style, vibrant colors, clean ink lines: {prompt}"
     async with httpx.AsyncClient(timeout=60.0) as client:
         resp = await client.post(
             IMAGEN_URL,
-            headers={
-                "Authorization": f"Bearer {token}",
-                "Content-Type": "application/json",
-            },
+            headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"},
             json={
-                "instances": [{"prompt": styled_prompt}],
-                "parameters": {
-                    "sampleCount": 1,
-                    "aspectRatio": "1:1",
-                    "safetyFilterLevel": "block_few",
-                },
+                "instances": [{"prompt": styled}],
+                "parameters": {"sampleCount": 1, "aspectRatio": "1:1"},
             },
         )
         if resp.status_code != 200:
-            print(f"Imagen error {resp.status_code}: {resp.text[:200]}")
+            print(f"[Imagen] error {resp.status_code}: {resp.text[:300]}")
             return None
-        data = resp.json()
-        predictions = data.get("predictions", [])
+        predictions = resp.json().get("predictions", [])
         if predictions:
-            return predictions[0].get("bytesBase64Encoded")
+            b64 = predictions[0].get("bytesBase64Encoded")
+            return f"data:image/png;base64,{b64}" if b64 else None
     return None
 
 
-async def generate_comic(book_title: str, author: str, chapters_summary: str) -> list[dict]:
-    """Generate full 6-panel comic: scenes + images."""
+async def generate_comic(book_title: str, author: str, chapters_summary: str) -> dict:
+    """Generate 6-panel comic: scene descriptions + 6 images in parallel."""
     panels = await generate_scene_prompts(book_title, author, chapters_summary)
     if not panels:
-        return []
+        return {"image": None, "panels": []}
 
-    results = []
-    for panel in panels:
-        image_b64 = await generate_image(panel.get("image_prompt", panel.get("description", "")))
-        results.append({
-            "panel": panel.get("panel"),
-            "title": panel.get("title"),
-            "description": panel.get("description"),
-            "image": f"data:image/png;base64,{image_b64}" if image_b64 else None,
-        })
+    token = _get_access_token()
 
-    return results
+    # Generate all 6 images in parallel
+    images = await asyncio.gather(*[
+        generate_image(p.get("image_prompt") or p.get("description", ""), token)
+        for p in panels
+    ])
+
+    result_panels = [
+        {
+            "panel": p.get("panel"),
+            "title": p.get("title"),
+            "description": p.get("description"),
+            "image": img,
+        }
+        for p, img in zip(panels, images)
+    ]
+    return {"image": None, "panels": result_panels}

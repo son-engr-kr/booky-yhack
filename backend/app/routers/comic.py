@@ -13,10 +13,10 @@ class ComicRequest(BaseModel):
 
 @router.post("/generate")
 async def generate_comic(req: ComicRequest):
-    panels = await comic_service.generate_comic(
+    result = await comic_service.generate_comic(
         req.book_title, req.author, req.chapters_summary
     )
-    return {"panels": panels}
+    return result
 
 
 @router.post("/scenes")
