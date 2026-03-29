@@ -5,7 +5,7 @@ from functools import lru_cache
 class Settings(BaseSettings):
     frontend_url: str = "http://localhost:3000"
     host: str = "0.0.0.0"
-    port: int = 8001
+    port: int = 8080
 
     # MongoDB
     mongodb_url: str = "mongodb://localhost:27017"
